@@ -1,20 +1,20 @@
 ﻿@using System.Linq.Expressions
-@using NetQueryBuilder.Blazor.ExpressionVisitors.Extensions
+@using NetQueryBuilder.Conditions
 <MudStack Spacing="5">
-    <Predicate PredicateExpression="PredicateExpression.Left"
+    <Predicate Condition="Condition"
                ParameterExpression="@ParameterExpression"
                OnChange="@ChangeLeft"
                OnRemove="@RemoveLeft">
     </Predicate>
     <div>
-        <MudSelect T="string" Label="Operator" Value="@PredicateExpression.NodeType.ToString()" ValueChanged="ChangeOperator">
+        <MudSelect T="string" Label="Operator" Value="@Condition.ComparaisonType.ToString()" ValueChanged="ChangeOperator">
             @foreach (var item in Operators)
             {
                 <MudSelectItem T="string" Value="@item.Key">@item.Value</MudSelectItem>
             }
         </MudSelect>
     </div>
-    <Predicate PredicateExpression="PredicateExpression.Right"
+    <Predicate Condition="Condition"
                ParameterExpression="@ParameterExpression"
                OnChange="@ChangeRight"
                OnRemove="@RemoveRight">
@@ -30,8 +30,8 @@
     };
 
     [Parameter] public Action<Expression> OnChange { get; set; }
-
-    [Parameter] public BinaryExpression PredicateExpression { get; set; }
+    
+    [Parameter] public LogicalCondition Condition { get; set; }
 
     [Parameter] public ParameterExpression ParameterExpression { get; set; }
 
@@ -41,32 +41,31 @@
 
     private void ChangeLeft(Expression left)
     {
-        PredicateExpression = Expression.MakeBinary(PredicateExpression.NodeType, left, PredicateExpression.Right);
-        OnChange(PredicateExpression);
+        Condition.Left = left;
+        OnChange(Condition.Compile());
     }
 
     private void ChangeRight(Expression right)
     {
-        PredicateExpression = Expression.MakeBinary(PredicateExpression.NodeType, PredicateExpression.Left, right);
-        OnChange(PredicateExpression);
+        Condition.Right = right;
+        OnChange(Condition.Compile());
     }
 
     private void ChangeOperator(string op)
     {
         var expressionType = (ExpressionType)Enum.Parse(typeof(ExpressionType), op);
-
-        PredicateExpression = Expression.MakeBinary(expressionType, PredicateExpression.Left, PredicateExpression.Right);
-        OnChange(PredicateExpression);
+        Condition.ComparaisonType = expressionType;
+        OnChange(Condition.Compile());
     }
 
     private void RemoveLeft()
     {
-        OnChange(PredicateExpression.Right.Copy());
+        //OnChange(PredicateExpression.Right.Copy());
     }
 
     private void RemoveRight()
     {
-        OnChange(PredicateExpression.Left.Copy());
+        //OnChange(PredicateExpression.Left.Copy());
     }
 
 }

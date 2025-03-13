@@ -1,118 +1,32 @@
-﻿@using System.Linq.Expressions
-@using System.Reflection
-@using NetQueryBuilder.Blazor.ExpressionVisitors.Extensions
-@using NetQueryBuilder.Extensions
-@using NetQueryBuilder.Operators
-<MudSelect Label="Field" T="string" ValueChanged="OnFieldSelected" Value="_selectedPropertyName">
-    @foreach (var property in _selectedPropertyType.GetProperties())
+﻿@using NetQueryBuilder.Conditions
+
+<MudSelect Label="Field" T="PropertyPath" ValueChanged="OnFieldSelected" Value="_selectedPropertyName">
+    @foreach (var property in properties)
     {
-        <MudSelectItem Value="@property.Name" style="@(property.PropertyType.IsClass ? "font-weight: bold" : "")">
-            @property.Name
+        <MudSelectItem Value="@property">
+            @property.PropertyName
         </MudSelectItem>
     }
 </MudSelect>
 
 @code {
-    [Parameter] public ParameterExpression ParameterExpression { get; set; }
+    
+    [CascadingParameter] public IQuery Query { get; set; }
+    [Parameter] public LogicalCondition Condition { get; set; }
 
-    [Parameter] public Expression PredicateExpression { get; set; }
+    private PropertyPath _selectedPropertyName;
+    private IEnumerable<PropertyPath> properties = new List<PropertyPath>();
 
-    [Parameter] public Action<string> OnNavigatePathChanged { get; set; }
-
-    [Parameter] public Action<Expression> OnFieldChanged { get; set; }
-
-    private Type _selectedPropertyType;
-    private string _selectedPropertyName;
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        if (PredicateExpression is MethodCallExpression methodCallExpression)
-        {
-            var propertyMember = methodCallExpression.Method.Name switch
-            {
-                "Like" or "Contains" => (MemberExpression)methodCallExpression.Arguments[1],
-                _ => throw new NotSupportedException($"Method {methodCallExpression.Method.Name} is not supported")
-            };
-
-            _selectedPropertyType = propertyMember.Member.DeclaringType;
-            _selectedPropertyName = propertyMember.Member.Name;
-        }
-        else if (PredicateExpression is BinaryExpression binaryExpression)
-        {
-            var propertyMember = (MemberExpression)binaryExpression.Left;
-            _selectedPropertyType = propertyMember.Member.DeclaringType;
-            _selectedPropertyName = propertyMember.Member.Name;
-        }
-
-        base.OnInitialized();
+        properties = Query.AvailableProperties();
+        _selectedPropertyName = Condition.PropertyPath;
+        await base.OnInitializedAsync();
     }
 
-    private void OnFieldSelected(string propertyName)
+    private void OnFieldSelected(PropertyPath propertyName)
     {
-        var memberExpression = GetMemberExpression();
-
-        var selectedProperty = _selectedPropertyType.GetProperty(propertyName);
-
-        if (selectedProperty.PropertyType.IsClass && selectedProperty.PropertyType != typeof(string))
-        {
-            var navigationPropertyExpression = memberExpression.ChangePropertyAccess(_selectedPropertyType, propertyName);
-            _selectedPropertyType = navigationPropertyExpression.Type;
-
-            selectedProperty = navigationPropertyExpression.Type.GetProperties().First();
-            _selectedPropertyName = selectedProperty.Name;
-
-            memberExpression = Expression.MakeMemberAccess(
-                navigationPropertyExpression,
-                selectedProperty);
-
-            OnNavigatePathChanged?.Invoke(propertyName);
-        }
-        else
-        {
-            _selectedPropertyName = propertyName;
-            memberExpression = memberExpression.ChangePropertyAccess(_selectedPropertyType, propertyName);
-        }
-
-        var defaultValueExpression = GetDefaultValueExpression(selectedProperty);
-
-        var newOperator = RelationalOperators
-            .GetOperators(selectedProperty.PropertyType)
-            .OfType<BinaryOperator>()
-            .First();
-
-        var newExpression = Expression.MakeBinary(newOperator.ExpressionType, memberExpression, defaultValueExpression);
-
-        PredicateExpression = newExpression;
-        OnFieldChanged?.Invoke(newExpression);
+        _selectedPropertyName = propertyName;
+        Condition.PropertyPath = propertyName;
     }
-
-    private MemberExpression GetMemberExpression()
-    {
-        return PredicateExpression switch
-        {
-            BinaryExpression binary => (MemberExpression)binary.Left,
-            MethodCallExpression methodCall => methodCall.Method.Name switch
-            {
-                "Like" or "Contains" => (MemberExpression)methodCall.Arguments[1],
-                _ => throw new NotSupportedException($"Method {methodCall.Method.Name} is not supported")
-            },
-            _ => throw new NotSupportedException($"Expression type {PredicateExpression.NodeType} is not supported")
-        };
-    }
-
-    private Expression GetDefaultValueExpression(PropertyInfo property)
-    {
-        return property.PropertyType switch
-        {
-            Type type when
-                type == typeof(int)
-                || type == typeof(long)
-                || type == typeof(string)
-                || type == typeof(bool) => Expression.Constant(property.PropertyType.GetDefaultValue(), property.PropertyType),
-            Type type when
-                type == typeof(DateTime) => Expression.Constant(DateTime.UtcNow),
-            _ => throw new Exception("Unsupported property type")
-        };
-    }
-
 }

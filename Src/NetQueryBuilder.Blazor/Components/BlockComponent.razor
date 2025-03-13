@@ -1,13 +1,22 @@
 ﻿@using System.Linq.Expressions
 @using NetQueryBuilder.Conditions
-@using NetQueryBuilder.Extensions
 
 <MudPaper Class="pa-2" Style=@("margin-left:"+(IndentationLevel * 20) + "px;")>
-    <MudStack Spacing="3">
-        <!-- Affichage de chaque “sous-condition” appartenant au même niveau -->
+    <MudGrid Spacing="3">
         @foreach (var childCondition in Condition.Conditions)
         {
-            <div>
+            if (childCondition != Condition.Conditions.First())
+            {
+                <MudItem xs="12" sm="4">
+                    <MudSelect T="string" Label="Operator" Value="@childCondition.LogicalType.ToString()" ValueChanged="@(v => ChangeOperator(childCondition, v))">
+                        @foreach (var item in Operators)
+                        {
+                            <MudSelectItem T="string" Value="@item.Key">@item.Value</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            }
+            <MudItem xs="12" sm="4">
                 @if (childCondition is BlockCondition block)
                 {
                     <!-- Affiche un sous-bloc récursivement -->
@@ -18,25 +27,28 @@
                 else if (childCondition is LogicalCondition condition)
                 {
                     <MudCheckBox T="bool" Label="Group"
-                                 ValueChanged="@(e => Select(e, childCondition))" />
+                                 ValueChanged="@(e => Select(e, childCondition))"/>
                     <!-- Affiche un composant “lambda” ou un équivalent pour la condition simple -->
                     <LambdaComponent Condition="@condition" Parameter="@Parameter" OnChanged="@OnChange"/>
                     <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(condition)"></MudIconButton>
                 }
-            </div>
+            </MudItem>
         }
-        <button @onclick="() => GroupConditions()">Créer un bloc</button>
 
         <MudItem xs="12" sm="4">
             <div>
                 <MudStack Row Spacing="2">
                     <MudButton Variant="Variant.Filled" OnClick="@(() => AddPredicate(ExpressionType.AndAlso))">And</MudButton>
                     <MudButton Variant="Variant.Filled" OnClick="@(() => AddPredicate(ExpressionType.OrElse))">Or</MudButton>
-                    <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.Group" OnClick="GroupConditions"></MudIconButton>
+                    <MudButton Variant="Variant.Filled" OnClick="@(() => GroupConditions())">Group</MudButton>
+                    @if (Condition.Parent != Condition.GetRoot())
+                    {
+                        <MudButton Variant="Variant.Filled" OnClick="@(() => UnGroupConditions())">Ungroup</MudButton>
+                    }
                 </MudStack>
             </div>
         </MudItem>
-    </MudStack>
+    </MudGrid>
 </MudPaper>
 @code {
     [Parameter]
@@ -51,12 +63,26 @@
     [Parameter]
     public Action<Expression> OnChange { get; set; }
 
-    public List<ICondition> SelectedConditions { get; set; } = new List<ICondition>();
+    List<ICondition> SelectedConditions { get; set; } = new List<ICondition>();
+    
+    Dictionary<string, string> Operators = new()
+    {
+        { "AndAlso", "And" },
+        { "OrElse", "Or" }
+    };
+
     private void GroupConditions()
     {
         Condition.Group(SelectedConditions);
         SelectedConditions.Clear();
         OnChange(Condition.Compile());
+    }
+
+    private void UnGroupConditions()
+    {
+        Condition.Ungroup(SelectedConditions);
+        SelectedConditions.Clear();
+        OnChange(Condition.GetRoot().Compile());
     }
 
     private void Select(bool e, ICondition childCondition)
@@ -71,27 +97,19 @@
     private void AddPredicate(ExpressionType binaryExpressionType)
     {
         Condition.CreateNew();
-        // var memberAccess = Expression.MakeMemberAccess(ParameterExpression, ParameterExpression.Type.GetProperties().First());
-        //
-        // var addedExpressionOperator = RelationalOperators
-        //     .GetOperators(memberAccess.Type)
-        //     .OfType<BinaryOperator>()
-        //     .First();
-        //
-        // var addedExpressionConstant = Expression.Constant(memberAccess.Type.GetDefaultValue(), memberAccess.Type);
-        // var addedExpression = Expression.MakeBinary(addedExpressionOperator.ExpressionType, memberAccess, addedExpressionConstant);
-        //
-        // var newLogicalExpression = Expression.MakeBinary(
-        //     binaryExpressionType,
-        //     PredicateExpression.Copy(),
-        //     addedExpression);
-
         OnChange(Condition.Compile());
     }
 
     private void RemovePredicate(LogicalCondition condition)
     {
         Condition.Remove(condition);
+    }
+
+    private void ChangeOperator(ICondition condition, string op)
+    {
+        var expressionType = (ExpressionType)Enum.Parse(typeof(ExpressionType), op);
+        condition.LogicalType = expressionType;
+        OnChange(condition.Compile());
     }
 
     

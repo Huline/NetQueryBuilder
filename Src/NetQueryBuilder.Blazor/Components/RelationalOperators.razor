@@ -1,6 +1,5 @@
 ﻿@using System.Linq.Expressions
-@using Microsoft.EntityFrameworkCore
-@using NetQueryBuilder.Extensions
+@using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Operators
 <MudSelect T="ExpressionOperator" Label="Operator" Value="_operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o.DisplayText)">
     @foreach (var item in _operators)
@@ -10,18 +9,16 @@
 </MudSelect>
 
 @code {
-    [Parameter] public Expression PredicateExpression { get; set; }
+    
+    [CascadingParameter] public IQuery Query { get; set; }
 
+    [Parameter] public LogicalCondition Condition { get; set; }
     [Parameter] public Action<Expression> OnOperatedUpdated { get; set; }
 
     private ExpressionOperator _operator { get; set; }
     private List<ExpressionOperator> _operators = new();
     private Expression _valueExpression;
     private MemberExpression _memberAccessExpression;
-
-    protected override void OnInitialized()
-    {
-    }
 
     protected override void OnParametersSet()
     {
@@ -30,7 +27,7 @@
 
     private void InitializeOperators()
     {
-        switch (PredicateExpression)
+        switch (Query.Lambda.Body)
         {
             case BinaryExpression binaryExpression:
                 InitializeBinaryExpression(binaryExpression);
@@ -42,7 +39,7 @@
                 InitializeMethodCallExpression(notMethodCallExpression, true);
                 break;
             default:
-                throw new NotSupportedException($"Expression type {PredicateExpression.NodeType} is not supported");
+                throw new NotSupportedException($"Expression type {Query.Lambda.Body.NodeType} is not supported");
         }
     }
 
@@ -84,45 +81,46 @@
     private void OperatorChanged(ExpressionOperator op)
     {
         _operator = op;
+        Condition.ComparaisonType = op.ExpressionType;
 
-        switch (op)
-        {
-            case BinaryOperator:
-                var newBinaryExpression = Expression.MakeBinary(
-                    op.ExpressionType,
-                    _memberAccessExpression,
-                    // Perserve the right binary constant value for BinaryOperators
-                    op is BinaryOperator
-                        ? _valueExpression
-                        : Expression.Constant(_memberAccessExpression.Type.GetDefaultValue()));
-                PredicateExpression = newBinaryExpression;
-                OnOperatedUpdated?.Invoke(newBinaryExpression);
-                break;
-
-            case MethodCallOperator methodCall when methodCall.MethodInfo.Name == "Like":
-                var likeMethodCallExpression = Expression.Call(
-                    null,
-                    methodCall.MethodInfo,
-                    Expression.Constant(EF.Functions),
-                    _memberAccessExpression,
-                    Expression.Constant(_memberAccessExpression.Type.GetDefaultValue(), _memberAccessExpression.Type));
-                UpdateMethodCallExpression(methodCall.IsNegated, likeMethodCallExpression);
-                break;
-
-            case MethodCallOperator methodCall when methodCall.MethodInfo.Name == "Contains":
-                var containsMethodCallExpression = Expression.Call(
-                    null,
-                    methodCall.MethodInfo,
-                    Expression.Constant(Array.CreateInstance(_memberAccessExpression.Type, 0)),
-                    _memberAccessExpression);
-                UpdateMethodCallExpression(methodCall.IsNegated, containsMethodCallExpression);
-                break;
+        // switch (op)
+        // {
+        //     case BinaryOperator:
+        //         var newBinaryExpression = Expression.MakeBinary(
+        //             op.ExpressionType,
+        //             _memberAccessExpression,
+        //             // Perserve the right binary constant value for BinaryOperators
+        //             op is BinaryOperator
+        //                 ? _valueExpression
+        //                 : Expression.Constant(_memberAccessExpression.Type.GetDefaultValue()));
+        //         PredicateExpression = newBinaryExpression;
+        //         OnOperatedUpdated?.Invoke(newBinaryExpression);
+        //         break;
+        //
+        //     case MethodCallOperator methodCall when methodCall.MethodInfo.Name == "Like":
+        //         var likeMethodCallExpression = Expression.Call(
+        //             null,
+        //             methodCall.MethodInfo,
+        //             Expression.Constant(EF.Functions),
+        //             _memberAccessExpression,
+        //             Expression.Constant(_memberAccessExpression.Type.GetDefaultValue(), _memberAccessExpression.Type));
+        //         UpdateMethodCallExpression(methodCall.IsNegated, likeMethodCallExpression);
+        //         break;
+        //
+        //     case MethodCallOperator methodCall when methodCall.MethodInfo.Name == "Contains":
+        //         var containsMethodCallExpression = Expression.Call(
+        //             null,
+        //             methodCall.MethodInfo,
+        //             Expression.Constant(Array.CreateInstance(_memberAccessExpression.Type, 0)),
+        //             _memberAccessExpression);
+        //         UpdateMethodCallExpression(methodCall.IsNegated, containsMethodCallExpression);
+        //         break;
         }
 
         void UpdateMethodCallExpression(bool isNegated, MethodCallExpression expression)
         {
-            PredicateExpression = expression;
-            OnOperatedUpdated?.Invoke(isNegated ? Expression.Not(expression) : expression);
+            // PredicateExpression = expression;
+            // OnOperatedUpdated?.Invoke(isNegated ? Expression.Not(expression) : expression);
         }
     }
 

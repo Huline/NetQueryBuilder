@@ -1,5 +1,5 @@
 ﻿@using NetQueryBuilder.Services
-@inject IQueryServiceFactory QueryServiceFactory
+@inject IQueryFactory QueryFactory
 
 <MudToolBar Gutters="false" Class="mb-4">
     <MudStack Row Spacing="3">
@@ -79,7 +79,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _entities = (await QueryServiceFactory.GetEntities()).ToList();
+        _entities = (await QueryFactory.GetEntities()).ToList();
 
         NewQuery();
 

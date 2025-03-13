@@ -2,12 +2,11 @@
 @using NetQueryBuilder.Conditions
 <MudStack Row Spacing="4">
     <MudItem xs="8" lg="8">
-        <Predicate PredicateExpression="@Expression"
-                   ParameterExpression="@Parameter"
-                   OnChange="@OnChangeBody">
-        </Predicate>
+        <RelationalPredicateField Condition="@Condition"></RelationalPredicateField>
+        <RelationalOperators Condition="@Condition"></RelationalOperators>
+        <RelationalValue Condition="@Condition"></RelationalValue>
     </MudItem>
-    </MudStack>
+</MudStack>
 
 @code {
     [Parameter] public LogicalCondition Condition { get; set; }

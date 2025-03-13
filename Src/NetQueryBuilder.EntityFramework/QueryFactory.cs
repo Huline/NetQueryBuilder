@@ -1,24 +1,50 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Linq.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using NetQueryBuilder.Conditions;
 using NetQueryBuilder.Services;
 
 namespace NetQueryBuilder.EntityFramework;
 
-public class EFQueryService<T, TDbContext> : IQueryService<T> where T : class where TDbContext : DbContext
+public class QueryFactory<TDbContext> : IQueryFactory
+    where TDbContext : DbContext
 {
-    private readonly TDbContext _dbContext;
+    private readonly IServiceProvider _serviceProvider;
 
-    public EFQueryService(TDbContext dbContext)
+    public QueryFactory(IServiceProvider serviceProvider)
     {
-        _dbContext = dbContext;
+        _serviceProvider = serviceProvider;
     }
 
-    public async Task<IEnumerable> QueryData(string predicateExpression, IEnumerable<string> selectedProperties)
+    public Task<IEnumerable<Type>> GetEntities()
     {
-        predicateExpression = predicateExpression
+        return Task.FromResult<IEnumerable<Type>>(_serviceProvider.GetRequiredService<TDbContext>()
+            .Model
+            .GetEntityTypes()
+            .Select(t => t.ClrType)
+            .ToList());
+    }
+
+    public Query<T> Create<T>() where T : class
+    {
+        return new EFQuery<T>(_serviceProvider.GetRequiredService<TDbContext>());
+    }
+}
+
+public class EFQuery<T>: Query<T> where T : class
+{
+    private readonly DbContext _dbContext;
+
+    public EFQuery(DbContext context)
+    {
+        _dbContext = context;
+    }
+    public override async Task<IEnumerable> Execute(IEnumerable<PropertyPath>? selectedProperties)
+    {
+        var predicat = Lambda.ToString()
             .Replace("AndAlso", "&&")
             .Replace("OrElse", "||");
 
@@ -39,9 +65,9 @@ public class EFQueryService<T, TDbContext> : IQueryService<T> where T : class wh
             .AddReferences(typeof(T).Assembly)
             .AddImports(types);
 
-        Expression<Func<T, bool>> predicate = await CSharpScript.EvaluateAsync<Expression<Func<T, bool>>>(predicateExpression, options);
+        Expression<Func<T, bool>> predicate = await CSharpScript.EvaluateAsync<Expression<Func<T, bool>>>(predicat, options);
 
-        return await QueryData(predicate, selectedProperties);
+        return await QueryData(predicate, selectedProperties.Select(p => p.PropertyName).ToList());
     }
 
     public async Task<IEnumerable> QueryData(

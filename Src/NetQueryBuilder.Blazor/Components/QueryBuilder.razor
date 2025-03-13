@@ -1,23 +1,16 @@
-﻿@using System.Collections
-@using System.Linq.Expressions
-@using System.Reflection
-@using NetQueryBuilder.Blazor.ExpressionVisitors.Extensions
-@using NetQueryBuilder.Conditions
-@using NetQueryBuilder.Extensions
+﻿@using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Services
 @typeparam TEntity where TEntity : class
-@inject PredicateFactory PredicateFactory
-@inject QueryBuilderService<TEntity> QueryBuilderService
-@inject IQueryServiceFactory QueryServiceFactory
+@inject IQueryFactory QueryFactory
 
 <MudStack Spacing="10">
     <div>
         <MudText Typo="Typo.h5">SELECT</MudText>
-        <MudSelect Label="Fields" T="string" @bind-SelectedValues="SelectedPropertyPaths" MultiSelection="true" SelectAll="true" ToStringFunc="@(prop => prop)">
+        <MudSelect Label="Fields" T="PropertyPath" @bind-SelectedValues="SelectedPropertyPaths" MultiSelection="true" SelectAll="true" ToStringFunc="@(prop => prop.PropertyName)">
             @foreach (var property in propertyPaths)
             {
-                <MudSelectItem T="string" Value="property">
-                    @property
+                <MudSelectItem T="PropertyPath" Value="property">
+                    @property.PropertyName
                 </MudSelectItem>
             }
         </MudSelect>
@@ -25,10 +18,12 @@
 
     <div>
         <MudText Typo="Typo.h5" GutterBottom="true">WHERE</MudText>
-        <BlockComponent OnChange="@OnChanged"
-                        Condition="@Condition"
-                         Parameter="@QueryBuilderService.Parameter">
-        </BlockComponent>
+        <CascadingValue Value="@_query">
+            <BlockComponent OnChange="@OnChanged"
+                            Condition="@Condition"
+                            Parameter="@_query.Parameter">
+            </BlockComponent>
+        </CascadingValue>
         <MudItem xs="4" lg="4">
             <MudCard>
                 <MudCardHeader>
@@ -40,7 +35,7 @@
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    <code>@QueryBuilderService.Lambda.ToString()</code>
+                    <code>@_query.Lambda.ToString()</code>
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -60,97 +55,8 @@
         <RowTemplate>
             @foreach (var propertyPath in SelectedPropertyPaths) // (ex: "Address.City")
             {
-                <MudTd>@GetNestedPropertyValue(context, propertyPath)</MudTd>
+                <MudTd>@GetNestedPropertyValue(context, propertyPath.PropertyName)</MudTd>
             }
         </RowTemplate>
     </MudTable>
 </MudStack>
-
-@code {
-
-    [Parameter] public string Expression { get; set; }
-
-    private List<TEntity> _data = new();
-    private Expression<Func<TEntity, bool>> Predicate => (Expression<Func<TEntity, bool>>)QueryBuilderService.Lambda;
-    private IEnumerable<string> propertyPaths = Enumerable.Empty<string>();
-    private IEnumerable<string> SelectedPropertyPaths = new List<string>();
-private BlockCondition Condition { get; set; }
-    protected override Task OnInitializedAsync()
-    {
-        propertyPaths = PropertyInspector.GetAllPropertyPaths(typeof(TEntity)).ToList();
-        SelectedPropertyPaths = propertyPaths.ToList();
-        if(QueryBuilderService.Lambda.Body is BinaryExpression binaryExpression)
-        {
-            
-            Condition = new BlockCondition(new []
-            {
-                new LogicalCondition()
-                {
-                    Left = binaryExpression.Left,
-                    Right = binaryExpression.Right,
-                    ExpressionType = binaryExpression.NodeType
-                }
-            }, ExpressionType.And);}
-        return base.OnInitializedAsync();
-    }
-
-    protected override void OnInitialized()
-    {
-        if (string.IsNullOrWhiteSpace(Expression))
-        {
-            QueryBuilderService.LoadEntity();
-        }
-        else
-        {
-            QueryBuilderService.LoadQuery(Expression);
-        }
-    }
-
-    private async Task RunQuery()
-    {
-        Func<TEntity, bool> predicate = Predicate.Compile();
-        var predicateModel = new NetQueryBuilder.Predicate
-        {
-            LambdaExpression = Predicate.ToString(),
-            EntityName = typeof(TEntity).Name,
-            EntityType = typeof(TEntity).FullName,
-            SelectedProperties = SelectedPropertyPaths.ToList()
-        };
-        var data = await ExecuteQuery(predicateModel) as IEnumerable<TEntity>;
-
-        _data = data.ToList();
-    }
-
-    private void OnChanged(Expression body)
-    {
-        var newLambda = QueryBuilderService.Lambda.ReplaceBody(body);
-        QueryBuilderService.Lambda = newLambda;
-        StateHasChanged();
-    }
-
-    public async Task<IEnumerable> ExecuteQuery(NetQueryBuilder.Predicate predicate)
-    {
-        IQueryService<TEntity> queryService = QueryServiceFactory.Create<TEntity>();
-
-        var data = await queryService.QueryData(Predicate, predicate.SelectedProperties);
-        return data;
-    }
-
-    private object GetNestedPropertyValue(object entity, string propertyPath)
-    {
-        var segments = propertyPath.Split('.');
-        var currentObject = entity;
-
-        foreach (var segment in segments)
-        {
-            // Récupérer la propriété par réflexion
-            if (currentObject == null) break;
-
-            var propInfo = currentObject.GetType().GetProperty(segment);
-            currentObject = propInfo?.GetValue(currentObject);
-        }
-
-        return currentObject;
-    }
-
-}
