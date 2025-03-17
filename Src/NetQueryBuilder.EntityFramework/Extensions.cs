@@ -2,7 +2,8 @@
 using System.Linq.Dynamic.Core.CustomTypeProviders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NetQueryBuilder.Services;
+using NetQueryBuilder.Operators;
+using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.EntityFramework;
 
@@ -15,6 +16,7 @@ public static class QueryBuilderServicesExtensions
             RenameParameterExpression = true
         }, true));
 
+        services.AddTransient<IOperatorFactory, EFOperatorFactory>();
         services.AddTransient<IQueryFactory, QueryFactory<TDbContext>>();
         return services;
     }

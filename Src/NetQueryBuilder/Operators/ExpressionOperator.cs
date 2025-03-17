@@ -9,7 +9,7 @@ public class ExpressionOperator
 
     public override bool Equals(object? obj)
     {
-        return obj is not null 
+        return obj is not null
                && obj is ExpressionOperator op
                && ExpressionType == op.ExpressionType;
     }

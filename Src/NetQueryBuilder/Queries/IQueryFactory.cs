@@ -1,6 +1,4 @@
-﻿using NetQueryBuilder.Conditions;
-
-namespace NetQueryBuilder.Services;
+﻿namespace NetQueryBuilder.Queries;
 
 public interface IQueryFactory
 {

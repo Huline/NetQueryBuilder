@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
 
 namespace NetQueryBuilder.Extensions;
 
@@ -39,5 +38,4 @@ public static class TypeExtensions
 
         return true;
     }
-
 }

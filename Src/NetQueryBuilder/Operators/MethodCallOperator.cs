@@ -12,12 +12,12 @@ public class MethodCallOperator : ExpressionOperator
     }
 
     public override ExpressionType ExpressionType => ExpressionType.Call;
-    public MethodInfo MethodInfo { get;  }
+    public MethodInfo MethodInfo { get; }
     public bool IsNegated { get; }
 
     public override bool Equals(object? obj)
     {
-        return obj is not null 
+        return obj is not null
                && obj is MethodCallOperator op
                && base.Equals(obj)
                && EqualityComparer<MethodInfo>.Default.Equals(MethodInfo, op.MethodInfo)

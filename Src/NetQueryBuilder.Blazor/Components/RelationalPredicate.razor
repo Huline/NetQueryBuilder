@@ -1,7 +1,4 @@
 ﻿@using System.Linq.Expressions
-@using NetQueryBuilder.Blazor.ExpressionVisitors.Extensions
-@using NetQueryBuilder.Extensions
-@using NetQueryBuilder.Operators
 <MudExpansionPanels>
     <MudExpansionPanel Expanded="true">
         <TitleContent>
@@ -53,7 +50,7 @@
     [Parameter] public Expression PredicateExpression { get; set; }
 
     private RelationalOperators _relationalOperators;
-    private List<string> _navigationPath = new();
+    private readonly List<string> _navigationPath = new();
 
     protected override void OnInitialized()
     {

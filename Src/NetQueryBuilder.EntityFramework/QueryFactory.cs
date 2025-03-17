@@ -5,7 +5,8 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NetQueryBuilder.Conditions;
-using NetQueryBuilder.Services;
+using NetQueryBuilder.Operators;
+using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.EntityFramework;
 
@@ -30,18 +31,20 @@ public class QueryFactory<TDbContext> : IQueryFactory
 
     public Query<T> Create<T>() where T : class
     {
-        return new EFQuery<T>(_serviceProvider.GetRequiredService<TDbContext>());
+        return new EFQuery<T>(_serviceProvider.GetRequiredService<TDbContext>(), _serviceProvider.GetRequiredService<IOperatorFactory>());
     }
 }
 
-public class EFQuery<T>: Query<T> where T : class
+public class EFQuery<T> : Query<T> where T : class
 {
     private readonly DbContext _dbContext;
 
-    public EFQuery(DbContext context)
+    public EFQuery(DbContext context, IOperatorFactory operatorFactory)
+        : base(operatorFactory)
     {
         _dbContext = context;
     }
+
     public override async Task<IEnumerable> Execute(IEnumerable<PropertyPath>? selectedProperties)
     {
         var predicat = Lambda.ToString()
@@ -85,7 +88,7 @@ public class EFQuery<T>: Query<T> where T : class
         return await query.ToListAsync();
     }
 
-     private IEnumerable<string> ExtractNavigationPaths(IEnumerable<string> selectedProperties)
+    private IEnumerable<string> ExtractNavigationPaths(IEnumerable<string> selectedProperties)
     {
         var paths = new HashSet<string>();
 

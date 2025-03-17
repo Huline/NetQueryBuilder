@@ -1,13 +1,18 @@
 using System.Collections;
+using System.Linq.Expressions;
 using System.Reflection;
+using NetQueryBuilder.Conditions;
+using NetQueryBuilder.Operators;
 
 namespace NetQueryBuilder.Extensions;
 
 public static class PropertyInspector
 {
     // Renvoyer tous les chemins de propriétés (propriétés "plates" => p.Address.City, etc.)
-    public static IEnumerable<string> GetAllPropertyPaths(
+    public static IEnumerable<PropertyPath> GetAllPropertyPaths(
         Type type,
+        ParameterExpression parameter,
+        IOperatorFactory operatorFactory,
         string parentPath = "",
         HashSet<Type>? visitedTypes = null)
     {
@@ -29,10 +34,10 @@ public static class PropertyInspector
 
             // Vérifier s'il s'agit d'un type simple
             if (IsSimpleType(prop.PropertyType))
-                yield return propertyPath;
+                yield return new PropertyPath(propertyPath, prop.PropertyType, type, parameter, operatorFactory);
             else if (!prop.PropertyType.IsAssignableTo(typeof(IEnumerable)))
                 // Récupérer les sous-propriétés sans redéclencher une boucle
-                foreach (var childPath in GetAllPropertyPaths(prop.PropertyType, propertyPath, new HashSet<Type>(visitedTypes)))
+                foreach (var childPath in GetAllPropertyPaths(prop.PropertyType, parameter, operatorFactory, propertyPath, new HashSet<Type>(visitedTypes)))
                     yield return childPath;
         }
 
@@ -50,6 +55,8 @@ public static class PropertyInspector
                || type == typeof(string)
                || type == typeof(decimal)
                || type == typeof(int)
+               || type == typeof(float)
+               || type == typeof(bool)
                || type == typeof(DateTime)
                || type == typeof(DateTimeOffset)
                || type == typeof(TimeSpan)

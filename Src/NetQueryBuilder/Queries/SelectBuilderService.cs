@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace NetQueryBuilder.Services;
+namespace NetQueryBuilder.Queries;
 
 public class SelectBuilderService<TEntity>
 {

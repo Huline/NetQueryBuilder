@@ -15,7 +15,6 @@
 
     [Parameter] public Action<Expression> OnChanged { get; set; }
 
-    protected Expression Expression => Condition.Compile();
     protected override void OnInitialized()
     {
     }
@@ -23,6 +22,37 @@
     private void OnChangeBody(Expression body)
     {
         OnChanged(body);
+    }
+
+    private void ChangeLeft(Expression left)
+    {
+        Condition.Left = left;
+        OnChanged(Condition.Compile());
+    }
+
+    private void ChangeRight(Expression right)
+    {
+        Condition.Right = right;
+        OnChanged(Condition.Compile());
+    }
+
+    private void ChangeOperator(string op)
+    {
+        var expressionType = (ExpressionType)Enum.Parse(typeof(ExpressionType), op);
+        var operators = Condition.AvailableOperatorsForCurrentProperty();
+        Condition.Operator = operators.FirstOrDefault(o => o.ExpressionType == expressionType) ?? operators.First();
+        ;
+        OnChanged(Condition.Compile());
+    }
+
+    private void RemoveLeft()
+    {
+        //OnChanged(PredicateExpression.Right.Copy());
+    }
+
+    private void RemoveRight()
+    {
+        //OnChanged(PredicateExpression.Left.Copy());
     }
 
 }

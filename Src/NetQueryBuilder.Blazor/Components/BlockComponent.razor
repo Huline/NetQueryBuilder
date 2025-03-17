@@ -1,7 +1,6 @@
 ﻿@using System.Linq.Expressions
 @using NetQueryBuilder.Conditions
-
-<MudPaper Class="pa-2" Style=@("margin-left:"+(IndentationLevel * 20) + "px;")>
+<MudPaper Class="pa-2" Style=@("margin-left:" + IndentationLevel * 20 + "px;")>
     <MudGrid Spacing="3">
         @foreach (var childCondition in Condition.Conditions)
         {
@@ -16,6 +15,7 @@
                     </MudSelect>
                 </MudItem>
             }
+
             <MudItem xs="12" sm="4">
                 @if (childCondition is BlockCondition block)
                 {
@@ -50,21 +50,18 @@
         </MudItem>
     </MudGrid>
 </MudPaper>
+
 @code {
-    [Parameter]
-    public BlockCondition Condition { get; set; }
+    [Parameter] public BlockCondition Condition { get; set; }
 
-    [Parameter]
-    public int IndentationLevel { get; set; } = 0;
+    [Parameter] public int IndentationLevel { get; set; } = 0;
 
-    [Parameter]
-    public ParameterExpression Parameter { get; set; }
+    [Parameter] public ParameterExpression Parameter { get; set; }
 
-    [Parameter]
-    public Action<Expression> OnChange { get; set; }
+    [Parameter] public Action<Expression> OnChange { get; set; }
 
-    List<ICondition> SelectedConditions { get; set; } = new List<ICondition>();
-    
+    List<ICondition> SelectedConditions { get; set; } = new();
+
     Dictionary<string, string> Operators = new()
     {
         { "AndAlso", "And" },
@@ -93,7 +90,7 @@
             SelectedConditions.Remove(childCondition);
     }
 
-    
+
     private void AddPredicate(ExpressionType binaryExpressionType)
     {
         Condition.CreateNew();
@@ -112,6 +109,5 @@
         OnChange(condition.Compile());
     }
 
-    
-    
+
 }

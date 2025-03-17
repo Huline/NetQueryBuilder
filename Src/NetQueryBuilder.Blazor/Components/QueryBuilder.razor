@@ -1,13 +1,13 @@
 ﻿@using NetQueryBuilder.Conditions
-@using NetQueryBuilder.Services
+@using NetQueryBuilder.Queries
 @typeparam TEntity where TEntity : class
 @inject IQueryFactory QueryFactory
 
 <MudStack Spacing="10">
     <div>
         <MudText Typo="Typo.h5">SELECT</MudText>
-        <MudSelect Label="Fields" T="PropertyPath" @bind-SelectedValues="SelectedPropertyPaths" MultiSelection="true" SelectAll="true" ToStringFunc="@(prop => prop.PropertyName)">
-            @foreach (var property in propertyPaths)
+        <MudSelect Label="Fields" T="PropertyPath" @bind-SelectedValues="_selectedPropertyPaths" MultiSelection="true" SelectAll="true" ToStringFunc="@(prop => prop.PropertyName)">
+            @foreach (var property in _propertyPaths)
             {
                 <MudSelectItem T="PropertyPath" Value="property">
                     @property.PropertyName
@@ -47,13 +47,13 @@
 
     <MudTable Items="_data" Bordered="true" Striped="true">
         <HeaderContent>
-            @foreach (var property in SelectedPropertyPaths)
+            @foreach (var property in _selectedPropertyPaths)
             {
                 <MudTh>@property</MudTh>
             }
         </HeaderContent>
         <RowTemplate>
-            @foreach (var propertyPath in SelectedPropertyPaths) // (ex: "Address.City")
+            @foreach (var propertyPath in _selectedPropertyPaths) // (ex: "Address.City")
             {
                 <MudTd>@GetNestedPropertyValue(context, propertyPath.PropertyName)</MudTd>
             }

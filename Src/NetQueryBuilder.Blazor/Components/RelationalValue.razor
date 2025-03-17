@@ -1,6 +1,6 @@
 ﻿@using System.Linq.Expressions
-@using NetQueryBuilder.Blazor.ExpressionVisitors.Extensions
 @using NetQueryBuilder.Conditions
+@using NetQueryBuilder.Queries
 @if (Query.Lambda.Body is BinaryExpression binaryExpression)
 {
     @switch (binaryExpression.Left.Type)

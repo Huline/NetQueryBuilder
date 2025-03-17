@@ -1,5 +1,5 @@
 ﻿@using NetQueryBuilder.Conditions
-
+@using NetQueryBuilder.Queries
 <MudSelect Label="Field" T="PropertyPath" ValueChanged="OnFieldSelected" Value="_selectedPropertyName">
     @foreach (var property in properties)
     {
@@ -10,7 +10,7 @@
 </MudSelect>
 
 @code {
-    
+
     [CascadingParameter] public IQuery Query { get; set; }
     [Parameter] public LogicalCondition Condition { get; set; }
 
@@ -29,4 +29,5 @@
         _selectedPropertyName = propertyName;
         Condition.PropertyPath = propertyName;
     }
+
 }

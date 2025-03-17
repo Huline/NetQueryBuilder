@@ -1,26 +1,30 @@
-﻿using System.Collections;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components;
-using NetQueryBuilder.Blazor.ExpressionVisitors.Extensions;
 using NetQueryBuilder.Conditions;
-using NetQueryBuilder.Services;
+using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.Blazor.Components;
 
 public partial class QueryBuilder<TEntity> : IAsyncDisposable
 {
-      [Parameter] public string Expression { get; set; }
-
     private List<TEntity> _data = new();
-    private IEnumerable<PropertyPath> propertyPaths = Enumerable.Empty<PropertyPath>();
-    private IEnumerable<PropertyPath> SelectedPropertyPaths = new List<PropertyPath>();
-    private IQuery<TEntity> _query;
-    private BlockCondition Condition { get; set; }
+    private IQuery<TEntity> _query = null!;
+    private IEnumerable<PropertyPath> _propertyPaths = Enumerable.Empty<PropertyPath>();
+    private IEnumerable<PropertyPath> _selectedPropertyPaths = new List<PropertyPath>();
+    [Parameter] public required string Expression { get; set; }
+    private BlockCondition Condition { get; set; } = null!;
+
+    public ValueTask DisposeAsync()
+    {
+        Condition.ConditionChanged -= OnConditionConditionChanged;
+        return ValueTask.CompletedTask;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _query = QueryFactory.Create<TEntity>();
-        propertyPaths = _query.AvailableProperties();
-        SelectedPropertyPaths = propertyPaths.ToList();
+        _propertyPaths = _query.AvailableProperties();
+        _selectedPropertyPaths = _propertyPaths.ToList();
 
         Condition = _query.Condition;
         Condition.ConditionChanged += OnConditionConditionChanged;
@@ -34,8 +38,8 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 
     private async Task RunQuery()
     {
-        var data = await _query.Execute(SelectedPropertyPaths);
-        
+        var data = await _query.Execute(_selectedPropertyPaths);
+
         _data = (data as IEnumerable<TEntity>)?.ToList();
     }
 
@@ -61,11 +65,4 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 
         return currentObject;
     }
-
-    public ValueTask DisposeAsync()
-    {
-        Condition.ConditionChanged -= OnConditionConditionChanged;
-        return ValueTask.CompletedTask;
-    }
-
 }

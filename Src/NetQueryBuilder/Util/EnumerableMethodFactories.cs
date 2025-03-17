@@ -36,7 +36,7 @@ public static class EnumerableMethodInfo
 
         return methodGeneric;
     }
-    
+
     private static MethodInfo GetGenericMethod(
         this Type type,
         string methodName,
