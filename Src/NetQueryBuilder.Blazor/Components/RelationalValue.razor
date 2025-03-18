@@ -1,30 +1,30 @@
 ﻿@using System.Linq.Expressions
 @using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Queries
-@if (Query.Lambda.Body is BinaryExpression binaryExpression)
+@if (Condition.Compile() is BinaryExpression)
 {
-    @switch (binaryExpression.Left.Type)
+    @switch (Condition.PropertyPath.PropertyType)
     {
-        case Type intType when intType == typeof(int) && binaryExpression.Right is ConstantExpression intConstant:
-            <MudTextField Label="Value" T="int" Value="@((int)intConstant.Value)" ValueChanged="@UpdateValue"/>
+        case { } intType when intType == typeof(int):
+            <MudTextField Label="Value" T="int" Value="@((int)Condition.Value)" ValueChanged="@UpdateValue"/>
             break;
-        case Type stringType when stringType == typeof(string) && binaryExpression.Right is ConstantExpression stringConstant:
-            <MudTextField Label="Value" T="string" Value="@(stringConstant.Value?.ToString())" ValueChanged="@UpdateValue"/>
+        case { } stringType when stringType == typeof(string):
+            <MudTextField Label="Value" T="string" Value="@(Condition.Value?.ToString())" ValueChanged="@UpdateValue"/>
             break;
-        case Type boolType when boolType == typeof(bool) && binaryExpression.Right is ConstantExpression boolConstant:
-            <MudSelect Label="Value" T="bool" Value="@((bool)boolConstant.Value)" ValueChanged="@UpdateValue">
+        case { } boolType when boolType == typeof(bool):
+            <MudSelect Label="Value" T="bool" Value="@((bool)Condition.Value)" ValueChanged="@UpdateValue">
                 <MudSelectItem Value="true">True</MudSelectItem>
                 <MudSelectItem Value="false">False</MudSelectItem>
             </MudSelect>
             break;
-        case Type dateTimeType when dateTimeType == typeof(DateTime) && binaryExpression.Right is ConstantExpression dateTimeContant:
-            <MudDatePicker Label="Value" Date="@((DateTime)dateTimeContant.Value)" DateChanged="@UpdateValue"/>
+        case { } dateTimeType when dateTimeType == typeof(DateTime):
+            <MudDatePicker Label="Value" Date="@((DateTime)Condition.Value)" DateChanged="@UpdateValue"/>
             break;
     }
 }
-@if (Query.Lambda.Body is MethodCallExpression methodCallExpression)
+@if (Condition.Compile() is MethodCallExpression)
 {
-    <RelationalValueMethod OnUpdateValue="UpdateValue" MethodCallExpression="methodCallExpression"></RelationalValueMethod>
+    <RelationalValueMethod OnUpdateValue="@UpdateValue" Condition="@Condition"></RelationalValueMethod>
 }
 
 
@@ -33,14 +33,6 @@
     [CascadingParameter] public IQuery Query { get; set; }
 
     [Parameter] public LogicalCondition Condition { get; set; }
-
-    private Expression _expression;
-
-    protected override void OnParametersSet()
-    {
-        _expression = Condition.Compile();
-        base.OnParametersSet();
-    }
 
     private void UpdateValue(DateTime? dateTime)
     {

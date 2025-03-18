@@ -5,7 +5,7 @@
     <MudStack>
         <MudChip T="T" OnClick="@OpenDialog" Size="Size.Small" Text="Add value" Icon="@Icons.Material.Filled.Add"/>
         <MudChipSet T="T" Size="Size.Small">
-            @foreach (var item in (IEnumerable<T>)((ConstantExpression)MethodCallExpression.Arguments[0]).Value)
+            @foreach (var item in Items)
             {
                 <MudChip T="T" Color="Color.Default" Variant="Variant.Text" OnClose="@RemoveListItem" Value="@item"/>
             }
@@ -35,34 +35,44 @@
     [Parameter] public Action<IEnumerable<T>> OnUpdateValues { get; set; }
 
     private T _listItemInputValue;
-    private IEnumerable<T> _items;
+    private List<T> _items = new();
     private bool _showListItemDialog;
     private DialogOptions _listItemDialogOptions = new() { CloseButton = true };
 
+    // Propriété pour accéder aux éléments de manière cohérente
+    private IEnumerable<T> Items => _items;
+
     protected override void OnParametersSet()
     {
+        // Si l'argument est un ConstantExpression, on récupère sa valeur
+        if (MethodCallExpression.Arguments[0] is ConstantExpression constantExpression)
+        {
+            _items = ((IEnumerable<T>)constantExpression.Value).ToList();
+        }
+        // Si c'est un NewExpression, on part du principe que c'est une liste vide
+        else if (MethodCallExpression.Arguments[0] is NewExpression)
+        {
+            // La liste est déjà initialisée comme vide
+        }
     }
 
     private void OpenDialog()
     {
         _showListItemDialog = true;
-        _items = (IEnumerable<T>)((ConstantExpression)MethodCallExpression.Arguments[0]).Value;
     }
 
     private void AddListItem()
     {
-        var items = _items.ToList();
-        items.Add(_listItemInputValue);
+        _items.Add(_listItemInputValue);
         _showListItemDialog = false;
         _listItemInputValue = default;
-        UpdateValues(items);
+        UpdateValues(_items);
     }
 
     private void RemoveListItem(MudChip<T> item)
     {
-        var items = _items.ToList();
-        items.Remove(item.Value);
-        UpdateValues(items);
+        _items.Remove(item.Value);
+        UpdateValues(_items);
     }
 
     private void UpdateValue(T value)

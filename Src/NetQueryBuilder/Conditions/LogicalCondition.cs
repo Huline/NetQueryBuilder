@@ -5,11 +5,14 @@ namespace NetQueryBuilder.Conditions;
 
 public class LogicalCondition : ICondition
 {
+    private Expression? _compiledExpression;
     private Expression _left;
     private ExpressionType _logicalType;
     private ExpressionOperator _operator;
     private PropertyPath _propertyPath;
     private Expression _right;
+
+    private object? _value;
 
     public LogicalCondition(PropertyPath propertyPath, ExpressionType logicalType, ICondition? parent = null)
         : this(propertyPath, logicalType, propertyPath.GetCompatibleOperators().First(), propertyPath.GetDefaultValue(), parent)
@@ -18,13 +21,13 @@ public class LogicalCondition : ICondition
 
     public LogicalCondition(PropertyPath propertyPath, ExpressionType logicalType, ExpressionOperator @operator, object value, ICondition? parent = null)
     {
-        PropertyPath = propertyPath;
-        LogicalType = logicalType;
-        Operator = @operator;
-        Value = value;
+        _propertyPath = propertyPath;
+        _logicalType = logicalType;
+        _operator = @operator;
+        _value = value;
+        _left = PropertyPath.GetExpression();
+        _right = Expression.Constant(Value);
         Parent = parent;
-        Left = PropertyPath.GetExpression();
-        Right = Expression.Constant(Value);
     }
 
     public PropertyPath PropertyPath
@@ -33,29 +36,21 @@ public class LogicalCondition : ICondition
         set
         {
             _propertyPath = value;
-            ConditionChanged?.Invoke(this, EventArgs.Empty);
+            _left = PropertyPath.GetExpression();
+            _value = PropertyPath.GetDefaultValue();
+            _right = Expression.Constant(_value);
+            NotifyConditionChanged();
         }
     }
 
-    public object Value { get; set; }
-
-    public Expression Left
+    public object? Value
     {
-        get => _left;
+        get => _value;
         set
         {
-            _left = value;
-            ConditionChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    public Expression Right
-    {
-        get => _right;
-        set
-        {
-            _right = value;
-            ConditionChanged?.Invoke(this, EventArgs.Empty);
+            _value = value;
+            _right = Expression.Constant(Value);
+            NotifyConditionChanged();
         }
     }
 
@@ -65,7 +60,9 @@ public class LogicalCondition : ICondition
         set
         {
             _operator = value;
-            ConditionChanged?.Invoke(this, EventArgs.Empty);
+            _value = _operator.GetDefaultValue(PropertyPath.PropertyType);
+            _right = Expression.Constant(Value);
+            NotifyConditionChanged();
         }
     }
 
@@ -75,7 +72,7 @@ public class LogicalCondition : ICondition
         set
         {
             _logicalType = value;
-            ConditionChanged?.Invoke(this, EventArgs.Empty);
+            NotifyConditionChanged();
         }
     }
 
@@ -85,7 +82,9 @@ public class LogicalCondition : ICondition
 
     public Expression Compile()
     {
-        return Expression.MakeBinary(Operator.ExpressionType, _left, _right);
+        if (_compiledExpression != null)
+            return _compiledExpression;
+        return _operator.ToExpression(_left, _right);
     }
 
     public ICondition GetRoot()
@@ -96,5 +95,12 @@ public class LogicalCondition : ICondition
     public IEnumerable<ExpressionOperator> AvailableOperatorsForCurrentProperty()
     {
         return PropertyPath.GetCompatibleOperators();
+    }
+
+    private void NotifyConditionChanged()
+    {
+        _compiledExpression = null;
+        _compiledExpression = Compile();
+        ConditionChanged.Invoke(this, EventArgs.Empty);
     }
 }

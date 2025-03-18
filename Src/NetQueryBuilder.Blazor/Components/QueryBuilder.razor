@@ -1,12 +1,11 @@
-﻿@using NetQueryBuilder.Conditions
-@using NetQueryBuilder.Queries
+﻿@using NetQueryBuilder.Queries
 @typeparam TEntity where TEntity : class
 @inject IQueryFactory QueryFactory
 
 <MudStack Spacing="10">
     <div>
         <MudText Typo="Typo.h5">SELECT</MudText>
-        <MudSelect Label="Fields" T="PropertyPath" @bind-SelectedValues="_selectedPropertyPaths" MultiSelection="true" SelectAll="true" ToStringFunc="@(prop => prop.PropertyName)">
+        <MudSelect Label="Fields" T="PropertyPath" @bind-SelectedValues="_selectedPropertyPaths" MultiSelection="true" SelectAll="true" ToStringFunc="@(prop => prop!.PropertyName)">
             @foreach (var property in _propertyPaths)
             {
                 <MudSelectItem T="PropertyPath" Value="property">
@@ -49,7 +48,7 @@
         <HeaderContent>
             @foreach (var property in _selectedPropertyPaths)
             {
-                <MudTh>@property</MudTh>
+                <MudTh>@property.PropertyName</MudTh>
             }
         </HeaderContent>
         <RowTemplate>

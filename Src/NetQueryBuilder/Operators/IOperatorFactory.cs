@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using NetQueryBuilder.Conditions;
 
 namespace NetQueryBuilder.Operators;
 

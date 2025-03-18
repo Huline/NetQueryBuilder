@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Linq.Expressions;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NetQueryBuilder.Conditions;
 using NetQueryBuilder.Operators;
 using NetQueryBuilder.Queries;
 
@@ -49,7 +47,11 @@ public class EFQuery<T> : Query<T> where T : class
     {
         var predicat = Lambda.ToString()
             .Replace("AndAlso", "&&")
-            .Replace("OrElse", "||");
+            .Replace("OrElse", "||")
+            .Replace("False", "false")
+            .Replace("True", "true")
+            .Replace(" Not ", " !")
+            .Replace(" Not(", " !(");
 
         var types = _dbContext
             .Model
@@ -58,6 +60,7 @@ public class EFQuery<T> : Query<T> where T : class
             .Concat(new[]
             {
                 _dbContext.GetType().Namespace,
+                typeof(EF).Namespace,
                 "System"
             })
             .Distinct()
@@ -65,10 +68,13 @@ public class EFQuery<T> : Query<T> where T : class
 
         var options = ScriptOptions
             .Default
+            .AddReferences(typeof(EFOperatorFactory).Assembly)
+            .AddReferences(typeof(EF).Assembly)
             .AddReferences(typeof(T).Assembly)
             .AddImports(types);
 
-        Expression<Func<T, bool>> predicate = await CSharpScript.EvaluateAsync<Expression<Func<T, bool>>>(predicat, options);
+        //Expression<Func<T, bool>> predicate = await CSharpScript.EvaluateAsync<Expression<Func<T, bool>>>(predicat, options);
+        Expression<Func<T, bool>> predicate = Lambda as Expression<Func<T, bool>>;
 
         return await QueryData(predicate, selectedProperties.Select(p => p.PropertyName).ToList());
     }

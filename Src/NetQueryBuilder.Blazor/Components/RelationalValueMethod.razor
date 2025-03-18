@@ -1,9 +1,10 @@
 ﻿@using System.Linq.Expressions
-@if (MethodCallExpression.Method.Name == "Like")
+@using NetQueryBuilder.Conditions
+@if (MethodCallExpression.Method.Name.Contains("Like", StringComparison.OrdinalIgnoreCase))
 {
-    <MudTextField Label="Value" T="string" Value="@((string)((ConstantExpression)MethodCallExpression.Arguments[2]).Value)" ValueChanged="UpdateValue"/>
+    <MudTextField Label="Value" T="string" Value="@GetStringValue(MethodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
 }
-@if (MethodCallExpression.Method.Name == "Contains")
+@if (MethodCallExpression.Method.Name.Contains("Contains", StringComparison.OrdinalIgnoreCase))
 {
     @switch (_memberType)
     {
@@ -17,19 +18,39 @@
 }
 
 @code {
-    [Parameter] public MethodCallExpression MethodCallExpression { get; set; }
-
+    [Parameter] public LogicalCondition Condition { get; set; }
     [Parameter] public Action<Expression> OnUpdateValue { get; set; }
 
+    private MethodCallExpression MethodCallExpression;
     private Type _memberType;
 
     protected override void OnParametersSet()
     {
+        MethodCallExpression = (MethodCallExpression)Condition.Compile();
         _memberType = ((MemberExpression)MethodCallExpression.Arguments[1]).Type;
     }
 
+    private string GetStringValue(Expression expression)
+    {
+        // Gère les différents types d'expressions possibles
+        switch (expression)
+        {
+            case ConstantExpression constExpr:
+                return constExpr.Value?.ToString() ?? string.Empty;
+
+            case UnaryExpression unaryExpr when unaryExpr.NodeType == ExpressionType.Convert
+                                                && unaryExpr.Operand is ConstantExpression constOperand:
+                return constOperand.Value?.ToString() ?? string.Empty;
+
+            default:
+                return string.Empty; // Valeur par défaut
+        }
+    }
+
+
     private void UpdateValue<T>(T value)
     {
+        Condition.Value = value;
         OnUpdateValue.Invoke(Expression.Constant(value, typeof(T)));
     }
 

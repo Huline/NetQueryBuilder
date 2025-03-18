@@ -2,7 +2,7 @@
 using NetQueryBuilder.Extensions;
 using NetQueryBuilder.Operators;
 
-namespace NetQueryBuilder.Conditions;
+namespace NetQueryBuilder;
 
 public class PropertyPath
 {
@@ -10,7 +10,7 @@ public class PropertyPath
     private readonly ParameterExpression _parameterExpression;
 
 
-    public PropertyPath(
+    internal PropertyPath(
         string propertyName,
         Type propertyType,
         Type parentType,
@@ -34,23 +34,14 @@ public class PropertyPath
         if (_parameterExpression == null)
             throw new InvalidOperationException("Le ParameterExpression n'a pas été défini. Appelez SetParameterExpression d'abord.");
 
-        // Création de l'expression d'accès au membre
-        return Expression.Property(_parameterExpression, PropertyName);
+        if (!PropertyName.Contains('.'))
+            return Expression.Property(_parameterExpression, PropertyName);
+        var parts = PropertyName.Split('.');
+        Expression expr = _parameterExpression;
 
-        // // Obtention de l'opérateur binaire par défaut pour ce type de propriété
-        // var defaultOperator = GetCompatibleOperators()
-        //     .OfType<BinaryOperator>()
-        //     .First();
-        //     
-        // // Création d'une valeur par défaut pour ce type
-        // var defaultValue = GetDefaultValueForType(PropertyType);
-        //
-        // // Création de l'expression binaire complète
-        // return Expression.MakeBinary(
-        //     defaultOperator.ExpressionType,
-        //     memberExpression,
-        //     defaultValue
-        // );
+        foreach (var part in parts) expr = Expression.Property(expr, part);
+
+        return (MemberExpression)expr;
     }
 
     public object GetDefaultValue()

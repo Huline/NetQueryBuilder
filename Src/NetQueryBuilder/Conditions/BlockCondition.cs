@@ -5,8 +5,8 @@ namespace NetQueryBuilder.Conditions;
 public class BlockCondition : ICondition
 {
     private readonly List<ICondition> _children = new();
+    private Expression? _compiledExpression;
     private ExpressionType _logicalType;
-    private ICondition? _parent;
 
     public BlockCondition(IEnumerable<ICondition> children, ExpressionType expressionType, ICondition? parent = null)
     {
@@ -22,16 +22,8 @@ public class BlockCondition : ICondition
     }
 
     public IReadOnlyCollection<ICondition> Conditions => _children.AsReadOnly();
-
-    public ICondition? Parent
-    {
-        get => _parent;
-        set
-        {
-            _parent = value;
-            ConditionChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
+    public EventHandler ConditionChanged { get; set; }
+    public ICondition? Parent { get; set; }
 
     public ExpressionType LogicalType
     {
@@ -39,11 +31,10 @@ public class BlockCondition : ICondition
         set
         {
             _logicalType = value;
-            ConditionChanged?.Invoke(this, EventArgs.Empty);
+            NotifyConditionChanged();
         }
     }
 
-    public EventHandler ConditionChanged { get; set; }
 
     public ICondition GetRoot()
     {
@@ -52,10 +43,13 @@ public class BlockCondition : ICondition
 
     public Expression Compile()
     {
+        if (_compiledExpression != null)
+            return _compiledExpression;
         var expressions = Conditions.Select(c => c.Compile()).ToList();
 
         var result = expressions.First();
-        foreach (var expression in expressions.Skip(1)) result = Expression.MakeBinary(LogicalType, result, expression);
+        foreach (var expression in expressions.Skip(1))
+            result = Expression.MakeBinary(LogicalType, result, expression);
 
         return result;
     }
@@ -65,20 +59,21 @@ public class BlockCondition : ICondition
         _children.Add(condition);
         condition.Parent = this;
         condition.ConditionChanged += ChildConditionChanged;
-        ConditionChanged?.Invoke(this, EventArgs.Empty);
+        NotifyConditionChanged();
     }
 
     public void Remove(ICondition condition)
     {
         _children.Remove(condition);
         condition.Parent = null;
-        if (condition.ConditionChanged?.GetInvocationList().Length > 0) condition.ConditionChanged -= ChildConditionChanged;
-        ConditionChanged?.Invoke(this, EventArgs.Empty);
+        if (condition.ConditionChanged.GetInvocationList().Length > 0)
+            UnsubscribeChildCondition(condition);
+        NotifyConditionChanged();
     }
 
     public void Group(IEnumerable<ICondition> childrenToGroup)
     {
-        var children = Conditions.Where(c => childrenToGroup.Contains(c)).ToList();
+        var children = Conditions.Where(childrenToGroup.Contains).ToList();
         if (children.Count == 0) return;
 
         var block = new BlockCondition(children, children.First().LogicalType, this);
@@ -86,31 +81,28 @@ public class BlockCondition : ICondition
         foreach (var child in children)
         {
             _children.Remove(child);
-            child.ConditionChanged -= ChildConditionChanged;
+            UnsubscribeChildCondition(child);
             child.Parent = block;
         }
 
         _children.Add(block);
         block.ConditionChanged += ChildConditionChanged;
 
-        ConditionChanged?.Invoke(this, EventArgs.Empty);
+        NotifyConditionChanged();
     }
 
-    private void ChildConditionChanged(object? sender, EventArgs args)
-    {
-        ConditionChanged?.Invoke(this, EventArgs.Empty);
-    }
 
     public void Ungroup(IEnumerable<ICondition> childrenToUngroup)
     {
-        var blocks = Conditions.OfType<BlockCondition>().Where(b => childrenToUngroup.Contains(b)).ToList();
+        var blocks = Conditions.OfType<BlockCondition>().Where(childrenToUngroup.Contains).ToList();
         if (blocks.Count == 0) return;
 
         foreach (var block in blocks)
         {
             _children.Remove(block);
-            block.ConditionChanged -= ChildConditionChanged;
-            foreach (var blockCondition in block.Conditions) blockCondition.ConditionChanged -= block.ChildConditionChanged;
+            UnsubscribeChildCondition(block);
+            foreach (var blockChildCondition in block.Conditions)
+                block.UnsubscribeChildCondition(blockChildCondition);
             _children.AddRange(block.Conditions);
             foreach (var condition in block.Conditions)
             {
@@ -119,7 +111,7 @@ public class BlockCondition : ICondition
             }
         }
 
-        ConditionChanged?.Invoke(this, EventArgs.Empty);
+        NotifyConditionChanged();
     }
 
     public void CreateNew()
@@ -132,5 +124,22 @@ public class BlockCondition : ICondition
     private LogicalCondition FindLogicalCondition()
     {
         return Conditions.OfType<LogicalCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>().Select(c => c.FindLogicalCondition()).First();
+    }
+
+    private void ChildConditionChanged(object? sender, EventArgs args)
+    {
+        NotifyConditionChanged();
+    }
+
+    private void UnsubscribeChildCondition(ICondition child)
+    {
+        child.ConditionChanged -= ChildConditionChanged;
+    }
+
+    private void NotifyConditionChanged()
+    {
+        _compiledExpression = null;
+        _compiledExpression = Compile();
+        ConditionChanged.Invoke(this, EventArgs.Empty);
     }
 }

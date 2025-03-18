@@ -2,10 +2,12 @@
 
 namespace NetQueryBuilder.Operators;
 
-public class ExpressionOperator
+public abstract class ExpressionOperator
 {
     public virtual ExpressionType ExpressionType { get; }
     public virtual string DisplayText { get; }
+
+    public abstract Expression ToExpression(Expression left, Expression right);
 
     public override bool Equals(object? obj)
     {
@@ -28,4 +30,6 @@ public class ExpressionOperator
     {
         return !(left == right);
     }
+
+    public abstract object? GetDefaultValue(Type type);
 }

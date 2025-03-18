@@ -23,7 +23,9 @@
 
     protected override void OnParametersSet()
     {
-        InitializeOperators();
+        _operators = Condition.AvailableOperatorsForCurrentProperty(); // Query.GetOperators(binaryExpression.Left.Type).ToList();
+        _operator = Condition.Operator; // _operators.FirstOrDefault(o => o.ExpressionType == Query.Lambda.Body.NodeType) ?? _operators.First();
+        //InitializeOperators();
     }
 
     private void InitializeOperators()

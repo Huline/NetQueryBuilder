@@ -1,5 +1,4 @@
-﻿using NetQueryBuilder.Conditions;
-using NetQueryBuilder.EntityFramework.Operators;
+﻿using NetQueryBuilder.EntityFramework.Operators;
 using NetQueryBuilder.Operators;
 
 namespace NetQueryBuilder.EntityFramework;

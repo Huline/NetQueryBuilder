@@ -1,15 +1,14 @@
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
-using NetQueryBuilder.Conditions;
 using NetQueryBuilder.Operators;
 
 namespace NetQueryBuilder.Extensions;
 
-public static class PropertyInspector
+internal static class PropertyInspector
 {
     // Renvoyer tous les chemins de propriétés (propriétés "plates" => p.Address.City, etc.)
-    public static IEnumerable<PropertyPath> GetAllPropertyPaths(
+    internal static IEnumerable<PropertyPath> GetAllPropertyPaths(
         Type type,
         ParameterExpression parameter,
         IOperatorFactory operatorFactory,

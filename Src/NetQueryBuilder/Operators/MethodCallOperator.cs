@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace NetQueryBuilder.Operators;
 
-public class MethodCallOperator : ExpressionOperator
+public abstract class MethodCallOperator : ExpressionOperator
 {
     public MethodCallOperator(MethodInfo methodInfo, bool isNegated = false)
     {

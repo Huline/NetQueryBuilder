@@ -24,17 +24,6 @@
         OnChanged(body);
     }
 
-    private void ChangeLeft(Expression left)
-    {
-        Condition.Left = left;
-        OnChanged(Condition.Compile());
-    }
-
-    private void ChangeRight(Expression right)
-    {
-        Condition.Right = right;
-        OnChanged(Condition.Compile());
-    }
 
     private void ChangeOperator(string op)
     {

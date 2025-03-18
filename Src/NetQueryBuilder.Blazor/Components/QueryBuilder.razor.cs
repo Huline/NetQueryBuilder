@@ -8,8 +8,8 @@ namespace NetQueryBuilder.Blazor.Components;
 public partial class QueryBuilder<TEntity> : IAsyncDisposable
 {
     private List<TEntity> _data = new();
-    private IQuery<TEntity> _query = null!;
     private IEnumerable<PropertyPath> _propertyPaths = Enumerable.Empty<PropertyPath>();
+    private IQuery<TEntity> _query = null!;
     private IEnumerable<PropertyPath> _selectedPropertyPaths = new List<PropertyPath>();
     [Parameter] public required string Expression { get; set; }
     private BlockCondition Condition { get; set; } = null!;
@@ -40,7 +40,7 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
     {
         var data = await _query.Execute(_selectedPropertyPaths);
 
-        _data = (data as IEnumerable<TEntity>)?.ToList();
+        _data = (data as IEnumerable<TEntity>)?.ToList() ?? new List<TEntity>();
     }
 
     private void OnChanged(Expression body)
@@ -49,7 +49,7 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
         StateHasChanged();
     }
 
-    private object GetNestedPropertyValue(object entity, string propertyPath)
+    private object? GetNestedPropertyValue(object entity, string propertyPath)
     {
         var segments = propertyPath.Split('.');
         var currentObject = entity;
