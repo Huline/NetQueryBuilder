@@ -29,7 +29,7 @@
                     <MudCheckBox T="bool" Label="Group"
                                  ValueChanged="@(e => Select(e, childCondition))"/>
                     <!-- Affiche un composant “lambda” ou un équivalent pour la condition simple -->
-                    <LambdaComponent Condition="@condition" Parameter="@Parameter" OnChanged="@OnChange"/>
+                    <LambdaComponent Condition="@condition" Parameter="@Parameter"/>
                     <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(condition)"></MudIconButton>
                 }
             </MudItem>
@@ -108,6 +108,5 @@
         condition.LogicalType = expressionType;
         OnChange(condition.Compile());
     }
-
 
 }

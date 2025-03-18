@@ -3,15 +3,21 @@ using NetQueryBuilder.Extensions;
 
 namespace NetQueryBuilder.Operators;
 
-public class BinaryOperator : ExpressionOperator
+public abstract class BinaryOperator : ExpressionOperator
 {
+    public BinaryOperator(ExpressionType type, string name, IExpressionStringifier expressionStringifier)
+        : base(type, name, expressionStringifier)
+    {
+    }
+
     public override Expression ToExpression(Expression left, Expression right)
     {
         return Expression.MakeBinary(ExpressionType, left, right);
     }
 
-    public override object? GetDefaultValue(Type type)
+    public override object? GetDefaultValue(Type type, object? value)
     {
+        if (type == value?.GetType()) return value;
         return type.GetDefaultValue();
     }
 }

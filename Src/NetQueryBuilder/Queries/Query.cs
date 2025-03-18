@@ -44,10 +44,7 @@ public abstract class Query<TEntity> : Query, IQuery<TEntity> where TEntity : cl
             typeof(TEntity).GetProperties().First().PropertyType.GetDefaultValue(),
             ExpressionType.Equal);
 
-
-        var operators = GetOperators(Lambda.Body.Type).ToList();
-        var op = operators.FirstOrDefault(o => o.ExpressionType == Lambda.Body.NodeType) ?? operators.First();
-        if (Lambda.Body is BinaryExpression binaryExpression)
+        if (Lambda.Body is BinaryExpression)
             Condition = new BlockCondition(new[]
             {
                 new LogicalCondition(AvailableProperties().First(), ExpressionType.And)
@@ -69,10 +66,7 @@ public abstract class Query<TEntity> : Query, IQuery<TEntity> where TEntity : cl
 
         Parameter = Lambda.Parameters[0];
 
-
-        var operators = GetOperators(Lambda.Body.Type).ToList();
-        var op = operators.FirstOrDefault(o => o.ExpressionType == Lambda.Body.NodeType) ?? operators.First();
-        if (Lambda.Body is BinaryExpression binaryExpression)
+        if (Lambda.Body is BinaryExpression)
             Condition = new BlockCondition(new[]
             {
                 new LogicalCondition(AvailableProperties().First(), ExpressionType.And)
@@ -101,51 +95,5 @@ public abstract class Query<TEntity> : Query, IQuery<TEntity> where TEntity : cl
         Expression<Func<T, bool>> expression = Expression.Lambda(binary, parameter) as Expression<Func<T, bool>>;
 
         return expression;
-    }
-
-    public static List<ExpressionOperator> GetOperators(Type operandType)
-    {
-        return operandType switch
-        {
-            Type type when type == typeof(int) => new List<ExpressionOperator>
-            {
-                new EqualsOperator(),
-                new NotEqualsOperator(),
-                new LessThanOperator(),
-                new LessThanOrEqualOperator(),
-                new GreaterThanOperator(),
-                new GreaterThanOrEqualOperator(),
-                new InListOperator<int>(),
-                new InListOperator<int>(true)
-            },
-            Type type when type == typeof(string) => new List<ExpressionOperator>
-            {
-                new EqualsOperator(),
-                new NotEqualsOperator(),
-                // new EfLikeOperator(),
-                // new EfLikeOperator(true),
-                new InListOperator<string>(),
-                new InListOperator<string>(true)
-            },
-            Type type when type == typeof(bool) => new List<ExpressionOperator>
-            {
-                new EqualsOperator(),
-                new NotEqualsOperator()
-            },
-            Type type when type == typeof(DateTime) => new List<ExpressionOperator>
-            {
-                new EqualsOperator(),
-                new NotEqualsOperator(),
-                new LessThanOperator(),
-                new LessThanOrEqualOperator(),
-                new GreaterThanOperator(),
-                new GreaterThanOrEqualOperator()
-            },
-            _ => new List<ExpressionOperator>
-            {
-                new EqualsOperator(),
-                new NotEqualsOperator()
-            }
-        };
     }
 }

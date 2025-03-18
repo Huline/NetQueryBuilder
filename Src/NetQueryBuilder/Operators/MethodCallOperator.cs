@@ -5,13 +5,13 @@ namespace NetQueryBuilder.Operators;
 
 public abstract class MethodCallOperator : ExpressionOperator
 {
-    public MethodCallOperator(MethodInfo methodInfo, bool isNegated = false)
+    public MethodCallOperator(string name, IExpressionStringifier expressionStringifier, MethodInfo methodInfo, bool isNegated = false)
+        : base(ExpressionType.Call, name, expressionStringifier)
     {
         MethodInfo = methodInfo;
         IsNegated = isNegated;
     }
 
-    public override ExpressionType ExpressionType => ExpressionType.Call;
     public MethodInfo MethodInfo { get; }
     public bool IsNegated { get; }
 

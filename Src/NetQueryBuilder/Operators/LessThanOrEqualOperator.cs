@@ -4,6 +4,8 @@ namespace NetQueryBuilder.Operators;
 
 public class LessThanOrEqualOperator : BinaryOperator
 {
-    public override ExpressionType ExpressionType => ExpressionType.LessThanOrEqual;
-    public override string DisplayText => "Less than or equal";
+    public LessThanOrEqualOperator(IExpressionStringifier expressionStringifier)
+        : base(ExpressionType.LessThanOrEqual, "LessThanOrEqual", expressionStringifier)
+    {
+    }
 }

@@ -60,7 +60,7 @@ public class LogicalCondition : ICondition
         set
         {
             _operator = value;
-            _value = _operator.GetDefaultValue(PropertyPath.PropertyType);
+            _value = _operator.GetDefaultValue(PropertyPath.PropertyType, _value);
             _right = Expression.Constant(Value);
             NotifyConditionChanged();
         }

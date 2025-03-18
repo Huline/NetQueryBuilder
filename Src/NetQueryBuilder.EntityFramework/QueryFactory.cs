@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Linq.Expressions;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NetQueryBuilder.Operators;
@@ -45,33 +44,33 @@ public class EFQuery<T> : Query<T> where T : class
 
     public override async Task<IEnumerable> Execute(IEnumerable<PropertyPath>? selectedProperties)
     {
-        var predicat = Lambda.ToString()
-            .Replace("AndAlso", "&&")
-            .Replace("OrElse", "||")
-            .Replace("False", "false")
-            .Replace("True", "true")
-            .Replace(" Not ", " !")
-            .Replace(" Not(", " !(");
-
-        var types = _dbContext
-            .Model
-            .GetEntityTypes()
-            .Select(t => t.ClrType.Namespace)
-            .Concat(new[]
-            {
-                _dbContext.GetType().Namespace,
-                typeof(EF).Namespace,
-                "System"
-            })
-            .Distinct()
-            .ToList();
-
-        var options = ScriptOptions
-            .Default
-            .AddReferences(typeof(EFOperatorFactory).Assembly)
-            .AddReferences(typeof(EF).Assembly)
-            .AddReferences(typeof(T).Assembly)
-            .AddImports(types);
+        // var predicat = Lambda.ToString()
+        //     .Replace("AndAlso", "&&")
+        //     .Replace("OrElse", "||")
+        //     .Replace("False", "false")
+        //     .Replace("True", "true")
+        //     .Replace(" Not ", " !")
+        //     .Replace(" Not(", " !(");
+        //
+        // var types = _dbContext
+        //     .Model
+        //     .GetEntityTypes()
+        //     .Select(t => t.ClrType.Namespace)
+        //     .Concat(new[]
+        //     {
+        //         _dbContext.GetType().Namespace,
+        //         typeof(EF).Namespace,
+        //         "System"
+        //     })
+        //     .Distinct()
+        //     .ToList();
+        //
+        // var options = ScriptOptions
+        //     .Default
+        //     .AddReferences(typeof(EFOperatorFactory).Assembly)
+        //     .AddReferences(typeof(EF).Assembly)
+        //     .AddReferences(typeof(T).Assembly)
+        //     .AddImports(types);
 
         //Expression<Func<T, bool>> predicate = await CSharpScript.EvaluateAsync<Expression<Func<T, bool>>>(predicat, options);
         Expression<Func<T, bool>> predicate = Lambda as Expression<Func<T, bool>>;

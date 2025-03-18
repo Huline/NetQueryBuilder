@@ -4,10 +4,20 @@ namespace NetQueryBuilder.Operators;
 
 public abstract class ExpressionOperator
 {
-    public virtual ExpressionType ExpressionType { get; }
-    public virtual string DisplayText { get; }
+    private readonly IExpressionStringifier _expressionStringifier;
+    protected readonly ExpressionType ExpressionType;
+    private readonly string Name;
+
+
+    public ExpressionOperator(ExpressionType type, string name, IExpressionStringifier expressionStringifier)
+    {
+        _expressionStringifier = expressionStringifier;
+        ExpressionType = type;
+        Name = name;
+    }
 
     public abstract Expression ToExpression(Expression left, Expression right);
+    public abstract object? GetDefaultValue(Type type, object? value);
 
     public override bool Equals(object? obj)
     {
@@ -31,5 +41,8 @@ public abstract class ExpressionOperator
         return !(left == right);
     }
 
-    public abstract object? GetDefaultValue(Type type);
+    public override string ToString()
+    {
+        return _expressionStringifier.GetString(ExpressionType, Name);
+    }
 }

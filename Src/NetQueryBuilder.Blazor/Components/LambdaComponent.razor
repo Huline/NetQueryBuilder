@@ -12,36 +12,4 @@
     [Parameter] public LogicalCondition Condition { get; set; }
 
     [Parameter] public ParameterExpression Parameter { get; set; }
-
-    [Parameter] public Action<Expression> OnChanged { get; set; }
-
-    protected override void OnInitialized()
-    {
-    }
-
-    private void OnChangeBody(Expression body)
-    {
-        OnChanged(body);
-    }
-
-
-    private void ChangeOperator(string op)
-    {
-        var expressionType = (ExpressionType)Enum.Parse(typeof(ExpressionType), op);
-        var operators = Condition.AvailableOperatorsForCurrentProperty();
-        Condition.Operator = operators.FirstOrDefault(o => o.ExpressionType == expressionType) ?? operators.First();
-        ;
-        OnChanged(Condition.Compile());
-    }
-
-    private void RemoveLeft()
-    {
-        //OnChanged(PredicateExpression.Right.Copy());
-    }
-
-    private void RemoveRight()
-    {
-        //OnChanged(PredicateExpression.Left.Copy());
-    }
-
 }

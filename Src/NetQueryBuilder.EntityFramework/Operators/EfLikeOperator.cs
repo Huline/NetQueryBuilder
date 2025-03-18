@@ -6,12 +6,10 @@ namespace NetQueryBuilder.EntityFramework.Operators;
 
 public class EfLikeOperator : MethodCallOperator
 {
-    public EfLikeOperator(bool isNegated = false)
-        : base(typeof(DbFunctionsExtensions).GetMethod("Like", new[] { typeof(DbFunctions), typeof(string), typeof(string) }), isNegated)
+    public EfLikeOperator(IExpressionStringifier expressionStringifier, bool isNegated = false)
+        : base(isNegated ? "NotLike" : "Like", expressionStringifier, typeof(DbFunctionsExtensions).GetMethod("Like", new[] { typeof(DbFunctions), typeof(string), typeof(string) }), isNegated)
     {
     }
-
-    public override string DisplayText => IsNegated ? "Not like" : "Like";
 
     public override Expression ToExpression(Expression left, Expression right)
     {
@@ -20,8 +18,9 @@ public class EfLikeOperator : MethodCallOperator
             : GetExpression(left, right);
     }
 
-    public override object? GetDefaultValue(Type type)
+    public override object? GetDefaultValue(Type type, object? value)
     {
+        if (value is string) return value;
         return string.Empty;
     }
 

@@ -16,6 +16,7 @@ public static class QueryBuilderServicesExtensions
             RenameParameterExpression = true
         }, true));
 
+        services.AddTransient<IExpressionStringifier, UpperSeparatorExpressionStringifier>();
         services.AddTransient<IOperatorFactory, EFOperatorFactory>();
         services.AddTransient<IQueryFactory, QueryFactory<TDbContext>>();
         return services;

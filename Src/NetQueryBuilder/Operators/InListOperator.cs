@@ -6,12 +6,10 @@ namespace NetQueryBuilder.Operators;
 
 public class InListOperator<T> : MethodCallOperator
 {
-    public InListOperator(bool isNegated = false)
-        : base(EnumerableMethodInfo.Contains<T>(), isNegated)
+    public InListOperator(IExpressionStringifier expressionStringifier, bool isNegated = false)
+        : base(isNegated ? "NotInList" : "InList", expressionStringifier, EnumerableMethodInfo.Contains<T>(), isNegated)
     {
     }
-
-    public override string DisplayText => IsNegated ? "Not in list" : "In list";
 
     public override Expression ToExpression(Expression left, Expression right)
     {
@@ -20,42 +18,39 @@ public class InListOperator<T> : MethodCallOperator
             : GetExpression(left, right);
     }
 
-    public override object? GetDefaultValue(Type type)
+    public override object? GetDefaultValue(Type type, object? value)
     {
         var listType = typeof(List<>).MakeGenericType(type);
+        if (value?.GetType() == listType)
+            return value;
         return Activator.CreateInstance(listType);
     }
 
     private MethodCallExpression GetExpression(Expression left, Expression right)
     {
-        if (left is MemberExpression memberExpression)
-        {
-            // Créer un type de liste pour le type de membre correct
-            // Si right est une constante contenant une liste, utiliser cette liste
-            if (right is ConstantExpression constantExpression &&
-                constantExpression.Value is IEnumerable enumerable)
-                return Expression.Call(
-                    null,
-                    MethodInfo,
-                    constantExpression,
-                    memberExpression);
-
-            // Sinon, créer une liste vide du type approprié
-            var listType = typeof(List<>).MakeGenericType(memberExpression.Type);
-            var emptyList = Activator.CreateInstance(listType);
-            var constantExp = Expression.Constant(emptyList);
-
+        if (left is not MemberExpression memberExpression)
             return Expression.Call(
                 null,
                 MethodInfo,
-                constantExp,
+                left,
+                right);
+
+        if (right is ConstantExpression constantExpression &&
+            constantExpression.Value is IEnumerable)
+            return Expression.Call(
+                null,
+                MethodInfo,
+                constantExpression,
                 memberExpression);
-        }
+
+        var listType = typeof(List<>).MakeGenericType(memberExpression.Type);
+        var emptyList = Activator.CreateInstance(listType);
+        var constantExp = Expression.Constant(emptyList);
 
         return Expression.Call(
             null,
             MethodInfo,
-            left,
-            right);
+            constantExp,
+            memberExpression);
     }
 }

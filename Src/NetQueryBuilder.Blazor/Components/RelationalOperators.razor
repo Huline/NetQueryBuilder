@@ -2,10 +2,10 @@
 @using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Operators
 @using NetQueryBuilder.Queries
-<MudSelect T="ExpressionOperator" Label="Operator" Value="_operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o.DisplayText)">
+<MudSelect T="ExpressionOperator" Label="Operator" Value="_operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o.ToString())">
     @foreach (var item in _operators)
     {
-        <MudSelectItem Value="@item">@item.DisplayText</MudSelectItem>
+        <MudSelectItem Value="@item">@item.ToString()</MudSelectItem>
     }
 </MudSelect>
 
@@ -27,59 +27,59 @@
         _operator = Condition.Operator; // _operators.FirstOrDefault(o => o.ExpressionType == Query.Lambda.Body.NodeType) ?? _operators.First();
         //InitializeOperators();
     }
-
-    private void InitializeOperators()
-    {
-        switch (Query.Lambda.Body)
-        {
-            case BinaryExpression binaryExpression:
-                InitializeBinaryExpression(binaryExpression);
-                break;
-            case MethodCallExpression methodCallExpression:
-                InitializeMethodCallExpression(methodCallExpression);
-                break;
-            case UnaryExpression { NodeType: ExpressionType.Not, Operand: MethodCallExpression notMethodCallExpression }:
-                InitializeMethodCallExpression(notMethodCallExpression, true);
-                break;
-            default:
-                throw new NotSupportedException($"Expression type {Query.Lambda.Body.NodeType} is not supported");
-        }
-    }
-
-    private void InitializeBinaryExpression(BinaryExpression binaryExpression)
-    {
-        _operators = Condition.AvailableOperatorsForCurrentProperty(); // Query.GetOperators(binaryExpression.Left.Type).ToList();
-        _operator = _operators.FirstOrDefault(o => o.ExpressionType == binaryExpression.NodeType) ?? _operators.First();
-        _valueExpression = binaryExpression.Right;
-        _memberAccessExpression = (MemberExpression)binaryExpression.Left;
-    }
-
-    private void InitializeMethodCallExpression(MethodCallExpression methodCallExpression, bool isNegated = false)
-    {
-        switch (methodCallExpression.Method.Name)
-        {
-            // case "Like":
-            //     _operators = GetOperators(((MemberExpression)methodCallExpression.Arguments[1]).Type);
-            //     _memberAccessExpression = (MemberExpression)methodCallExpression.Arguments[1];
-            //     _valueExpression = methodCallExpression.Arguments[2];
-            //     break;
-            // case "Contains":
-            //     _operators = GetOperators(((MemberExpression)methodCallExpression.Arguments[1]).Type);
-            //     _memberAccessExpression = (MemberExpression)methodCallExpression.Arguments[1];
-            //     _valueExpression = methodCallExpression.Arguments[0];
-            //     break;
-            default:
-                throw new NotSupportedException($"Method {methodCallExpression.Method.Name} is not supported");
-        }
-
-        _operator = _operators
-                        .OfType<MethodCallOperator>()
-                        .FirstOrDefault(o =>
-                            o.ExpressionType == methodCallExpression.NodeType
-                            && o.MethodInfo == methodCallExpression.Method
-                            && o.IsNegated == isNegated)
-                    ?? _operators.First();
-    }
+    //
+    // private void InitializeOperators()
+    // {
+    //     switch (Query.Lambda.Body)
+    //     {
+    //         case BinaryExpression binaryExpression:
+    //             InitializeBinaryExpression(binaryExpression);
+    //             break;
+    //         case MethodCallExpression methodCallExpression:
+    //             InitializeMethodCallExpression(methodCallExpression);
+    //             break;
+    //         case UnaryExpression { NodeType: ExpressionType.Not, Operand: MethodCallExpression notMethodCallExpression }:
+    //             InitializeMethodCallExpression(notMethodCallExpression, true);
+    //             break;
+    //         default:
+    //             throw new NotSupportedException($"Expression type {Query.Lambda.Body.NodeType} is not supported");
+    //     }
+    // }
+    //
+    // private void InitializeBinaryExpression(BinaryExpression binaryExpression)
+    // {
+    //     _operators = Condition.AvailableOperatorsForCurrentProperty();
+    //     _operator = _operators.FirstOrDefault(o => o.ExpressionType == binaryExpression.NodeType) ?? _operators.First();
+    //     _valueExpression = binaryExpression.Right;
+    //     _memberAccessExpression = (MemberExpression)binaryExpression.Left;
+    // }
+    //
+    // private void InitializeMethodCallExpression(MethodCallExpression methodCallExpression, bool isNegated = false)
+    // {
+    //     switch (methodCallExpression.Method.Name)
+    //     {
+    //         // case "Like":
+    //         //     _operators = GetOperators(((MemberExpression)methodCallExpression.Arguments[1]).Type);
+    //         //     _memberAccessExpression = (MemberExpression)methodCallExpression.Arguments[1];
+    //         //     _valueExpression = methodCallExpression.Arguments[2];
+    //         //     break;
+    //         // case "Contains":
+    //         //     _operators = GetOperators(((MemberExpression)methodCallExpression.Arguments[1]).Type);
+    //         //     _memberAccessExpression = (MemberExpression)methodCallExpression.Arguments[1];
+    //         //     _valueExpression = methodCallExpression.Arguments[0];
+    //         //     break;
+    //         default:
+    //             throw new NotSupportedException($"Method {methodCallExpression.Method.Name} is not supported");
+    //     }
+    //
+    //     _operator = _operators
+    //                     .OfType<MethodCallOperator>()
+    //                     .FirstOrDefault(o =>
+    //                         o.ExpressionType == methodCallExpression.NodeType
+    //                         && o.MethodInfo == methodCallExpression.Method
+    //                         && o.IsNegated == isNegated)
+    //                 ?? _operators.First();
+    // }
 
     private void OperatorChanged(ExpressionOperator op)
     {
