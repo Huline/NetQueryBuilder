@@ -20,9 +20,6 @@
         <Content Update="Components\RelationalOperators.razor">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
-        <Content Update="Components\RelationalPredicate.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
         <Content Update="Components\RelationalPredicateField.razor">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
