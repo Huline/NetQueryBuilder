@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{F513
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A2741D5A-C8E5-4AF3-A544-6ED362460E7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetQueryBuilder.Tests", "Tests\NetQueryBuilder.Tests\NetQueryBuilder.Tests.csproj", "{4CE6CA84-5717-466C-9E96-75367692AD7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{EB956806-7EE6-46CB-8CE3-2B07BF31921D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB956806-7EE6-46CB-8CE3-2B07BF31921D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB956806-7EE6-46CB-8CE3-2B07BF31921D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CE6CA84-5717-466C-9E96-75367692AD7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CE6CA84-5717-466C-9E96-75367692AD7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CE6CA84-5717-466C-9E96-75367692AD7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CE6CA84-5717-466C-9E96-75367692AD7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,5 +62,6 @@ Global
 		{EB956806-7EE6-46CB-8CE3-2B07BF31921D} = {637AC837-4843-4D8E-AE42-759E2D2DE4C5}
 		{6B710EF8-EE72-4A24-AD0F-CAF43B173896} = {637AC837-4843-4D8E-AE42-759E2D2DE4C5}
 		{B97627D7-4107-4054-B2B1-0E869B5541EF} = {F513E84C-518B-4052-A529-81846E9E9689}
+		{4CE6CA84-5717-466C-9E96-75367692AD7D} = {A2741D5A-C8E5-4AF3-A544-6ED362460E7A}
 	EndGlobalSection
 EndGlobal

@@ -1,17 +1,17 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 
-namespace NetQueryBuilder.Queries;
+namespace NetQueryBuilder.Utils;
 
-public class SelectBuilderService<TEntity>
+internal static class SelectBuilderService<TEntity>
 {
-    public Expression<Func<TEntity, TEntity>> BuildSelect(IEnumerable<string> propertyPaths)
+    internal static Expression<Func<TEntity, TEntity>> BuildSelect(IEnumerable<string> propertyPaths)
     {
         var param = Expression.Parameter(typeof(TEntity), "entity");
         var newEntity = Expression.New(typeof(TEntity));
 
         var propertiesGroupedPaths = propertyPaths
-            .Select(path => new PathDescriptor(path, path.Split('.')))
+            .Select(path => new PathDescriptor(path.Split('.')))
             .GroupBy(x => x.Parts[0]);
 
         var bindings = propertiesGroupedPaths
@@ -70,7 +70,7 @@ public class SelectBuilderService<TEntity>
         var newSub = Expression.New(subType);
 
         var groupedPaths = propertyPaths
-            .Select(path => new PathDescriptor(path, path.Split('.')))
+            .Select(path => new PathDescriptor(path.Split('.')))
             .GroupBy(x => x.Parts[0]);
 
         var subBindings = groupedPaths
@@ -111,5 +111,5 @@ public class SelectBuilderService<TEntity>
                || type == typeof(Guid);
     }
 
-    private record PathDescriptor(object Original, string[] Parts);
+    private record PathDescriptor(string[] Parts);
 }

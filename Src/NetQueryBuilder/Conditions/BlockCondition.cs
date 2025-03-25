@@ -41,11 +41,13 @@ public class BlockCondition : ICondition
         return Parent == null ? this : Parent.GetRoot();
     }
 
-    public Expression Compile()
+    public Expression? Compile()
     {
         if (_compiledExpression != null)
             return _compiledExpression;
 
+        if (Conditions.Count == 0)
+            return null;
         var result = Conditions.First().Compile();
         foreach (var condition in Conditions.Skip(1))
             result = Expression.MakeBinary(ToExpression(condition.LogicalOperator), result, condition.Compile());

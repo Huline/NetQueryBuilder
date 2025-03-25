@@ -3,27 +3,21 @@ using System.Linq.Expressions;
 using System.Reflection;
 using NetQueryBuilder.Operators;
 
-namespace NetQueryBuilder.Extensions;
+namespace NetQueryBuilder.Utils;
 
 internal static class PropertyInspector
 {
-    // Renvoyer tous les chemins de propriétés (propriétés "plates" => p.Address.City, etc.)
-    internal static IEnumerable<PropertyPath> GetAllPropertyPaths(
-        Type type,
+    internal static IEnumerable<PropertyPath> GetAllPropertyPaths(Type type,
         ParameterExpression parameter,
+        IPropertyStringifier? propertyStringifier,
         IOperatorFactory operatorFactory,
         string parentPath = "",
         HashSet<Type>? visitedTypes = null)
     {
-        // Initialisation du HashSet si nécéssaire
         visitedTypes ??= new HashSet<Type>();
 
-        // Si on a déjà vu ce type dans la chaîne courante, on arrête
-        if (visitedTypes.Contains(type))
+        if (!visitedTypes.Add(type))
             yield break;
-
-        // Ajout du type actuel à l'ensemble
-        visitedTypes.Add(type);
 
         foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
@@ -31,22 +25,16 @@ internal static class PropertyInspector
                 ? prop.Name
                 : $"{parentPath}.{prop.Name}";
 
-            // Vérifier s'il s'agit d'un type simple
             if (IsSimpleType(prop.PropertyType))
-                yield return new PropertyPath(propertyPath, prop.PropertyType, type, parameter, operatorFactory);
+                yield return new PropertyPath(propertyPath, prop.PropertyType, type, parameter, propertyStringifier, operatorFactory);
             else if (!prop.PropertyType.IsAssignableTo(typeof(IEnumerable)))
-                // Récupérer les sous-propriétés sans redéclencher une boucle
-                foreach (var childPath in GetAllPropertyPaths(prop.PropertyType, parameter, operatorFactory, propertyPath, new HashSet<Type>(visitedTypes)))
+                foreach (var childPath in GetAllPropertyPaths(prop.PropertyType, parameter, propertyStringifier, operatorFactory, propertyPath, new HashSet<Type>(visitedTypes)))
                     yield return childPath;
         }
 
-        // Une fois ce type traité, on peut le retirer si l’on veut poursuivre d’autres chemins indépendants
-        // Mais si l’on souhaite éviter toute revisite sur l’arborescence globale, on peut choisir de ne pas l’enlever.
         visitedTypes.Remove(type);
     }
 
-
-    // Déterminer si c’est un type “simple” (valeur, string, DateTime, etc.)
     private static bool IsSimpleType(Type type)
     {
         return type.IsPrimitive

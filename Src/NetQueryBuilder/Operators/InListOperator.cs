@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Linq.Expressions;
-using NetQueryBuilder.Util;
+using NetQueryBuilder.Utils;
 
 namespace NetQueryBuilder.Operators;
 

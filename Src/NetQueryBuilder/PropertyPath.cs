@@ -1,42 +1,52 @@
 ﻿using System.Linq.Expressions;
-using NetQueryBuilder.Extensions;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Utils;
 
 namespace NetQueryBuilder;
 
+public class SelectPropertyPath(PropertyPath propertyPath, bool isSelected = true)
+{
+    public bool IsSelected { get; set; } = isSelected;
+    public PropertyPath Property { get; } = propertyPath;
+}
+
 public class PropertyPath
 {
+    private const string PropertyPathSeparator = ".";
     private readonly IOperatorFactory _operatorFactory;
     private readonly ParameterExpression _parameterExpression;
-
-
+    private readonly IPropertyStringifier? _propertyStringifier;
+    
     internal PropertyPath(
-        string propertyName,
+        string propertyFullName,
         Type propertyType,
         Type parentType,
         ParameterExpression parameterExpression,
+        IPropertyStringifier? propertyStringifier,
         IOperatorFactory operatorFactory)
     {
         _parameterExpression = parameterExpression;
+        _propertyStringifier = propertyStringifier;
         _operatorFactory = operatorFactory;
-        PropertyName = propertyName;
+        PropertyFullName = propertyFullName;
         ParentType = parentType;
         PropertyType = propertyType;
+        Depth = propertyFullName.Split(PropertyPathSeparator).Length - 1;
     }
 
-    public string PropertyName { get; }
+    public string PropertyFullName { get; }
     public Type ParentType { get; }
     public Type PropertyType { get; }
-
+    public int Depth { get; }
 
     public MemberExpression GetExpression()
     {
         if (_parameterExpression == null)
             throw new InvalidOperationException("Le ParameterExpression n'a pas été défini. Appelez SetParameterExpression d'abord.");
 
-        if (!PropertyName.Contains('.'))
-            return Expression.Property(_parameterExpression, PropertyName);
-        var parts = PropertyName.Split('.');
+        if (!PropertyFullName.Contains(PropertyPathSeparator))
+            return Expression.Property(_parameterExpression, PropertyFullName);
+        var parts = PropertyFullName.Split(PropertyPathSeparator);
         Expression expr = _parameterExpression;
 
         foreach (var part in parts) expr = Expression.Property(expr, part);
@@ -49,17 +59,16 @@ public class PropertyPath
         return GetDefaultValueForType(PropertyType).Type.GetDefaultValue();
     }
 
-    // Méthode utilitaire pour obtenir une valeur par défaut pour un type donné
     private static Expression GetDefaultValueForType(Type propertyType)
     {
         return propertyType switch
         {
-            Type type when
+            { } type when
                 type == typeof(int)
                 || type == typeof(long)
                 || type == typeof(string)
                 || type == typeof(bool) => Expression.Constant(propertyType.GetDefaultValue(), propertyType),
-            Type type when
+            { } type when
                 type == typeof(DateTime) => Expression.Constant(DateTime.UtcNow),
             _ => throw new Exception("Type de propriété non pris en charge")
         };
@@ -67,17 +76,38 @@ public class PropertyPath
 
     public override bool Equals(object? obj)
     {
-        if (obj is PropertyPath other) return string.Equals(PropertyName, other.PropertyName, StringComparison.Ordinal);
+        if (obj is PropertyPath other) return string.Equals(PropertyFullName, other.PropertyFullName, StringComparison.Ordinal);
         return false;
     }
 
     public override int GetHashCode()
     {
-        return PropertyName.GetHashCode(StringComparison.Ordinal);
+        return PropertyFullName.GetHashCode(StringComparison.Ordinal);
     }
 
     public IEnumerable<ExpressionOperator> GetCompatibleOperators()
     {
         return _operatorFactory.GetAllForProperty(this);
+    }
+
+    public string DisplayName()
+    {
+        return _propertyStringifier?.GetName(PropertyFullName) ?? PropertyFullName;
+    }
+
+    public string DisplayValue(object context)
+    {
+        var segments = PropertyFullName.Split(PropertyPathSeparator);
+        var currentObject = context;
+
+        foreach (var segment in segments)
+        {
+            if (currentObject == null) break;
+
+            var propInfo = currentObject.GetType().GetProperty(segment);
+            currentObject = propInfo?.GetValue(currentObject);
+        }
+
+        return _propertyStringifier?.FormatValue(PropertyFullName, PropertyType, currentObject) ?? currentObject?.ToString() ?? string.Empty;
     }
 }

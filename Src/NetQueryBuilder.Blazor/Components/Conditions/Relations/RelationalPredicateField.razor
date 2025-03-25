@@ -4,22 +4,22 @@
     @foreach (var property in _properties)
     {
         <MudSelectItem Value="@property">
-            @property.PropertyName
+            @property.PropertyFullName
         </MudSelectItem>
     }
 </MudSelect>
 
 @code {
 
-    [CascadingParameter] public IQuery Query { get; set; }
-    [Parameter] public SimpleCondition Condition { get; set; }
+    [CascadingParameter] public required IQuery Query { get; set; }
+    [Parameter] public required SimpleCondition Condition { get; set; }
 
     private PropertyPath _selectedPropertyName;
     private IEnumerable<PropertyPath> _properties = new List<PropertyPath>();
 
     protected override async Task OnInitializedAsync()
     {
-        _properties = Query.AvailableProperties();
+        _properties = Query.ConditionPropertyPaths;
         _selectedPropertyName = Condition.PropertyPath;
         await base.OnInitializedAsync();
     }

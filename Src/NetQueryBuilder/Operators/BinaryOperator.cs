@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using NetQueryBuilder.Extensions;
+using NetQueryBuilder.Utils;
 
 namespace NetQueryBuilder.Operators;
 

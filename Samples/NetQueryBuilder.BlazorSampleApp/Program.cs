@@ -16,7 +16,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseInMemoryDatabase("InMemoryDb");
     options.UseLazyLoadingProxies();
 });
-builder.Services.AddScoped<IQueryConfigurator, EFQueryConfigurator<MyDbContext>>();
+builder.Services.AddScoped<IQueryConfigurator, EfQueryConfigurator<MyDbContext>>();
 
 var app = builder.Build();
 

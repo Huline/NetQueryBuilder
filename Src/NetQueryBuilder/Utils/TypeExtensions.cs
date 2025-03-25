@@ -1,23 +1,23 @@
 ﻿using System.Linq.Expressions;
 
-namespace NetQueryBuilder.Extensions;
+namespace NetQueryBuilder.Utils;
 
-public static class TypeExtensions
+internal static class TypeExtensions
 {
-    public static T GetDefaultValue<T>()
+    internal static T GetDefaultValue<T>()
     {
         var e = Expression.Lambda<Func<T>>(Expression.Default(typeof(T)));
         return e.Compile()();
     }
 
-    public static object GetDefaultValue(this Type type)
+    internal static object GetDefaultValue(this Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
         var e = Expression.Lambda<Func<object>>(Expression.Convert(Expression.Default(type), typeof(object)));
         return e.Compile()();
     }
 
-    public static bool IsGenericInstance(this Type type, Type genTypeDef, params Type?[] args)
+    internal static bool IsGenericInstance(this Type type, Type genTypeDef, params Type?[] args)
     {
         if (type.GetGenericTypeDefinition() != genTypeDef)
             return false;

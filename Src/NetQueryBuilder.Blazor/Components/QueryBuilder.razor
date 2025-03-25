@@ -4,14 +4,24 @@
 <MudStack Spacing="10">
     <div>
         <MudText Typo="Typo.h5">SELECT</MudText>
-        <MudSelect Label="Fields" T="PropertyPath" @bind-SelectedValues="_selectedPropertyPaths" MultiSelection="true" SelectAll="true" ToStringFunc="@(prop => prop!.PropertyName)">
-            @foreach (var property in _propertyPaths)
-            {
-                <MudSelectItem T="PropertyPath" Value="property">
-                    @property.PropertyName
-                </MudSelectItem>
-            }
-        </MudSelect>
+        <div class="form-group">
+            <label>Sélectionner les champs</label>
+            <div class="custom-multiselect">
+                @foreach (var property in _selectedPropertyPaths)
+                {
+                    <div class="custom-checkbox">
+                        <input type="checkbox"
+                               id="@($"prop_{property.Property.DisplayName()}")"
+                               checked="@property.IsSelected"
+                               @onchange="(e) => OnPropertySelectionChanged(property, e)" />
+                        <label for="@($"prop_{property.Property.DisplayName()}")">
+                            @property.Property.DisplayName()
+                        </label>
+                    </div>
+                }
+            </div>
+        </div>
+
     </div>
 
     <div>
@@ -47,13 +57,13 @@
         <HeaderContent>
             @foreach (var property in _selectedPropertyPaths)
             {
-                <MudTh>@property.PropertyName</MudTh>
+                <MudTh>@property.Property.DisplayName()</MudTh>
             }
         </HeaderContent>
         <RowTemplate>
-            @foreach (var propertyPath in _selectedPropertyPaths) // (ex: "Address.City")
+            @foreach (var propertyPath in _selectedPropertyPaths)
             {
-                <MudTd>@GetNestedPropertyValue(context, propertyPath.PropertyName)</MudTd>
+                <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
             }
         </RowTemplate>
     </MudTable>

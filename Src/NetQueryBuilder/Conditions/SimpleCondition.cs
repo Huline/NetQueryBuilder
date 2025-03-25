@@ -80,7 +80,7 @@ public class SimpleCondition : ICondition
 
     public EventHandler? ConditionChanged { get; set; }
 
-    public Expression Compile()
+    public Expression? Compile()
     {
         if (_compiledExpression != null)
             return _compiledExpression;

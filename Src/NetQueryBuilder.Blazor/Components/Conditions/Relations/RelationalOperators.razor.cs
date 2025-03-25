@@ -1,5 +1,3 @@
 ﻿namespace NetQueryBuilder.Blazor.Components.Conditions.Relations;
 
-public partial class RelationalOperators
-{
-}
+public partial class RelationalOperators;

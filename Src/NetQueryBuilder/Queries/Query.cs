@@ -3,72 +3,107 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Dynamic.Core.CustomTypeProviders;
 using System.Linq.Expressions;
 using NetQueryBuilder.Conditions;
-using NetQueryBuilder.Extensions;
+using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Utils;
 
 namespace NetQueryBuilder.Queries;
 
 public abstract class Query<TEntity> : IQuery where TEntity : class
 {
     private readonly BlockCondition _condition;
+    private readonly List<PropertyPath> _conditionPropertyPaths;
     private readonly IOperatorFactory _operatorFactory;
     private readonly ParameterExpression _parameter;
-    protected LambdaExpression Lambda;
+    private readonly List<SelectPropertyPath> _selectPropertyPaths;
+    private LambdaExpression? _lambda;
 
-    private Query(LambdaExpression lambda, IOperatorFactory operatorFactory)
+    protected Query(SelectConfiguration selectConfiguration, ConditionConfiguration conditionConfiguration, IOperatorFactory operatorFactory)
     {
-        if (lambda.Body is not BinaryExpression)
-            throw new InvalidOperationException("Expression is not valid");
-
-        Lambda = lambda;
-        _parameter = lambda.Parameters.First();
+        _parameter = Expression.Parameter(
+            typeof(TEntity),
+            typeof(TEntity).Name.ToLower());
         _operatorFactory = operatorFactory;
-        SelectedPropertyPaths = AvailableProperties();
-        _condition = new BlockCondition([
-            new SimpleCondition(SelectedPropertyPaths.First(), LogicalOperator.And)
-        ], LogicalOperator.And);
+        _selectPropertyPaths = AvailableProperties(selectConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, selectConfiguration)).Select(p => new SelectPropertyPath(p)).ToList();
+        _conditionPropertyPaths = AvailableProperties(conditionConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, conditionConfiguration)).ToList();
+        _condition = new BlockCondition([], LogicalOperator.And);
+        _lambda = null; 
         _condition.ConditionChanged += OnConditionConditionChanged;
     }
 
-    protected Query(IOperatorFactory operatorFactory)
-        : this(CreateRelationalPredicate<TEntity>(
-            typeof(TEntity).GetProperties().First().Name,
-            Expression.Parameter(
-                typeof(TEntity),
-                typeof(TEntity).Name.ToLower()),
-            typeof(TEntity).GetProperties().First().PropertyType.GetDefaultValue(),
-            ExpressionType.Equal), operatorFactory)
-    {
-    }
-
-    protected Query(string expression, DefaultDynamicLinqCustomTypeProvider customTypeProvider, IOperatorFactory operatorFactory)
-        : this(DynamicExpressionParser.ParseLambda(
-            new ParsingConfig { RenameParameterExpression = true, CustomTypeProvider = customTypeProvider },
-            typeof(TEntity),
-            typeof(bool),
-            expression), operatorFactory)
-    {
-        // var config = new ParsingConfig { RenameParameterExpression = true };
-        // config.CustomTypeProvider = new CustomEFTypeProvider(config, true);
-    }
-
     public EventHandler? OnChanged { get; set; }
-    public IEnumerable<PropertyPath> SelectedPropertyPaths { get; set; }
+    public IReadOnlyCollection<SelectPropertyPath> SelectPropertyPaths => _selectPropertyPaths;
+    public IReadOnlyCollection<PropertyPath> ConditionPropertyPaths => _conditionPropertyPaths;
     public IReadOnlyCollection<ICondition> Conditions => [_condition];
 
-    public abstract Task<IEnumerable> Execute(IEnumerable<PropertyPath>? selectedProperties);
-
-    public virtual LambdaExpression Compile()
+    public virtual async Task<IEnumerable> Execute()
     {
-        Lambda = Expression.Lambda(
-            _condition.Compile(),
-            _parameter);
-        return Lambda;
+        var predicate = Compile() as Expression<Func<TEntity, bool>>;
+        var selectedProps = SelectPropertyPaths
+            .Where(p => p.IsSelected)
+            .Select(p => p.Property.PropertyFullName)
+            .ToList();
+        var queryable = GetQueryable(selectedProps);
+
+        if (predicate != null)
+            queryable = queryable.Where(predicate);
+        if (selectedProps.Count != 0)
+        {
+            var select = SelectBuilderService<TEntity>.BuildSelect(selectedProps);
+            queryable = queryable.Select(select);
+        }
+
+        return await ToList(queryable);
     }
 
-    public IEnumerable<PropertyPath> AvailableProperties()
+    public virtual LambdaExpression? Compile()
     {
-        return PropertyInspector.GetAllPropertyPaths(typeof(TEntity), _parameter, _operatorFactory);
+        if(_condition.Compile() == null)
+            return null;
+        _lambda = Expression.Lambda(
+            _condition.Compile(),
+            _parameter);
+        return _lambda;
+    }
+
+    protected abstract IQueryable<TEntity> GetQueryable(IReadOnlyCollection<string> selectedProperties);
+
+    protected virtual Task<IEnumerable> ToList(IQueryable<TEntity> queryable)
+    {
+        return Task.FromResult<IEnumerable>(queryable.ToList());
+    }
+
+    private IEnumerable<PropertyPath> AvailableProperties(IPropertyStringifier? propertyStringifier)
+    {
+        return PropertyInspector.GetAllPropertyPaths(typeof(TEntity), _parameter, propertyStringifier, _operatorFactory);
+    }
+
+
+    private bool MatchConfiguration(PropertyPath propertyPath, SelectConfiguration selectConfiguration)
+    {
+        if (selectConfiguration.Fields.Any() && !selectConfiguration.Fields.Contains(propertyPath.PropertyFullName))
+            return false;
+        if (selectConfiguration.ExcludedRelationships.Any() && selectConfiguration.ExcludedRelationships.Contains(propertyPath.ParentType))
+            return false;
+        if (selectConfiguration.IgnoreFields.Any() && selectConfiguration.IgnoreFields.Contains(propertyPath.PropertyFullName))
+            return false;
+        if (selectConfiguration.Depth >= 0 && propertyPath.Depth > selectConfiguration.Depth)
+            return false;
+
+        return true;
+    }
+
+    private bool MatchConfiguration(PropertyPath propertyPath, ConditionConfiguration conditionConfiguration)
+    {
+        if (conditionConfiguration.Fields.Any() && !conditionConfiguration.Fields.Contains(propertyPath.PropertyFullName))
+            return false;
+        if (conditionConfiguration.ExcludedRelationships.Any() && conditionConfiguration.ExcludedRelationships.Contains(propertyPath.ParentType))
+            return false;
+        if (conditionConfiguration.IgnoreFields.Any() && conditionConfiguration.IgnoreFields.Contains(propertyPath.PropertyFullName))
+            return false;
+        if (conditionConfiguration.Depth >= 0 && propertyPath.Depth > conditionConfiguration.Depth)
+            return false;
+        return true;
     }
 
     private void OnConditionConditionChanged(object? sender, EventArgs e)

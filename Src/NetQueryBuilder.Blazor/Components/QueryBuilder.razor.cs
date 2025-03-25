@@ -7,9 +7,8 @@ namespace NetQueryBuilder.Blazor.Components;
 public partial class QueryBuilder<TEntity> : IAsyncDisposable
 {
     private List<TEntity> _data = new();
-    private IEnumerable<PropertyPath> _propertyPaths = Enumerable.Empty<PropertyPath>();
     private IQuery _query = null!;
-    private IEnumerable<PropertyPath> _selectedPropertyPaths = new List<PropertyPath>();
+    private IReadOnlyCollection<SelectPropertyPath> _selectedPropertyPaths = new List<SelectPropertyPath>();
     [Inject] private IQueryConfigurator QueryConfigurator { get; set; } = null!;
     [Parameter] public required string Expression { get; set; }
 
@@ -22,8 +21,7 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
     protected override async Task OnInitializedAsync()
     {
         _query = QueryConfigurator.BuildFor<TEntity>();
-        _propertyPaths = _query.AvailableProperties();
-        _selectedPropertyPaths = _propertyPaths.ToList();
+        _selectedPropertyPaths = _query.SelectPropertyPaths;
         _query.OnChanged += OnConditionConditionChanged;
         await base.OnInitializedAsync();
     }
@@ -36,25 +34,14 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 
     private async Task RunQuery()
     {
-        var data = await _query.Execute(_selectedPropertyPaths);
+        var data = await _query.Execute();
 
         _data = (data as IEnumerable<TEntity>)?.ToList() ?? new List<TEntity>();
     }
-
-    private object? GetNestedPropertyValue(object entity, string propertyPath)
+    private void OnPropertySelectionChanged(dynamic property, ChangeEventArgs e)
     {
-        var segments = propertyPath.Split('.');
-        var currentObject = entity;
-
-        foreach (var segment in segments)
-        {
-            // Récupérer la propriété par réflexion
-            if (currentObject == null) break;
-
-            var propInfo = currentObject.GetType().GetProperty(segment);
-            currentObject = propInfo?.GetValue(currentObject);
-        }
-
-        return currentObject;
+        property.IsSelected = (bool)e.Value;
+        StateHasChanged();
     }
+
 }

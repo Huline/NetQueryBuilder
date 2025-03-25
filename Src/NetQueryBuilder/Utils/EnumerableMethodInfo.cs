@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
-using NetQueryBuilder.Extensions;
 
-namespace NetQueryBuilder.Util;
+namespace NetQueryBuilder.Utils;
 
 public static class EnumerableMethodInfo
 {

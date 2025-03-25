@@ -8,5 +8,5 @@ public interface ICondition
     EventHandler? ConditionChanged { get; set; }
     LogicalOperator LogicalOperator { get; set; }
     ICondition GetRoot();
-    Expression Compile();
+    Expression? Compile();
 }
