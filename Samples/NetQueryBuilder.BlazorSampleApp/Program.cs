@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using NetQueryBuilder.BlazorSampleApp;
+using NetQueryBuilder.Configurations;
 using NetQueryBuilder.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseInMemoryDatabase("InMemoryDb");
     options.UseLazyLoadingProxies();
 });
-builder.Services.AddQueryBuilderServices<MyDbContext>();
+builder.Services.AddScoped<IQueryConfigurator, EFQueryConfigurator<MyDbContext>>();
 
 var app = builder.Build();
 

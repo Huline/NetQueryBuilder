@@ -8,92 +8,88 @@ using NetQueryBuilder.Operators;
 
 namespace NetQueryBuilder.Queries;
 
-public abstract class Query : IQuery
+public abstract class Query<TEntity> : IQuery where TEntity : class
 {
-    public BlockCondition Condition { get; protected set; }
-    public LambdaExpression Lambda { get; protected set; }
-    public ParameterExpression Parameter { get; protected set; }
-    public IEnumerable<PropertyPath> SelectedPropertyPaths { get; set; }
-
-    public void Compile()
-    {
-        Lambda = Expression.Lambda(
-            Condition.Compile(),
-            Parameter);
-    }
-
-    public abstract Task<IEnumerable> Execute(IEnumerable<PropertyPath>? selectedProperties);
-
-    public abstract IEnumerable<PropertyPath> AvailableProperties();
-}
-
-public abstract class Query<TEntity> : Query, IQuery<TEntity> where TEntity : class
-{
+    private readonly BlockCondition _condition;
     private readonly IOperatorFactory _operatorFactory;
+    private readonly ParameterExpression _parameter;
+    protected LambdaExpression Lambda;
 
-    public Query(IOperatorFactory operatorFactory)
+    private Query(LambdaExpression lambda, IOperatorFactory operatorFactory)
     {
+        if (lambda.Body is not BinaryExpression)
+            throw new InvalidOperationException("Expression is not valid");
+
+        Lambda = lambda;
+        _parameter = lambda.Parameters.First();
         _operatorFactory = operatorFactory;
-        Parameter = Expression.Parameter(
-            typeof(TEntity),
-            typeof(TEntity).Name.ToLower());
-
-        Lambda = CreateRelationalPredicate<TEntity>(
-            typeof(TEntity).GetProperties().First().Name,
-            Parameter,
-            typeof(TEntity).GetProperties().First().PropertyType.GetDefaultValue(),
-            ExpressionType.Equal);
-
-        if (Lambda.Body is BinaryExpression)
-            Condition = new BlockCondition(new[]
-            {
-                new LogicalCondition(AvailableProperties().First(), ExpressionType.And)
-            }, ExpressionType.And);
+        SelectedPropertyPaths = AvailableProperties();
+        _condition = new BlockCondition([
+            new SimpleCondition(SelectedPropertyPaths.First(), LogicalOperator.And)
+        ], LogicalOperator.And);
+        _condition.ConditionChanged += OnConditionConditionChanged;
     }
 
-    public Query(string expression, DefaultDynamicLinqCustomTypeProvider _customTypeProvider)
+    protected Query(IOperatorFactory operatorFactory)
+        : this(CreateRelationalPredicate<TEntity>(
+            typeof(TEntity).GetProperties().First().Name,
+            Expression.Parameter(
+                typeof(TEntity),
+                typeof(TEntity).Name.ToLower()),
+            typeof(TEntity).GetProperties().First().PropertyType.GetDefaultValue(),
+            ExpressionType.Equal), operatorFactory)
+    {
+    }
+
+    protected Query(string expression, DefaultDynamicLinqCustomTypeProvider customTypeProvider, IOperatorFactory operatorFactory)
+        : this(DynamicExpressionParser.ParseLambda(
+            new ParsingConfig { RenameParameterExpression = true, CustomTypeProvider = customTypeProvider },
+            typeof(TEntity),
+            typeof(bool),
+            expression), operatorFactory)
     {
         // var config = new ParsingConfig { RenameParameterExpression = true };
         // config.CustomTypeProvider = new CustomEFTypeProvider(config, true);
-        var config = new ParsingConfig { RenameParameterExpression = true };
-        config.CustomTypeProvider = _customTypeProvider;
-
-        Lambda = DynamicExpressionParser.ParseLambda(
-            config,
-            typeof(TEntity),
-            typeof(bool),
-            expression);
-
-        Parameter = Lambda.Parameters[0];
-
-        if (Lambda.Body is BinaryExpression)
-            Condition = new BlockCondition(new[]
-            {
-                new LogicalCondition(AvailableProperties().First(), ExpressionType.And)
-            }, ExpressionType.And);
     }
 
+    public EventHandler? OnChanged { get; set; }
+    public IEnumerable<PropertyPath> SelectedPropertyPaths { get; set; }
+    public IReadOnlyCollection<ICondition> Conditions => [_condition];
 
-    public sealed override IEnumerable<PropertyPath> AvailableProperties()
+    public abstract Task<IEnumerable> Execute(IEnumerable<PropertyPath>? selectedProperties);
+
+    public virtual LambdaExpression Compile()
     {
-        return PropertyInspector.GetAllPropertyPaths(typeof(TEntity), Parameter, _operatorFactory);
+        Lambda = Expression.Lambda(
+            _condition.Compile(),
+            _parameter);
+        return Lambda;
     }
 
-    private Expression<Func<T, bool>> CreateRelationalPredicate<T>(
+    public IEnumerable<PropertyPath> AvailableProperties()
+    {
+        return PropertyInspector.GetAllPropertyPaths(typeof(TEntity), _parameter, _operatorFactory);
+    }
+
+    private void OnConditionConditionChanged(object? sender, EventArgs e)
+    {
+        OnChanged?.Invoke(this, e);
+    }
+
+
+    private static Expression<Func<T, bool>> CreateRelationalPredicate<T>(
         string propertyName,
         ParameterExpression parameter,
         object comparisonValue,
         ExpressionType expressionType)
     {
         var property = typeof(T).GetProperty(propertyName);
-        var memberAccess = Expression.MakeMemberAccess(parameter, property);
 
+        var memberAccess = Expression.MakeMemberAccess(parameter, property!);
         var right = Expression.Constant(comparisonValue);
-
         var binary = Expression.MakeBinary(expressionType, memberAccess, right);
 
-        Expression<Func<T, bool>> expression = Expression.Lambda(binary, parameter) as Expression<Func<T, bool>>;
-
-        return expression;
+        var expression = Expression.Lambda(binary, parameter) as Expression<Func<T, bool>>;
+        return expression ?? throw new InvalidOperationException("Expression is not valid");
     }
 }

@@ -3,26 +3,26 @@ using NetQueryBuilder.Operators;
 
 namespace NetQueryBuilder.Conditions;
 
-public class LogicalCondition : ICondition
+public class SimpleCondition : ICondition
 {
     private Expression? _compiledExpression;
     private Expression _left;
-    private ExpressionType _logicalType;
+    private LogicalOperator _logicalOperator;
     private ExpressionOperator _operator;
     private PropertyPath _propertyPath;
     private Expression _right;
 
     private object? _value;
 
-    public LogicalCondition(PropertyPath propertyPath, ExpressionType logicalType, ICondition? parent = null)
-        : this(propertyPath, logicalType, propertyPath.GetCompatibleOperators().First(), propertyPath.GetDefaultValue(), parent)
+    public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, ICondition? parent = null)
+        : this(propertyPath, logicalOperator, propertyPath.GetCompatibleOperators().First(), propertyPath.GetDefaultValue(), parent)
     {
     }
 
-    public LogicalCondition(PropertyPath propertyPath, ExpressionType logicalType, ExpressionOperator @operator, object value, ICondition? parent = null)
+    public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, ExpressionOperator @operator, object value, ICondition? parent = null)
     {
         _propertyPath = propertyPath;
-        _logicalType = logicalType;
+        _logicalOperator = logicalOperator;
         _operator = @operator;
         _value = value;
         _left = PropertyPath.GetExpression();
@@ -66,19 +66,19 @@ public class LogicalCondition : ICondition
         }
     }
 
-    public ExpressionType LogicalType
+    public LogicalOperator LogicalOperator
     {
-        get => _logicalType;
+        get => _logicalOperator;
         set
         {
-            _logicalType = value;
+            _logicalOperator = value;
             NotifyConditionChanged();
         }
     }
 
     public ICondition? Parent { get; set; }
 
-    public EventHandler ConditionChanged { get; set; }
+    public EventHandler? ConditionChanged { get; set; }
 
     public Expression Compile()
     {
@@ -101,6 +101,6 @@ public class LogicalCondition : ICondition
     {
         _compiledExpression = null;
         _compiledExpression = Compile();
-        ConditionChanged.Invoke(this, EventArgs.Empty);
+        ConditionChanged?.Invoke(this, EventArgs.Empty);
     }
 }

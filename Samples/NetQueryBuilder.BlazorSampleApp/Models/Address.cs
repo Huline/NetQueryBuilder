@@ -16,14 +16,3 @@ public class Address
 
     public virtual List<Utility> Utilities { get; set; }
 }
-
-public class Utility
-{
-    public int UtilityId { get; set; }
-    public string Provider { get; set; }
-    public string AccountNumber { get; set; }
-    public string Type { get; set; }
-    public int AddressId { get; set; }
-
-    [ForeignKey(nameof(AddressId))] public virtual Address Address { get; set; }
-}

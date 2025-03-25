@@ -5,15 +5,15 @@ namespace NetQueryBuilder.Operators;
 public abstract class ExpressionOperator
 {
     private readonly IExpressionStringifier _expressionStringifier;
+    private readonly string _name;
     protected readonly ExpressionType ExpressionType;
-    private readonly string Name;
 
 
     public ExpressionOperator(ExpressionType type, string name, IExpressionStringifier expressionStringifier)
     {
         _expressionStringifier = expressionStringifier;
         ExpressionType = type;
-        Name = name;
+        _name = name;
     }
 
     public abstract Expression ToExpression(Expression left, Expression right);
@@ -43,6 +43,6 @@ public abstract class ExpressionOperator
 
     public override string ToString()
     {
-        return _expressionStringifier.GetString(ExpressionType, Name);
+        return _expressionStringifier.GetString(ExpressionType, _name);
     }
 }

@@ -5,15 +5,15 @@ namespace NetQueryBuilder.Operators;
 
 public abstract class MethodCallOperator : ExpressionOperator
 {
-    public MethodCallOperator(string name, IExpressionStringifier expressionStringifier, MethodInfo methodInfo, bool isNegated = false)
+    protected MethodCallOperator(string name, IExpressionStringifier expressionStringifier, MethodInfo? methodInfo, bool isNegated = false)
         : base(ExpressionType.Call, name, expressionStringifier)
     {
-        MethodInfo = methodInfo;
+        MethodInfo = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
         IsNegated = isNegated;
     }
 
-    public MethodInfo MethodInfo { get; }
-    public bool IsNegated { get; }
+    protected MethodInfo MethodInfo { get; }
+    protected bool IsNegated { get; }
 
     public override bool Equals(object? obj)
     {

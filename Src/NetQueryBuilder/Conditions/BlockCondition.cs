@@ -6,9 +6,9 @@ public class BlockCondition : ICondition
 {
     private readonly List<ICondition> _children = new();
     private Expression? _compiledExpression;
-    private ExpressionType _logicalType;
+    private LogicalOperator _logicalOperator;
 
-    public BlockCondition(IEnumerable<ICondition> children, ExpressionType expressionType, ICondition? parent = null)
+    public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator, ICondition? parent = null)
     {
         _children.AddRange(children);
         foreach (var condition in _children)
@@ -17,20 +17,20 @@ public class BlockCondition : ICondition
             condition.ConditionChanged += ChildConditionChanged;
         }
 
-        _logicalType = expressionType;
+        _logicalOperator = logicalOperator;
         Parent = parent;
     }
 
     public IReadOnlyCollection<ICondition> Conditions => _children.AsReadOnly();
-    public EventHandler ConditionChanged { get; set; }
+    public EventHandler? ConditionChanged { get; set; }
     public ICondition? Parent { get; set; }
 
-    public ExpressionType LogicalType
+    public LogicalOperator LogicalOperator
     {
-        get => _logicalType;
+        get => _logicalOperator;
         set
         {
-            _logicalType = value;
+            _logicalOperator = value;
             NotifyConditionChanged();
         }
     }
@@ -45,13 +45,22 @@ public class BlockCondition : ICondition
     {
         if (_compiledExpression != null)
             return _compiledExpression;
-        var expressions = Conditions.Select(c => c.Compile()).ToList();
 
-        var result = expressions.First();
-        foreach (var expression in expressions.Skip(1))
-            result = Expression.MakeBinary(LogicalType, result, expression);
+        var result = Conditions.First().Compile();
+        foreach (var condition in Conditions.Skip(1))
+            result = Expression.MakeBinary(ToExpression(condition.LogicalOperator), result, condition.Compile());
 
         return result;
+    }
+
+    private static ExpressionType ToExpression(LogicalOperator logicalOperator)
+    {
+        return logicalOperator switch
+        {
+            LogicalOperator.And => ExpressionType.AndAlso,
+            LogicalOperator.Or => ExpressionType.OrElse,
+            _ => throw new ArgumentOutOfRangeException(nameof(logicalOperator), logicalOperator, null)
+        };
     }
 
     public void Add(ICondition condition)
@@ -66,7 +75,7 @@ public class BlockCondition : ICondition
     {
         _children.Remove(condition);
         condition.Parent = null;
-        if (condition.ConditionChanged.GetInvocationList().Length > 0)
+        if (condition.ConditionChanged?.GetInvocationList().Length > 0)
             UnsubscribeChildCondition(condition);
         NotifyConditionChanged();
     }
@@ -76,7 +85,7 @@ public class BlockCondition : ICondition
         var children = Conditions.Where(childrenToGroup.Contains).ToList();
         if (children.Count == 0) return;
 
-        var block = new BlockCondition(children, children.First().LogicalType, this);
+        var block = new BlockCondition(children, children.First().LogicalOperator, this);
 
         foreach (var child in children)
         {
@@ -117,13 +126,13 @@ public class BlockCondition : ICondition
     public void CreateNew()
     {
         var lastLogicalCondition = FindLogicalCondition();
-        var newLogicalCondition = new LogicalCondition(lastLogicalCondition.PropertyPath, lastLogicalCondition.LogicalType);
+        var newLogicalCondition = new SimpleCondition(lastLogicalCondition.PropertyPath, lastLogicalCondition.LogicalOperator);
         Add(newLogicalCondition);
     }
 
-    private LogicalCondition FindLogicalCondition()
+    private SimpleCondition FindLogicalCondition()
     {
-        return Conditions.OfType<LogicalCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>().Select(c => c.FindLogicalCondition()).First();
+        return Conditions.OfType<SimpleCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>().Select(c => c.FindLogicalCondition()).First();
     }
 
     private void ChildConditionChanged(object? sender, EventArgs args)
@@ -140,6 +149,6 @@ public class BlockCondition : ICondition
     {
         _compiledExpression = null;
         _compiledExpression = Compile();
-        ConditionChanged.Invoke(this, EventArgs.Empty);
+        ConditionChanged?.Invoke(this, EventArgs.Empty);
     }
 }

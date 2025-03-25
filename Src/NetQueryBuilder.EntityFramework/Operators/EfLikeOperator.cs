@@ -7,7 +7,7 @@ namespace NetQueryBuilder.EntityFramework.Operators;
 public class EfLikeOperator : MethodCallOperator
 {
     public EfLikeOperator(IExpressionStringifier expressionStringifier, bool isNegated = false)
-        : base(isNegated ? "NotLike" : "Like", expressionStringifier, typeof(DbFunctionsExtensions).GetMethod("Like", new[] { typeof(DbFunctions), typeof(string), typeof(string) }), isNegated)
+        : base(isNegated ? "NotLike" : "Like", expressionStringifier, typeof(DbFunctionsExtensions).GetMethod("Like", [typeof(DbFunctions), typeof(string), typeof(string)]), isNegated)
     {
     }
 
@@ -20,8 +20,7 @@ public class EfLikeOperator : MethodCallOperator
 
     public override object? GetDefaultValue(Type type, object? value)
     {
-        if (value is string) return value;
-        return string.Empty;
+        return value is string ? value : string.Empty;
     }
 
     private MethodCallExpression GetExpression(Expression left, Expression right)
@@ -29,6 +28,8 @@ public class EfLikeOperator : MethodCallOperator
         if (right.Type != typeof(string)) right = Expression.Convert(right, typeof(string));
 
         var efFunctionsProperty = typeof(EF).GetProperty("Functions");
+        if (efFunctionsProperty == null)
+            throw new InvalidOperationException("EF.Functions property not found");
         var efFunctionsExpression = Expression.Property(null, efFunctionsProperty);
 
         if (left is MemberExpression memberExpression)

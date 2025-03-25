@@ -32,7 +32,7 @@
 
     [CascadingParameter] public IQuery Query { get; set; }
 
-    [Parameter] public LogicalCondition Condition { get; set; }
+    [Parameter] public SimpleCondition Condition { get; set; }
 
     private void UpdateValue(DateTime? dateTime)
     {
@@ -51,13 +51,13 @@
     private void UpdateValue(Expression expression)
     {
         // TODO: Unit test
-        // if (Query.Lambda.Body is BinaryExpression binaryExpression)
+        // if (Query._lambda.Body is BinaryExpression binaryExpression)
         // {
         //     var updated = binaryExpression.ReplaceRight(expression);
         //     OnValueChanged(updated);
         // }
         // // TODO: Unit test
-        // else if (Query.Lambda.Body is MethodCallExpression methodCallExpression)
+        // else if (Query._lambda.Body is MethodCallExpression methodCallExpression)
         // {
         //     if (methodCallExpression.Method.Name == "Like")
         //     {

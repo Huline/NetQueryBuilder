@@ -1,6 +1,5 @@
-﻿@using NetQueryBuilder.Queries
+﻿@using NetQueryBuilder.Blazor.Components.Conditions
 @typeparam TEntity where TEntity : class
-@inject IQueryFactory QueryFactory
 
 <MudStack Spacing="10">
     <div>
@@ -18,23 +17,23 @@
     <div>
         <MudText Typo="Typo.h5" GutterBottom="true">WHERE</MudText>
         <CascadingValue Value="@_query">
-            <BlockComponent OnChange="@OnChanged"
-                            Condition="@Condition"
-                            Parameter="@_query.Parameter">
-            </BlockComponent>
+            @foreach (var condition in _query.Conditions)
+            {
+                <ConditionComponent Condition="@condition"/>
+            }
         </CascadingValue>
         <MudItem xs="4" lg="4">
             <MudCard>
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Lambda Expression</MudText>
+                        <MudText Typo="Typo.h6">_lambda Expression</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudIconButton Icon="@Icons.Material.Filled.CopyAll" Color="Color.Default"/>
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    <code>@_query.Lambda.ToString()</code>
+                    <code>@Expression</code>
                 </MudCardContent>
             </MudCard>
         </MudItem>

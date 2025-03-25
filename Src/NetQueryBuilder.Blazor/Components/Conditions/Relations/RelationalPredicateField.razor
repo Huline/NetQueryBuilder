@@ -1,7 +1,7 @@
 ﻿@using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Queries
 <MudSelect Label="Field" T="PropertyPath" ValueChanged="OnFieldSelected" Value="_selectedPropertyName">
-    @foreach (var property in properties)
+    @foreach (var property in _properties)
     {
         <MudSelectItem Value="@property">
             @property.PropertyName
@@ -12,14 +12,14 @@
 @code {
 
     [CascadingParameter] public IQuery Query { get; set; }
-    [Parameter] public LogicalCondition Condition { get; set; }
+    [Parameter] public SimpleCondition Condition { get; set; }
 
     private PropertyPath _selectedPropertyName;
-    private IEnumerable<PropertyPath> properties = new List<PropertyPath>();
+    private IEnumerable<PropertyPath> _properties = new List<PropertyPath>();
 
     protected override async Task OnInitializedAsync()
     {
-        properties = Query.AvailableProperties();
+        _properties = Query.AvailableProperties();
         _selectedPropertyName = Condition.PropertyPath;
         await base.OnInitializedAsync();
     }

@@ -8,28 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Update="Components\LambdaComponent.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
         <Content Update="Components\QueryBuilder.razor">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
         <Content Update="Components\QueryBuilderContainer.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Update="Components\RelationalOperators.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Update="Components\RelationalPredicateField.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Update="Components\RelationalValue.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Update="Components\RelationalValueMethod.razor">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Update="Components\RelationValueInList.razor">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
     </ItemGroup>

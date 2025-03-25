@@ -1,33 +1,33 @@
 ﻿@using System.Linq.Expressions
 @using NetQueryBuilder.Conditions
-@if (MethodCallExpression.Method.Name.Contains("Like", StringComparison.OrdinalIgnoreCase))
+@if (_methodCallExpression.Method.Name.Contains("Like", StringComparison.OrdinalIgnoreCase))
 {
-    <MudTextField Label="Value" T="string" Value="@GetStringValue(MethodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
+    <MudTextField Label="Value" T="string" Value="@GetStringValue(_methodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
 }
-@if (MethodCallExpression.Method.Name.Contains("Contains", StringComparison.OrdinalIgnoreCase))
+@if (_methodCallExpression.Method.Name.Contains("Contains", StringComparison.OrdinalIgnoreCase))
 {
     @switch (_memberType)
     {
         case Type stringType when stringType == typeof(string):
-            <RelationValueInList T="string" MethodCallExpression="MethodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
+            <RelationValueInList T="string" MethodCallExpression="_methodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
             break;
         case Type intType when intType == typeof(int):
-            <RelationValueInList T="int" MethodCallExpression="MethodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
+            <RelationValueInList T="int" MethodCallExpression="_methodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
             break;
     }
 }
 
 @code {
-    [Parameter] public LogicalCondition Condition { get; set; }
+    [Parameter] public SimpleCondition Condition { get; set; }
     [Parameter] public Action<Expression> OnUpdateValue { get; set; }
 
-    private MethodCallExpression MethodCallExpression;
+    private MethodCallExpression _methodCallExpression;
     private Type _memberType;
 
     protected override void OnParametersSet()
     {
-        MethodCallExpression = (MethodCallExpression)Condition.Compile();
-        _memberType = ((MemberExpression)MethodCallExpression.Arguments[1]).Type;
+        _methodCallExpression = (MethodCallExpression)Condition.Compile();
+        _memberType = ((MemberExpression)_methodCallExpression.Arguments[1]).Type;
     }
 
     private string GetStringValue(Expression expression)

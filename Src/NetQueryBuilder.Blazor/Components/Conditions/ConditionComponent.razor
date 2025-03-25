@@ -1,0 +1,17 @@
+﻿@using NetQueryBuilder.Conditions
+@if (Condition is BlockCondition blockCondition)
+{
+    <BlockConditionComponent Condition="blockCondition"/>
+}
+else if (Condition is SimpleCondition logicalCondition)
+{
+    <SimpleConditionComponent Condition="logicalCondition"/>
+}
+else
+{
+    <p>Condition type not supported</p>
+}
+
+@code {
+    [Parameter] public ICondition Condition { get; set; }
+}

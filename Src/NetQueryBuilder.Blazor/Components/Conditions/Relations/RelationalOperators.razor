@@ -2,7 +2,7 @@
 @using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Operators
 @using NetQueryBuilder.Queries
-<MudSelect T="ExpressionOperator" Label="Operator" Value="_operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o.ToString())">
+<MudSelect T="ExpressionOperator" Label="Operator" Value="Operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o.ToString())">
     @foreach (var item in _operators)
     {
         <MudSelectItem Value="@item">@item.ToString()</MudSelectItem>
@@ -13,10 +13,10 @@
 
     [CascadingParameter] public IQuery Query { get; set; }
 
-    [Parameter] public LogicalCondition Condition { get; set; }
+    [Parameter] public SimpleCondition Condition { get; set; }
     [Parameter] public Action<Expression> OnOperatedUpdated { get; set; }
 
-    private ExpressionOperator _operator { get; set; }
+    private ExpressionOperator Operator { get; set; }
     private IEnumerable<ExpressionOperator> _operators = new List<ExpressionOperator>();
     private Expression _valueExpression;
     private MemberExpression _memberAccessExpression;
@@ -24,13 +24,13 @@
     protected override void OnParametersSet()
     {
         _operators = Condition.AvailableOperatorsForCurrentProperty(); // Query.GetOperators(binaryExpression.Left.Type).ToList();
-        _operator = Condition.Operator; // _operators.FirstOrDefault(o => o.ExpressionType == Query.Lambda.Body.NodeType) ?? _operators.First();
+        Operator = Condition.Operator; // _operators.FirstOrDefault(o => o.ExpressionType == Query._lambda.Body.NodeType) ?? _operators.First();
         //InitializeOperators();
     }
     //
     // private void InitializeOperators()
     // {
-    //     switch (Query.Lambda.Body)
+    //     switch (Query._lambda.Body)
     //     {
     //         case BinaryExpression binaryExpression:
     //             InitializeBinaryExpression(binaryExpression);
@@ -42,7 +42,7 @@
     //             InitializeMethodCallExpression(notMethodCallExpression, true);
     //             break;
     //         default:
-    //             throw new NotSupportedException($"Expression type {Query.Lambda.Body.NodeType} is not supported");
+    //             throw new NotSupportedException($"Expression type {Query._lambda.Body.NodeType} is not supported");
     //     }
     // }
     //
@@ -83,7 +83,7 @@
 
     private void OperatorChanged(ExpressionOperator op)
     {
-        _operator = op;
+        Operator = op;
         Condition.Operator = op;
 
         // switch (op)

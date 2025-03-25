@@ -17,12 +17,12 @@ public static class TypeExtensions
         return e.Compile()();
     }
 
-    public static bool IsGenericInstance(this Type type, Type genTypeDef, params Type[] args)
+    public static bool IsGenericInstance(this Type type, Type genTypeDef, params Type?[] args)
     {
         if (type.GetGenericTypeDefinition() != genTypeDef)
             return false;
 
-        Type[] typeArgs = type.GetGenericArguments();
+        var typeArgs = type.GetGenericArguments();
 
         if (typeArgs.Length != args.Length)
             return false;

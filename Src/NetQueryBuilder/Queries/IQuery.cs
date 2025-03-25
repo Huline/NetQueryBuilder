@@ -6,16 +6,11 @@ namespace NetQueryBuilder.Queries;
 
 public interface IQuery
 {
-    BlockCondition Condition { get; }
-    LambdaExpression Lambda { get; }
-    ParameterExpression Parameter { get; }
+    EventHandler? OnChanged { get; set; }
     IEnumerable<PropertyPath> SelectedPropertyPaths { get; set; }
+    IReadOnlyCollection<ICondition> Conditions { get; }
 
     IEnumerable<PropertyPath> AvailableProperties();
-    void Compile();
+    LambdaExpression Compile();
     Task<IEnumerable> Execute(IEnumerable<PropertyPath>? selectedProperties);
-}
-
-public interface IQuery<TEntity> : IQuery where TEntity : class
-{
 }

@@ -1,4 +1,4 @@
-﻿@using System.Linq.Expressions
+﻿@using NetQueryBuilder.Blazor.Components.Conditions.Relations
 @using NetQueryBuilder.Conditions
 <MudStack Row Spacing="4">
     <MudItem xs="8" lg="8">
@@ -9,7 +9,5 @@
 </MudStack>
 
 @code {
-    [Parameter] public LogicalCondition Condition { get; set; }
-
-    [Parameter] public ParameterExpression Parameter { get; set; }
+    [Parameter] public SimpleCondition Condition { get; set; }
 }

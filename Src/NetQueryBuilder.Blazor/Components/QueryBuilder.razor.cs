@@ -1,6 +1,5 @@
-﻿using System.Linq.Expressions;
-using Microsoft.AspNetCore.Components;
-using NetQueryBuilder.Conditions;
+﻿using Microsoft.AspNetCore.Components;
+using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.Blazor.Components;
@@ -9,31 +8,30 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 {
     private List<TEntity> _data = new();
     private IEnumerable<PropertyPath> _propertyPaths = Enumerable.Empty<PropertyPath>();
-    private IQuery<TEntity> _query = null!;
+    private IQuery _query = null!;
     private IEnumerable<PropertyPath> _selectedPropertyPaths = new List<PropertyPath>();
+    [Inject] private IQueryConfigurator QueryConfigurator { get; set; } = null!;
     [Parameter] public required string Expression { get; set; }
-    private BlockCondition Condition { get; set; } = null!;
 
     public ValueTask DisposeAsync()
     {
-        Condition.ConditionChanged -= OnConditionConditionChanged;
+        _query.OnChanged -= OnConditionConditionChanged;
         return ValueTask.CompletedTask;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        _query = QueryFactory.Create<TEntity>();
+        _query = QueryConfigurator.BuildFor<TEntity>();
         _propertyPaths = _query.AvailableProperties();
         _selectedPropertyPaths = _propertyPaths.ToList();
-
-        Condition = _query.Condition;
-        Condition.ConditionChanged += OnConditionConditionChanged;
+        _query.OnChanged += OnConditionConditionChanged;
         await base.OnInitializedAsync();
     }
 
     private void OnConditionConditionChanged(object? sender, EventArgs args)
     {
-        OnChanged(Condition.Compile());
+        Expression = _query.Compile().ToString();
+        StateHasChanged();
     }
 
     private async Task RunQuery()
@@ -41,12 +39,6 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
         var data = await _query.Execute(_selectedPropertyPaths);
 
         _data = (data as IEnumerable<TEntity>)?.ToList() ?? new List<TEntity>();
-    }
-
-    private void OnChanged(Expression body)
-    {
-        _query.Compile();
-        StateHasChanged();
     }
 
     private object? GetNestedPropertyValue(object entity, string propertyPath)

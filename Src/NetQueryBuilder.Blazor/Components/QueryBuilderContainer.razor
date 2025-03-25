@@ -1,5 +1,5 @@
-﻿@using NetQueryBuilder.Queries
-@inject IQueryFactory QueryFactory
+﻿@using NetQueryBuilder.Configurations
+@inject IQueryConfigurator QueryConfigurator
 
 <MudToolBar Gutters="false" Class="mb-4">
     <MudStack Row Spacing="3">
@@ -47,7 +47,7 @@
 </MudStack>
 
 @code {
-    Type SelectedEntityType;
+    Type _selectedEntityType;
 
     private int _queryBuilderKey = 0; // Unique key to force re-render
     private string _selectedQuery;
@@ -67,7 +67,7 @@
     {
         return builder =>
         {
-            builder.OpenComponent(0, typeof(QueryBuilder<>).MakeGenericType(SelectedEntityType));
+            builder.OpenComponent(0, typeof(QueryBuilder<>).MakeGenericType(_selectedEntityType));
             builder.AddAttribute(1, "Expression", Expression);
             builder.CloseComponent();
         };
@@ -79,7 +79,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _entities = (await QueryFactory.GetEntities()).ToList();
+        _entities = QueryConfigurator.GetEntities().ToList();
 
         NewQuery();
 
@@ -94,7 +94,7 @@
 
     private void SelectEntity(Type entityType)
     {
-        SelectedEntityType = entityType;
+        _selectedEntityType = entityType;
         StateHasChanged();
     }
 

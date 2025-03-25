@@ -40,8 +40,8 @@ public static class EnumerableMethodInfo
     private static MethodInfo GetGenericMethod(
         this Type type,
         string methodName,
-        Type? genericTypeDefinition,
-        params Type[]? genericTypeArgs)
+        Type genericTypeDefinition,
+        params Type?[] genericTypeArgs)
     {
         return type
             .GetMethods()

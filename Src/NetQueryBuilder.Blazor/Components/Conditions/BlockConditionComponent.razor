@@ -7,31 +7,22 @@
             if (childCondition != Condition.Conditions.First())
             {
                 <MudItem xs="12" sm="4">
-                    <MudSelect T="string" Label="Operator" Value="@childCondition.LogicalType.ToString()" ValueChanged="@(v => ChangeOperator(childCondition, v))">
-                        @foreach (var item in Operators)
+                    <MudSelect T="LogicalOperator" Label="Operator" Value="@childCondition.LogicalOperator" ValueChanged="@(v => ChangeOperator(childCondition, v))">
+                        @foreach (var item in _operators)
                         {
-                            <MudSelectItem T="string" Value="@item.Key">@item.Value</MudSelectItem>
+                            <MudSelectItem T="LogicalOperator" Value="@item">@item.ToString()</MudSelectItem>
                         }
                     </MudSelect>
                 </MudItem>
             }
 
             <MudItem xs="12" sm="4">
-                @if (childCondition is BlockCondition block)
-                {
-                    <!-- Affiche un sous-bloc récursivement -->
-                    <BlockComponent Condition="block"
-                                    IndentationLevel="@(IndentationLevel + 1)"
-                                    Parameter="@Parameter" OnChange="@OnChange"/>
-                }
-                else if (childCondition is LogicalCondition condition)
-                {
-                    <MudCheckBox T="bool" Label="Group"
-                                 ValueChanged="@(e => Select(e, childCondition))"/>
-                    <!-- Affiche un composant “lambda” ou un équivalent pour la condition simple -->
-                    <LambdaComponent Condition="@condition" Parameter="@Parameter"/>
-                    <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(condition)"></MudIconButton>
-                }
+                <MudCheckBox T="bool" Label="Group"
+                             ValueChanged="@(e => Select(e, childCondition))"/>
+                <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(childCondition)"></MudIconButton>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <ConditionComponent Condition="childCondition"></ConditionComponent>
             </MudItem>
         }
 
@@ -52,34 +43,25 @@
 </MudPaper>
 
 @code {
-    [Parameter] public BlockCondition Condition { get; set; }
+    [Parameter] public required BlockCondition Condition { get; set; }
 
     [Parameter] public int IndentationLevel { get; set; } = 0;
 
-    [Parameter] public ParameterExpression Parameter { get; set; }
-
-    [Parameter] public Action<Expression> OnChange { get; set; }
 
     List<ICondition> SelectedConditions { get; set; } = new();
 
-    Dictionary<string, string> Operators = new()
-    {
-        { "AndAlso", "And" },
-        { "OrElse", "Or" }
-    };
+    IEnumerable<LogicalOperator> _operators = Enum.GetValues<LogicalOperator>();
 
     private void GroupConditions()
     {
         Condition.Group(SelectedConditions);
         SelectedConditions.Clear();
-        OnChange(Condition.Compile());
     }
 
     private void UnGroupConditions()
     {
         Condition.Ungroup(SelectedConditions);
         SelectedConditions.Clear();
-        OnChange(Condition.GetRoot().Compile());
     }
 
     private void Select(bool e, ICondition childCondition)
@@ -90,23 +72,19 @@
             SelectedConditions.Remove(childCondition);
     }
 
-
     private void AddPredicate(ExpressionType binaryExpressionType)
     {
         Condition.CreateNew();
-        OnChange(Condition.Compile());
     }
 
-    private void RemovePredicate(LogicalCondition condition)
+    private void RemovePredicate(ICondition condition)
     {
         Condition.Remove(condition);
     }
 
-    private void ChangeOperator(ICondition condition, string op)
+    private void ChangeOperator(ICondition condition, LogicalOperator op)
     {
-        var expressionType = (ExpressionType)Enum.Parse(typeof(ExpressionType), op);
-        condition.LogicalType = expressionType;
-        OnChange(condition.Compile());
+        condition.LogicalOperator = op;
     }
 
 }

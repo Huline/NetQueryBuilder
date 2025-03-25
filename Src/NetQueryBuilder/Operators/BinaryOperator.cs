@@ -5,7 +5,7 @@ namespace NetQueryBuilder.Operators;
 
 public abstract class BinaryOperator : ExpressionOperator
 {
-    public BinaryOperator(ExpressionType type, string name, IExpressionStringifier expressionStringifier)
+    protected BinaryOperator(ExpressionType type, string name, IExpressionStringifier expressionStringifier)
         : base(type, name, expressionStringifier)
     {
     }

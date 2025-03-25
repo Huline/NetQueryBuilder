@@ -3,11 +3,11 @@ using NetQueryBuilder.Operators;
 
 namespace NetQueryBuilder.EntityFramework;
 
-public class EFOperatorFactory : DefaultOperatorFactory
+public class EfOperatorFactory : DefaultOperatorFactory
 {
     private readonly IExpressionStringifier _expressionStringifier;
 
-    public EFOperatorFactory(IExpressionStringifier expressionStringifier) : base(expressionStringifier)
+    public EfOperatorFactory(IExpressionStringifier expressionStringifier) : base(expressionStringifier)
     {
         _expressionStringifier = expressionStringifier;
     }
