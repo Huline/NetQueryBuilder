@@ -9,7 +9,7 @@ public interface IQuery
     EventHandler? OnChanged { get; set; }
     IReadOnlyCollection<SelectPropertyPath> SelectPropertyPaths { get; }
     IReadOnlyCollection<PropertyPath> ConditionPropertyPaths { get; }
-    IReadOnlyCollection<ICondition> Conditions { get; }
+    BlockCondition Condition { get; }
     LambdaExpression Compile();
     Task<IEnumerable> Execute();
 }

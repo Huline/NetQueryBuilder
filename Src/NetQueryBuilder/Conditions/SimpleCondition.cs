@@ -14,12 +14,12 @@ public class SimpleCondition : ICondition
 
     private object? _value;
 
-    public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, ICondition? parent = null)
+    public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, BlockCondition? parent = null)
         : this(propertyPath, logicalOperator, propertyPath.GetCompatibleOperators().First(), propertyPath.GetDefaultValue(), parent)
     {
     }
 
-    public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, ExpressionOperator @operator, object value, ICondition? parent = null)
+    public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, ExpressionOperator @operator, object value, BlockCondition? parent = null)
     {
         _propertyPath = propertyPath;
         _logicalOperator = logicalOperator;
@@ -76,7 +76,7 @@ public class SimpleCondition : ICondition
         }
     }
 
-    public ICondition? Parent { get; set; }
+    public BlockCondition? Parent { get; set; }
 
     public EventHandler? ConditionChanged { get; set; }
 

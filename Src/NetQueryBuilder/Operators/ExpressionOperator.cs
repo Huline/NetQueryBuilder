@@ -31,12 +31,12 @@ public abstract class ExpressionOperator
         return HashCode.Combine(ExpressionType);
     }
 
-    public static bool operator ==(ExpressionOperator left, ExpressionOperator right)
+    public static bool operator ==(ExpressionOperator? left, ExpressionOperator? right)
     {
         return EqualityComparer<ExpressionOperator>.Default.Equals(left, right);
     }
 
-    public static bool operator !=(ExpressionOperator left, ExpressionOperator right)
+    public static bool operator !=(ExpressionOperator? left, ExpressionOperator? right)
     {
         return !(left == right);
     }

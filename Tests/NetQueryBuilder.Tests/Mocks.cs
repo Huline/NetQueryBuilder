@@ -1,4 +1,4 @@
-﻿namespace NetQueryBuilder.Tests.Mocks
+﻿namespace NetQueryBuilder.Tests
 {
     public class Person
     {

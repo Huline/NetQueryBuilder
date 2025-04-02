@@ -21,6 +21,7 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
     protected override async Task OnInitializedAsync()
     {
         _query = QueryConfigurator.BuildFor<TEntity>();
+        _query.Condition.CreateNew(_query.ConditionPropertyPaths.First());
         _selectedPropertyPaths = _query.SelectPropertyPaths;
         _query.OnChanged += OnConditionConditionChanged;
         await base.OnInitializedAsync();

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using NetQueryBuilder.Operators;
 
 namespace NetQueryBuilder.Conditions;
 
@@ -8,7 +9,7 @@ public class BlockCondition : ICondition
     private Expression? _compiledExpression;
     private LogicalOperator _logicalOperator;
 
-    public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator, ICondition? parent = null)
+    public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator, BlockCondition? parent = null)
     {
         _children.AddRange(children);
         foreach (var condition in _children)
@@ -23,7 +24,7 @@ public class BlockCondition : ICondition
 
     public IReadOnlyCollection<ICondition> Conditions => _children.AsReadOnly();
     public EventHandler? ConditionChanged { get; set; }
-    public ICondition? Parent { get; set; }
+    public BlockCondition? Parent { get; set; }
 
     public LogicalOperator LogicalOperator
     {
@@ -49,8 +50,15 @@ public class BlockCondition : ICondition
         if (Conditions.Count == 0)
             return null;
         var result = Conditions.First().Compile();
+        if (result is null)
+            return null;
+
         foreach (var condition in Conditions.Skip(1))
-            result = Expression.MakeBinary(ToExpression(condition.LogicalOperator), result, condition.Compile());
+        {
+            var compiled = condition.Compile();
+            if(compiled is not null)
+                result = Expression.MakeBinary(ToExpression(condition.LogicalOperator), result, compiled);
+        }
 
         return result;
     }
@@ -65,12 +73,13 @@ public class BlockCondition : ICondition
         };
     }
 
-    public void Add(ICondition condition)
+    public ICondition Add(ICondition condition)
     {
         _children.Add(condition);
         condition.Parent = this;
         condition.ConditionChanged += ChildConditionChanged;
         NotifyConditionChanged();
+        return condition;
     }
 
     public void Remove(ICondition condition)
@@ -82,10 +91,10 @@ public class BlockCondition : ICondition
         NotifyConditionChanged();
     }
 
-    public void Group(IEnumerable<ICondition> childrenToGroup)
+    public BlockCondition? Group(IEnumerable<ICondition> childrenToGroup)
     {
         var children = Conditions.Where(childrenToGroup.Contains).ToList();
-        if (children.Count == 0) return;
+        if (children.Count == 0) return null;
 
         var block = new BlockCondition(children, children.First().LogicalOperator, this);
 
@@ -100,41 +109,66 @@ public class BlockCondition : ICondition
         block.ConditionChanged += ChildConditionChanged;
 
         NotifyConditionChanged();
+        return block;
     }
 
 
     public void Ungroup(IEnumerable<ICondition> childrenToUngroup)
     {
-        var blocks = Conditions.OfType<BlockCondition>().Where(childrenToUngroup.Contains).ToList();
-        if (blocks.Count == 0) return;
+        var conditions = Conditions.Where(childrenToUngroup.Contains).ToList();
+        if(this.Parent == null)
+            return; 
+        if (conditions.Count == 0) return;
 
-        foreach (var block in blocks)
+        foreach (var condition in conditions)
         {
-            _children.Remove(block);
-            UnsubscribeChildCondition(block);
-            foreach (var blockChildCondition in block.Conditions)
-                block.UnsubscribeChildCondition(blockChildCondition);
-            _children.AddRange(block.Conditions);
-            foreach (var condition in block.Conditions)
-            {
-                condition.Parent = this;
-                condition.ConditionChanged += ChildConditionChanged;
-            }
+            _children.Remove(condition);
+            UnsubscribeChildCondition(condition);
+            condition.Parent = this.Parent;
+            this.Parent._children.Add(condition);
+            condition.ConditionChanged -= ChildConditionChanged;
+            condition.ConditionChanged += Parent.ChildConditionChanged;
+        }
+
+        if (_children.Count == 0)
+        {
+            Parent.Remove(this);
         }
 
         NotifyConditionChanged();
     }
 
-    public void CreateNew()
+    public SimpleCondition CreateNew<TOperator>(PropertyPath property, object? valueOverride = null)
+    where TOperator : ExpressionOperator
+    {
+        return CreateNew(property, property.GetCompatibleOperators().OfType<TOperator>().FirstOrDefault(), valueOverride);
+    }
+    
+    
+    public SimpleCondition CreateNew(PropertyPath property, ExpressionOperator? operatorOverride = null, object? valueOverride = null)
+    {
+        var newLogicalCondition = new SimpleCondition(property, LogicalOperator.And);
+        if (operatorOverride != null)
+            newLogicalCondition.Operator = operatorOverride;
+        if (valueOverride != null)
+            newLogicalCondition.Value = valueOverride;
+        return (Add(newLogicalCondition) as SimpleCondition)!;
+    }
+    
+    public SimpleCondition CreateNew()
     {
         var lastLogicalCondition = FindLogicalCondition();
+        if (lastLogicalCondition == null)
+        {
+            throw new InvalidOperationException("No logical condition found to create a new one. Use CreateNew(PropertyPath property) instead.");
+        }
         var newLogicalCondition = new SimpleCondition(lastLogicalCondition.PropertyPath, lastLogicalCondition.LogicalOperator);
-        Add(newLogicalCondition);
+        return (Add(newLogicalCondition) as SimpleCondition)!;
     }
 
-    private SimpleCondition FindLogicalCondition()
+    private SimpleCondition? FindLogicalCondition()
     {
-        return Conditions.OfType<SimpleCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>().Select(c => c.FindLogicalCondition()).First();
+        return Conditions.OfType<SimpleCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>().Select(c => c.FindLogicalCondition()).FirstOrDefault();
     }
 
     private void ChildConditionChanged(object? sender, EventArgs args)

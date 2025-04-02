@@ -34,7 +34,7 @@ public abstract class Query<TEntity> : IQuery where TEntity : class
     public EventHandler? OnChanged { get; set; }
     public IReadOnlyCollection<SelectPropertyPath> SelectPropertyPaths => _selectPropertyPaths;
     public IReadOnlyCollection<PropertyPath> ConditionPropertyPaths => _conditionPropertyPaths;
-    public IReadOnlyCollection<ICondition> Conditions => [_condition];
+    public BlockCondition Condition => _condition;
 
     public virtual async Task<IEnumerable> Execute()
     {

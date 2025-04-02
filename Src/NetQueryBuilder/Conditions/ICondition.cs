@@ -4,7 +4,7 @@ namespace NetQueryBuilder.Conditions;
 
 public interface ICondition
 {
-    internal ICondition? Parent { get; set; }
+    internal BlockCondition? Parent { get; set; }
     EventHandler? ConditionChanged { get; set; }
     LogicalOperator LogicalOperator { get; set; }
     ICondition GetRoot();

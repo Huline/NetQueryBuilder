@@ -27,10 +27,7 @@
     <div>
         <MudText Typo="Typo.h5" GutterBottom="true">WHERE</MudText>
         <CascadingValue Value="@_query">
-            @foreach (var condition in _query.Conditions)
-            {
-                <ConditionComponent Condition="@condition"/>
-            }
+            <ConditionComponent Condition="@_query.Condition"/>
         </CascadingValue>
         <MudItem xs="4" lg="4">
             <MudCard>

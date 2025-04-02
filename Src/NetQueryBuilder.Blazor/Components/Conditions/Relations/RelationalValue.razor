@@ -24,15 +24,15 @@
 }
 @if (Condition.Compile() is MethodCallExpression)
 {
-    <RelationalValueMethod OnUpdateValue="@UpdateValue" Condition="@Condition"></RelationalValueMethod>
+    <RelationalValueMethod Condition="@Condition"></RelationalValueMethod>
 }
 
 
 @code {
 
-    [CascadingParameter] public IQuery Query { get; set; }
+    [CascadingParameter] public required IQuery Query { get; set; }
 
-    [Parameter] public SimpleCondition Condition { get; set; }
+    [Parameter] public required SimpleCondition Condition { get; set; }
 
     private void UpdateValue(DateTime? dateTime)
     {
@@ -45,32 +45,6 @@
     private void UpdateValue<T>(T value)
     {
         Condition.Value = value;
-        UpdateValue((Expression)Expression.Constant(value, typeof(T)));
-    }
-
-    private void UpdateValue(Expression expression)
-    {
-        // TODO: Unit test
-        // if (Query._lambda.Body is BinaryExpression binaryExpression)
-        // {
-        //     var updated = binaryExpression.ReplaceRight(expression);
-        //     OnValueChanged(updated);
-        // }
-        // // TODO: Unit test
-        // else if (Query._lambda.Body is MethodCallExpression methodCallExpression)
-        // {
-        //     if (methodCallExpression.Method.Name == "Like")
-        //     {
-        //         var updated = methodCallExpression.Update(methodCallExpression.Object, new[] { methodCallExpression.Arguments[0], methodCallExpression.Arguments[1], expression });
-        //         OnValueChanged(updated);
-        //     }
-        //
-        //     if (methodCallExpression.Method.Name == "Contains")
-        //     {
-        //         var updated = methodCallExpression.Update(methodCallExpression.Object, new[] { expression, methodCallExpression.Arguments[1] });
-        //         OnValueChanged(updated);
-        //     }
-        // }
     }
 
 }

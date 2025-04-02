@@ -18,7 +18,7 @@ public class EfLikeOperator : MethodCallOperator
             : GetExpression(left, right);
     }
 
-    public override object? GetDefaultValue(Type type, object? value)
+    public override object GetDefaultValue(Type type, object? value)
     {
         return value is string ? value : string.Empty;
     }
