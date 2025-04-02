@@ -27,7 +27,7 @@
     private MudThemeProvider _mudThemeProvider = default!;
     private bool _drawerOpen = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _drawerOpen = false;
     }

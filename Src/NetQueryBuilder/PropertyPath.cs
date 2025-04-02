@@ -16,7 +16,7 @@ public class PropertyPath
     private readonly IOperatorFactory _operatorFactory;
     private readonly ParameterExpression _parameterExpression;
     private readonly IPropertyStringifier? _propertyStringifier;
-    
+
     internal PropertyPath(
         string propertyFullName,
         Type propertyType,

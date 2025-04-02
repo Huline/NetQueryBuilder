@@ -1,0 +1,23 @@
+﻿@typeparam TEntity where TEntity : class
+
+<MudTable Items="@Data" Bordered="@Bordered" Striped="@Striped" Loading="@Loading"
+          LoadingProgressColor="@LoadingColor" Hover="@Hover" Dense="@Dense">
+    <HeaderContent>
+        @foreach (var property in SelectedProperties)
+        {
+            <MudTh>@property.Property.DisplayName()</MudTh>
+        }
+    </HeaderContent>
+    <RowTemplate>
+        @foreach (var propertyPath in SelectedProperties)
+        {
+            <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
+        }
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText Class="pa-4">No result found</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText Class="pa-4">Loading...</MudText>
+    </LoadingContent>
+</MudTable>

@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Linq.Dynamic.Core;
-using System.Linq.Dynamic.Core.CustomTypeProviders;
 using System.Linq.Expressions;
 using NetQueryBuilder.Conditions;
 using NetQueryBuilder.Configurations;
@@ -11,7 +9,6 @@ namespace NetQueryBuilder.Queries;
 
 public abstract class Query<TEntity> : IQuery where TEntity : class
 {
-    private readonly BlockCondition _condition;
     private readonly List<PropertyPath> _conditionPropertyPaths;
     private readonly IOperatorFactory _operatorFactory;
     private readonly ParameterExpression _parameter;
@@ -26,15 +23,15 @@ public abstract class Query<TEntity> : IQuery where TEntity : class
         _operatorFactory = operatorFactory;
         _selectPropertyPaths = AvailableProperties(selectConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, selectConfiguration)).Select(p => new SelectPropertyPath(p)).ToList();
         _conditionPropertyPaths = AvailableProperties(conditionConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, conditionConfiguration)).ToList();
-        _condition = new BlockCondition([], LogicalOperator.And);
-        _lambda = null; 
-        _condition.ConditionChanged += OnConditionConditionChanged;
+        Condition = new BlockCondition([], LogicalOperator.And);
+        _lambda = null;
+        Condition.ConditionChanged += OnConditionConditionChanged;
     }
 
     public EventHandler? OnChanged { get; set; }
     public IReadOnlyCollection<SelectPropertyPath> SelectPropertyPaths => _selectPropertyPaths;
     public IReadOnlyCollection<PropertyPath> ConditionPropertyPaths => _conditionPropertyPaths;
-    public BlockCondition Condition => _condition;
+    public BlockCondition Condition { get; }
 
     public virtual async Task<IEnumerable> Execute()
     {
@@ -58,10 +55,11 @@ public abstract class Query<TEntity> : IQuery where TEntity : class
 
     public virtual LambdaExpression? Compile()
     {
-        if(_condition.Compile() == null)
+        var expression = Condition.Compile();
+        if (expression == null)
             return null;
         _lambda = Expression.Lambda(
-            _condition.Compile(),
+            expression,
             _parameter);
         return _lambda;
     }

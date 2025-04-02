@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Src\NetQueryBuilder\NetQueryBuilder.csproj" />
+        <ProjectReference Include="..\..\Src\NetQueryBuilder\NetQueryBuilder.csproj"/>
     </ItemGroup>
 
 </Project>

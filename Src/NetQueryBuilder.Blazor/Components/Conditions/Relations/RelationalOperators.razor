@@ -1,8 +1,7 @@
-﻿@using System.Linq.Expressions
-@using NetQueryBuilder.Conditions
+﻿@using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Operators
 @using NetQueryBuilder.Queries
-<MudSelect T="ExpressionOperator" Label="Operator" Value="Operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o.ToString())">
+<MudSelect T="ExpressionOperator" Label="Operator" Value="Operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o?.ToString())">
     @foreach (var item in _operators)
     {
         <MudSelectItem Value="@item">@item.ToString()</MudSelectItem>
@@ -11,120 +10,23 @@
 
 @code {
 
-    [CascadingParameter] public IQuery Query { get; set; }
+    [CascadingParameter] public required IQuery Query { get; set; }
 
-    [Parameter] public SimpleCondition Condition { get; set; }
-    [Parameter] public Action<Expression> OnOperatedUpdated { get; set; }
+    [Parameter] public required SimpleCondition Condition { get; set; }
 
-    private ExpressionOperator Operator { get; set; }
+    private ExpressionOperator? Operator { get; set; }
     private IEnumerable<ExpressionOperator> _operators = new List<ExpressionOperator>();
-    private Expression _valueExpression;
-    private MemberExpression _memberAccessExpression;
 
     protected override void OnParametersSet()
     {
-        _operators = Condition.AvailableOperatorsForCurrentProperty(); // Query.GetOperators(binaryExpression.Left.Type).ToList();
-        Operator = Condition.Operator; // _operators.FirstOrDefault(o => o.ExpressionType == Query._lambda.Body.NodeType) ?? _operators.First();
-        //InitializeOperators();
+        _operators = Condition.AvailableOperatorsForCurrentProperty();
+        Operator = Condition.Operator;
     }
-    //
-    // private void InitializeOperators()
-    // {
-    //     switch (Query._lambda.Body)
-    //     {
-    //         case BinaryExpression binaryExpression:
-    //             InitializeBinaryExpression(binaryExpression);
-    //             break;
-    //         case MethodCallExpression methodCallExpression:
-    //             InitializeMethodCallExpression(methodCallExpression);
-    //             break;
-    //         case UnaryExpression { NodeType: ExpressionType.Not, Operand: MethodCallExpression notMethodCallExpression }:
-    //             InitializeMethodCallExpression(notMethodCallExpression, true);
-    //             break;
-    //         default:
-    //             throw new NotSupportedException($"Expression type {Query._lambda.Body.NodeType} is not supported");
-    //     }
-    // }
-    //
-    // private void InitializeBinaryExpression(BinaryExpression binaryExpression)
-    // {
-    //     _operators = Condition.AvailableOperatorsForCurrentProperty();
-    //     _operator = _operators.FirstOrDefault(o => o.ExpressionType == binaryExpression.NodeType) ?? _operators.First();
-    //     _valueExpression = binaryExpression.Right;
-    //     _memberAccessExpression = (MemberExpression)binaryExpression.Left;
-    // }
-    //
-    // private void InitializeMethodCallExpression(MethodCallExpression methodCallExpression, bool isNegated = false)
-    // {
-    //     switch (methodCallExpression.Method.Name)
-    //     {
-    //         // case "Like":
-    //         //     _operators = GetOperators(((MemberExpression)methodCallExpression.Arguments[1]).Type);
-    //         //     _memberAccessExpression = (MemberExpression)methodCallExpression.Arguments[1];
-    //         //     _valueExpression = methodCallExpression.Arguments[2];
-    //         //     break;
-    //         // case "Contains":
-    //         //     _operators = GetOperators(((MemberExpression)methodCallExpression.Arguments[1]).Type);
-    //         //     _memberAccessExpression = (MemberExpression)methodCallExpression.Arguments[1];
-    //         //     _valueExpression = methodCallExpression.Arguments[0];
-    //         //     break;
-    //         default:
-    //             throw new NotSupportedException($"Method {methodCallExpression.Method.Name} is not supported");
-    //     }
-    //
-    //     _operator = _operators
-    //                     .OfType<MethodCallOperator>()
-    //                     .FirstOrDefault(o =>
-    //                         o.ExpressionType == methodCallExpression.NodeType
-    //                         && o.MethodInfo == methodCallExpression.Method
-    //                         && o.IsNegated == isNegated)
-    //                 ?? _operators.First();
-    // }
 
     private void OperatorChanged(ExpressionOperator op)
     {
         Operator = op;
         Condition.Operator = op;
-
-        // switch (op)
-        // {
-        //     case BinaryOperator:
-        //         var newBinaryExpression = Expression.MakeBinary(
-        //             op.ExpressionType,
-        //             _memberAccessExpression,
-        //             // Perserve the right binary constant value for BinaryOperators
-        //             op is BinaryOperator
-        //                 ? _valueExpression
-        //                 : Expression.Constant(_memberAccessExpression.Type.GetDefaultValue()));
-        //         PredicateExpression = newBinaryExpression;
-        //         OnOperatedUpdated?.Invoke(newBinaryExpression);
-        //         break;
-        //
-        //     case MethodCallOperator methodCall when methodCall.MethodInfo.Name == "Like":
-        //         var likeMethodCallExpression = Expression.Call(
-        //             null,
-        //             methodCall.MethodInfo,
-        //             Expression.Constant(EF.Functions),
-        //             _memberAccessExpression,
-        //             Expression.Constant(_memberAccessExpression.Type.GetDefaultValue(), _memberAccessExpression.Type));
-        //         UpdateMethodCallExpression(methodCall.IsNegated, likeMethodCallExpression);
-        //         break;
-        //
-        //     case MethodCallOperator methodCall when methodCall.MethodInfo.Name == "Contains":
-        //         var containsMethodCallExpression = Expression.Call(
-        //             null,
-        //             methodCall.MethodInfo,
-        //             Expression.Constant(Array.CreateInstance(_memberAccessExpression.Type, 0)),
-        //             _memberAccessExpression);
-        //         UpdateMethodCallExpression(methodCall.IsNegated, containsMethodCallExpression);
-        //         break;
-        //}
-
-        void UpdateMethodCallExpression(bool isNegated, MethodCallExpression expression)
-        {
-            // PredicateExpression = expression;
-            // OnOperatedUpdated?.Invoke(isNegated ? Expression.Not(expression) : expression);
-        }
     }
 
 }

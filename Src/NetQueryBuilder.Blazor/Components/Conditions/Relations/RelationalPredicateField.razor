@@ -14,7 +14,7 @@
     [CascadingParameter] public required IQuery Query { get; set; }
     [Parameter] public required SimpleCondition Condition { get; set; }
 
-    private PropertyPath _selectedPropertyName;
+    private PropertyPath? _selectedPropertyName;
     private IEnumerable<PropertyPath> _properties = new List<PropertyPath>();
 
     protected override async Task OnInitializedAsync()

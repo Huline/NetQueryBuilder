@@ -28,13 +28,13 @@
 </MudDialog>
 
 @code {
-    [Parameter] public MethodCallExpression MethodCallExpression { get; set; }
+    [Parameter] public required MethodCallExpression MethodCallExpression { get; set; }
 
-    [Parameter] public Action<T> OnUpdateValue { get; set; }
+    [Parameter] public required Action<T> OnUpdateValue { get; set; }
 
-    [Parameter] public Action<IEnumerable<T>> OnUpdateValues { get; set; }
+    [Parameter] public required Action<IEnumerable<T>> OnUpdateValues { get; set; }
 
-    private T _listItemInputValue;
+    private T? _listItemInputValue;
     private List<T> _items = new();
     private bool _showListItemDialog;
     private DialogOptions _listItemDialogOptions = new() { CloseButton = true };
@@ -47,7 +47,7 @@
         // Si l'argument est un ConstantExpression, on récupère sa valeur
         if (MethodCallExpression.Arguments[0] is ConstantExpression constantExpression)
         {
-            _items = ((IEnumerable<T>)constantExpression.Value).ToList();
+            _items = ((IEnumerable<T>)constantExpression.Value! ?? Array.Empty<T>()).ToList();
         }
         // Si c'est un NewExpression, on part du principe que c'est une liste vide
         else if (MethodCallExpression.Arguments[0] is NewExpression)
@@ -63,7 +63,8 @@
 
     private void AddListItem()
     {
-        _items.Add(_listItemInputValue);
+        if (_listItemInputValue is not null)
+            _items.Add(_listItemInputValue);
         _showListItemDialog = false;
         _listItemInputValue = default;
         UpdateValues(_items);
@@ -71,7 +72,8 @@
 
     private void RemoveListItem(MudChip<T> item)
     {
-        _items.Remove(item.Value);
+        if (item.Value is not null)
+            _items.Remove(item.Value);
         UpdateValues(_items);
     }
 

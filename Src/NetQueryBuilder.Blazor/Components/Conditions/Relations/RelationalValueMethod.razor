@@ -1,57 +1,66 @@
 ﻿@using System.Linq.Expressions
 @using NetQueryBuilder.Conditions
-@if (_methodCallExpression.Method.Name.Contains("Like", StringComparison.OrdinalIgnoreCase))
-{
-    <MudTextField Label="Value" T="string" Value="@GetStringValue(_methodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
-}
-@if (_methodCallExpression.Method.Name.Contains("Contains", StringComparison.OrdinalIgnoreCase))
-{
-    @switch (_memberType)
+@{
+    if (_methodCallExpression == null)
     {
-        case Type stringType when stringType == typeof(string):
-            <RelationValueInList T="string" MethodCallExpression="_methodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
-            break;
-        case Type intType when intType == typeof(int):
-            <RelationValueInList T="int" MethodCallExpression="_methodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
-            break;
+        <p>Method call expression is null</p>
+    }
+    else if (_methodCallExpression.Method.Name.Contains("Like", StringComparison.OrdinalIgnoreCase))
+    {
+        <MudTextField Label="Value" T="string" Value="@GetStringValue(_methodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
+    }
+    else if (_methodCallExpression.Method.Name.Contains("Contains", StringComparison.OrdinalIgnoreCase))
+    {
+        switch (_memberType)
+        {
+            case { } stringType when stringType == typeof(string):
+                <RelationValueInList T="string" MethodCallExpression="_methodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
+                break;
+            case { } intType when intType == typeof(int):
+                <RelationValueInList T="int" MethodCallExpression="_methodCallExpression" OnUpdateValue="UpdateValue" OnUpdateValues="UpdateValue"/>
+                break;
+        }
+    }
+    else
+    {
+        <p>Method call expression is not supported</p>
     }
 }
 
-@code {
-    [Parameter] public SimpleCondition Condition { get; set; }
-    [Parameter] public Action<Expression> OnUpdateValue { get; set; }
 
-    private MethodCallExpression _methodCallExpression;
-    private Type _memberType;
+@code {
+    [Parameter] public required SimpleCondition Condition { get; set; }
+
+    private MethodCallExpression? _methodCallExpression;
+    private Type? _memberType;
 
     protected override void OnParametersSet()
     {
-        _methodCallExpression = (MethodCallExpression)Condition.Compile();
+        var expression = Condition.Compile();
+        if (expression is not MethodCallExpression methodCallExpression)
+        {
+            _methodCallExpression = null;
+            _memberType = null;
+            return;
+        }
+
+        _methodCallExpression = methodCallExpression;
         _memberType = ((MemberExpression)_methodCallExpression.Arguments[1]).Type;
     }
 
     private string GetStringValue(Expression expression)
     {
-        // Gère les différents types d'expressions possibles
-        switch (expression)
+        return expression switch
         {
-            case ConstantExpression constExpr:
-                return constExpr.Value?.ToString() ?? string.Empty;
-
-            case UnaryExpression unaryExpr when unaryExpr.NodeType == ExpressionType.Convert
-                                                && unaryExpr.Operand is ConstantExpression constOperand:
-                return constOperand.Value?.ToString() ?? string.Empty;
-
-            default:
-                return string.Empty; // Valeur par défaut
-        }
+            ConstantExpression constExpr => constExpr.Value?.ToString() ?? string.Empty,
+            UnaryExpression { NodeType: ExpressionType.Convert, Operand: ConstantExpression constOperand } => constOperand.Value?.ToString() ?? string.Empty,
+            _ => string.Empty
+        };
     }
-
 
     private void UpdateValue<T>(T value)
     {
         Condition.Value = value;
-        OnUpdateValue.Invoke(Expression.Constant(value, typeof(T)));
     }
 
 }

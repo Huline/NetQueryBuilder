@@ -6,19 +6,19 @@
     @switch (Condition.PropertyPath.PropertyType)
     {
         case { } intType when intType == typeof(int):
-            <MudTextField Label="Value" T="int" Value="@((int)Condition.Value)" ValueChanged="@UpdateValue"/>
+            <MudTextField Label="Value" T="int" Value="@((int)Condition.Value!)" ValueChanged="@UpdateValue"/>
             break;
         case { } stringType when stringType == typeof(string):
             <MudTextField Label="Value" T="string" Value="@(Condition.Value?.ToString())" ValueChanged="@UpdateValue"/>
             break;
         case { } boolType when boolType == typeof(bool):
-            <MudSelect Label="Value" T="bool" Value="@((bool)Condition.Value)" ValueChanged="@UpdateValue">
+            <MudSelect Label="Value" T="bool" Value="@((bool)Condition.Value!)" ValueChanged="@UpdateValue">
                 <MudSelectItem Value="true">True</MudSelectItem>
                 <MudSelectItem Value="false">False</MudSelectItem>
             </MudSelect>
             break;
         case { } dateTimeType when dateTimeType == typeof(DateTime):
-            <MudDatePicker Label="Value" Date="@((DateTime)Condition.Value)" DateChanged="@UpdateValue"/>
+            <MudDatePicker Label="Value" Date="@((DateTime)Condition.Value!)" DateChanged="@UpdateValue"/>
             break;
     }
 }

@@ -13,7 +13,7 @@ public class DefaultOperatorFactory : IOperatorFactory
     {
         return propertyPath.PropertyType switch
         {
-            Type type when type == typeof(int) => new List<ExpressionOperator>
+            { } type when type == typeof(int) => new List<ExpressionOperator>
             {
                 new EqualsOperator(_expressionStringifier),
                 new NotEqualsOperator(_expressionStringifier),
@@ -24,19 +24,19 @@ public class DefaultOperatorFactory : IOperatorFactory
                 new InListOperator<int>(_expressionStringifier),
                 new InListOperator<int>(_expressionStringifier, true)
             },
-            Type type when type == typeof(string) => new List<ExpressionOperator>
+            { } type when type == typeof(string) => new List<ExpressionOperator>
             {
                 new EqualsOperator(_expressionStringifier),
                 new NotEqualsOperator(_expressionStringifier),
                 new InListOperator<string>(_expressionStringifier),
                 new InListOperator<string>(_expressionStringifier, true)
             },
-            Type type when type == typeof(bool) => new List<ExpressionOperator>
+            { } type when type == typeof(bool) => new List<ExpressionOperator>
             {
                 new EqualsOperator(_expressionStringifier),
                 new NotEqualsOperator(_expressionStringifier)
             },
-            Type type when type == typeof(DateTime) => new List<ExpressionOperator>
+            { } type when type == typeof(DateTime) => new List<ExpressionOperator>
             {
                 new EqualsOperator(_expressionStringifier),
                 new NotEqualsOperator(_expressionStringifier),

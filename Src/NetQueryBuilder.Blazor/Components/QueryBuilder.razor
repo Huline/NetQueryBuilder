@@ -4,24 +4,15 @@
 <MudStack Spacing="10">
     <div>
         <MudText Typo="Typo.h5">SELECT</MudText>
-        <div class="form-group">
-            <label>Sélectionner les champs</label>
-            <div class="custom-multiselect">
-                @foreach (var property in _selectedPropertyPaths)
-                {
-                    <div class="custom-checkbox">
-                        <input type="checkbox"
-                               id="@($"prop_{property.Property.DisplayName()}")"
-                               checked="@property.IsSelected"
-                               @onchange="(e) => OnPropertySelectionChanged(property, e)" />
-                        <label for="@($"prop_{property.Property.DisplayName()}")">
-                            @property.Property.DisplayName()
-                        </label>
-                    </div>
-                }
-            </div>
-        </div>
-
+        <MudSelect Label="Fields" T="SelectPropertyPath" SelectedValues="_selectedPropertyPaths.Where(s => s.IsSelected)" SelectedValuesChanged="SelectedValuesChanged" MultiSelection="true" SelectAll="true"
+                   ToStringFunc="@(prop => prop!.Property.DisplayName())">
+            @foreach (var property in _selectedPropertyPaths)
+            {
+                <MudSelectItem T="SelectPropertyPath" Value="property">
+                    @property.Property.DisplayName()
+                </MudSelectItem>
+            }
+        </MudSelect>
     </div>
 
     <div>
@@ -50,18 +41,5 @@
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="RunQuery">Run Query</MudButton>
     </div>
 
-    <MudTable Items="_data" Bordered="true" Striped="true">
-        <HeaderContent>
-            @foreach (var property in _selectedPropertyPaths)
-            {
-                <MudTh>@property.Property.DisplayName()</MudTh>
-            }
-        </HeaderContent>
-        <RowTemplate>
-            @foreach (var propertyPath in _selectedPropertyPaths)
-            {
-                <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
-            }
-        </RowTemplate>
-    </MudTable>
+    <QueryResultTable TEntity="TEntity" Data="_data" Properties="_selectedPropertyPaths"/>
 </MudStack>

@@ -11,6 +11,7 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
     private IReadOnlyCollection<SelectPropertyPath> _selectedPropertyPaths = new List<SelectPropertyPath>();
     [Inject] private IQueryConfigurator QueryConfigurator { get; set; } = null!;
     [Parameter] public required string Expression { get; set; }
+    public List<PropertyPath> SelectedProperty => _selectedPropertyPaths.Select(s => s.Property).ToList();
 
     public ValueTask DisposeAsync()
     {
@@ -29,7 +30,7 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 
     private void OnConditionConditionChanged(object? sender, EventArgs args)
     {
-        Expression = _query.Compile().ToString();
+        Expression = _query.Compile()?.ToString() ?? string.Empty;
         StateHasChanged();
     }
 
@@ -39,10 +40,11 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 
         _data = (data as IEnumerable<TEntity>)?.ToList() ?? new List<TEntity>();
     }
-    private void OnPropertySelectionChanged(dynamic property, ChangeEventArgs e)
-    {
-        property.IsSelected = (bool)e.Value;
-        StateHasChanged();
-    }
 
+    private void SelectedValuesChanged(IEnumerable<SelectPropertyPath?>? obj)
+    {
+        if (obj == null) return;
+        var selectPropertyPaths = obj.ToHashSet();
+        foreach (var selectedPropertyPath in _selectedPropertyPaths) selectedPropertyPath.IsSelected = selectPropertyPaths.Contains(selectedPropertyPath);
+    }
 }

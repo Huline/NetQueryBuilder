@@ -56,7 +56,7 @@ public class BlockCondition : ICondition
         foreach (var condition in Conditions.Skip(1))
         {
             var compiled = condition.Compile();
-            if(compiled is not null)
+            if (compiled is not null)
                 result = Expression.MakeBinary(ToExpression(condition.LogicalOperator), result, compiled);
         }
 
@@ -116,35 +116,32 @@ public class BlockCondition : ICondition
     public void Ungroup(IEnumerable<ICondition> childrenToUngroup)
     {
         var conditions = Conditions.Where(childrenToUngroup.Contains).ToList();
-        if(this.Parent == null)
-            return; 
+        if (Parent == null)
+            return;
         if (conditions.Count == 0) return;
 
         foreach (var condition in conditions)
         {
             _children.Remove(condition);
             UnsubscribeChildCondition(condition);
-            condition.Parent = this.Parent;
-            this.Parent._children.Add(condition);
+            condition.Parent = Parent;
+            Parent._children.Add(condition);
             condition.ConditionChanged -= ChildConditionChanged;
             condition.ConditionChanged += Parent.ChildConditionChanged;
         }
 
-        if (_children.Count == 0)
-        {
-            Parent.Remove(this);
-        }
+        if (_children.Count == 0) Parent.Remove(this);
 
         NotifyConditionChanged();
     }
 
     public SimpleCondition CreateNew<TOperator>(PropertyPath property, object? valueOverride = null)
-    where TOperator : ExpressionOperator
+        where TOperator : ExpressionOperator
     {
         return CreateNew(property, property.GetCompatibleOperators().OfType<TOperator>().FirstOrDefault(), valueOverride);
     }
-    
-    
+
+
     public SimpleCondition CreateNew(PropertyPath property, ExpressionOperator? operatorOverride = null, object? valueOverride = null)
     {
         var newLogicalCondition = new SimpleCondition(property, LogicalOperator.And);
@@ -154,14 +151,11 @@ public class BlockCondition : ICondition
             newLogicalCondition.Value = valueOverride;
         return (Add(newLogicalCondition) as SimpleCondition)!;
     }
-    
+
     public SimpleCondition CreateNew()
     {
         var lastLogicalCondition = FindLogicalCondition();
-        if (lastLogicalCondition == null)
-        {
-            throw new InvalidOperationException("No logical condition found to create a new one. Use CreateNew(PropertyPath property) instead.");
-        }
+        if (lastLogicalCondition == null) throw new InvalidOperationException("No logical condition found to create a new one. Use CreateNew(PropertyPath property) instead.");
         var newLogicalCondition = new SimpleCondition(lastLogicalCondition.PropertyPath, lastLogicalCondition.LogicalOperator);
         return (Add(newLogicalCondition) as SimpleCondition)!;
     }

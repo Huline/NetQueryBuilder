@@ -10,6 +10,6 @@ public interface IQuery
     IReadOnlyCollection<SelectPropertyPath> SelectPropertyPaths { get; }
     IReadOnlyCollection<PropertyPath> ConditionPropertyPaths { get; }
     BlockCondition Condition { get; }
-    LambdaExpression Compile();
+    LambdaExpression? Compile();
     Task<IEnumerable> Execute();
 }
