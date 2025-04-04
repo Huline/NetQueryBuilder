@@ -1,23 +1,50 @@
 ﻿@typeparam TEntity where TEntity : class
 
-<MudTable Items="@Data" Bordered="@Bordered" Striped="@Striped" Loading="@Loading"
-          LoadingProgressColor="@LoadingColor" Hover="@Hover" Dense="@Dense">
-    <HeaderContent>
-        @foreach (var property in SelectedProperties)
-        {
-            <MudTh>@property.Property.DisplayName()</MudTh>
-        }
-    </HeaderContent>
-    <RowTemplate>
-        @foreach (var propertyPath in SelectedProperties)
-        {
-            <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
-        }
-    </RowTemplate>
-    <NoRecordsContent>
-        <MudText Class="pa-4">No result found</MudText>
-    </NoRecordsContent>
-    <LoadingContent>
-        <MudText Class="pa-4">Loading...</MudText>
-    </LoadingContent>
-</MudTable>
+<MudPaper Elevation="0" Class="mt-2">
+    <MudTable Items="@Data"
+              Bordered="@Bordered"
+              Striped="@Striped"
+              Loading="@Loading"
+              LoadingProgressColor="@LoadingColor"
+              Hover="@Hover"
+              Dense="@Dense"
+              Virtualize="true"
+              FixedHeader="true"
+              Height="400px">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Résultats (@Data.Count)</MudText>
+            <MudSpacer/>
+            <MudTextField
+                T="string"
+                Placeholder="Rechercher..."
+                Adornment="Adornment.Start"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium"
+                Class="mt-0"/>
+        </ToolBarContent>
+        <HeaderContent>
+            @foreach (var property in SelectedProperties)
+            {
+                <MudTh>
+                    <MudText Typo="Typo.subtitle2">@property.Property.DisplayName()</MudText>
+                </MudTh>
+            }
+        </HeaderContent>
+        <RowTemplate>
+            @foreach (var propertyPath in SelectedProperties)
+            {
+                <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
+            }
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudAlert Severity="Severity.Info" Class="my-2">Aucun résultat trouvé</MudAlert>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+            <MudText Class="ms-2">Chargement des données...</MudText>
+        </LoadingContent>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"/>
+        </PagerContent>
+    </MudTable>
+</MudPaper>

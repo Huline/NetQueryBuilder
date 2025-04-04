@@ -27,6 +27,13 @@ public class EfLikeOperator : MethodCallOperator
     {
         if (right.Type != typeof(string)) right = Expression.Convert(right, typeof(string));
 
+        if (right is ConstantExpression constantExpression && constantExpression.Value is string searchValue)
+        {
+            var modifiedValue = $"%{searchValue}%";
+            right = Expression.Constant(modifiedValue, typeof(string));
+        }
+
+
         var efFunctionsProperty = typeof(EF).GetProperty("Functions");
         if (efFunctionsProperty == null)
             throw new InvalidOperationException("EF.Functions property not found");

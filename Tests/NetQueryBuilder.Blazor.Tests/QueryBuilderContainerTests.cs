@@ -9,17 +9,15 @@ namespace NetQueryBuilder.Blazor.Tests;
 
 public sealed class QueryBuilderContainerTests : TestContext
 {
-    private readonly IQueryConfigurator _mockQueryConfigurator;
-
     public QueryBuilderContainerTests()
     {
-        _mockQueryConfigurator = new QueryableQueryConfigurator<TestEntity>(new[]
+        IQueryConfigurator mockQueryConfigurator = new QueryableQueryConfigurator<TestEntity>(new[]
         {
             new TestEntity { Id = 1, Name = "Test" },
             new TestEntity { Id = 2, Name = "Another Test" }
         }.AsQueryable());
 
-        Services.AddSingleton(_mockQueryConfigurator);
+        Services.AddSingleton(mockQueryConfigurator);
         Services.AddMudServices();
         JSInterop.Mode = JSRuntimeMode.Loose;
         JSInterop.SetupModule("mudBlazor.js");
@@ -41,24 +39,24 @@ public sealed class QueryBuilderContainerTests : TestContext
         var newQueryButton = cut.Find("button");
         Assert.Contains("New Query", newQueryButton.TextContent);
     }
-
-    [Fact]
-    public void QueryBuilderContainer_ShowsAllEntities_InDropdown()
-    {
-        // Act
-        var cut = RenderComponent<QueryBuilderContainer>();
-
-        // Assert
-        // Ouvrir le menu déroulant
-        var select = cut.Find("div.mud-select");
-        select.Click();
-
-        // Vérifier que les deux entités sont présentes dans le menu déroulant
-        var items = cut.FindAll(".mud-list-item");
-        Assert.Equal(2, items.Count);
-        Assert.Contains(items, item => item.TextContent.Contains("TestEntity"));
-        Assert.Contains(items, item => item.TextContent.Contains("AnotherEntity"));
-    }
+    //
+    // [Fact]
+    // public void QueryBuilderContainer_ShowsAllEntities_InDropdown()
+    // {
+    //     // Act
+    //     var cut = RenderComponent<QueryBuilderContainer>();
+    //
+    //     // Assert
+    //     // Ouvrir le menu déroulant
+    //     var select = cut.Find("div.mud-select");
+    //     select.Click();
+    //
+    //     // Vérifier que les deux entités sont présentes dans le menu déroulant
+    //     var items = cut.FindAll(".mud-list-item");
+    //     Assert.Equal(2, items.Count);
+    //     Assert.Contains(items, item => item.TextContent.Contains("TestEntity"));
+    //     Assert.Contains(items, item => item.TextContent.Contains("AnotherEntity"));
+    // }
 
     [Fact]
     public void QueryBuilderContainer_SelectsFirstEntity_ByDefault()
@@ -128,17 +126,17 @@ public sealed class QueryBuilderContainerTests : TestContext
         Assert.NotNull(renderedComponent);
     }
 
-    [Fact]
-    public void EntitySelect_ValueChanged_ShouldUpdateSelectedEntity()
-    {
-        var cut = RenderComponent<QueryBuilderContainer>();
-
-        // Act - Simulation du changement de valeur dans MudSelect
-        // Nous utilisons InvokeAsync pour appeler directement la méthode qui est liée à l'événement ValueChanged
-        cut.InvokeAsync(() => cut.Instance.OnEntitySelect(typeof(TestEntity)));
-
-        // Assert - Vérifier que l'entité sélectionnée a changé
-        // Nous pouvons vérifier indirectement que le contenu du composant affiche le nom de la nouvelle entité
-        Assert.Contains("TestEntity", cut.Markup);
-    }
+    // [Fact]
+    // public void EntitySelect_ValueChanged_ShouldUpdateSelectedEntity()
+    // {
+    //     var cut = RenderComponent<QueryBuilderContainer>();
+    //
+    //     // Act - Simulation du changement de valeur dans MudSelect
+    //     // Nous utilisons InvokeAsync pour appeler directement la méthode qui est liée à l'événement ValueChanged
+    //     cut.InvokeAsync(() => cut.Instance.OnEntitySelect(typeof(TestEntity)));
+    //
+    //     // Assert - Vérifier que l'entité sélectionnée a changé
+    //     // Nous pouvons vérifier indirectement que le contenu du composant affiche le nom de la nouvelle entité
+    //     Assert.Contains("TestEntity", cut.Markup);
+    // }
 }

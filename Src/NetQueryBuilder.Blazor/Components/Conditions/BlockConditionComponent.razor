@@ -2,11 +2,21 @@
 @using NetQueryBuilder.Conditions
 <MudPaper Class="pa-2" Style=@("margin-left:" + IndentationLevel * 20 + "px;")>
     <MudGrid Spacing="3">
+        <MudItem xs="12" sm="12">
+            <MudStack Row Spacing="3">
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => AddPredicate(ExpressionType.AndAlso))">And/Or</MudButton>
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => GroupConditions())">Group</MudButton>
+                @if (Condition.Parent != null)
+                {
+                    <MudButton Variant="Variant.Outlined" OnClick="@(() => UnGroupConditions())">Ungroup</MudButton>
+                }
+            </MudStack>
+        </MudItem>
         @foreach (var childCondition in Condition.Conditions)
         {
             if (childCondition != Condition.Conditions.First())
             {
-                <MudItem xs="12" sm="4">
+                <MudItem xs="12" sm="12">
                     <MudSelect T="LogicalOperator" Label="Operator" Value="@childCondition.LogicalOperator" ValueChanged="@(v => ChangeOperator(childCondition, v))">
                         @foreach (var item in _operators)
                         {
@@ -16,29 +26,16 @@
                 </MudItem>
             }
 
-            <MudItem xs="12" sm="4">
-                <MudCheckBox T="bool" Label="Group"
-                             ValueChanged="@(e => Select(e, childCondition))"/>
-                <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(childCondition)"></MudIconButton>
+            <MudItem xs="12" sm="2">
+                <MudStack Row Spacing="3">
+                    <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(childCondition)"></MudIconButton>
+                    <MudCheckBox T="bool" Label="Group" ValueChanged="@(e => Select(e, childCondition))"/>
+                </MudStack>
             </MudItem>
-            <MudItem xs="12" sm="4">
+            <MudItem xs="12" sm="10">
                 <ConditionComponent Condition="childCondition"></ConditionComponent>
             </MudItem>
         }
-
-        <MudItem xs="12" sm="4">
-            <div>
-                <MudStack Row Spacing="2">
-                    <MudButton Variant="Variant.Filled" OnClick="@(() => AddPredicate(ExpressionType.AndAlso))">And</MudButton>
-                    <MudButton Variant="Variant.Filled" OnClick="@(() => AddPredicate(ExpressionType.OrElse))">Or</MudButton>
-                    <MudButton Variant="Variant.Filled" OnClick="@(() => GroupConditions())">Group</MudButton>
-                    @if (Condition.Parent != Condition.GetRoot())
-                    {
-                        <MudButton Variant="Variant.Filled" OnClick="@(() => UnGroupConditions())">Ungroup</MudButton>
-                    }
-                </MudStack>
-            </div>
-        </MudItem>
     </MudGrid>
 </MudPaper>
 

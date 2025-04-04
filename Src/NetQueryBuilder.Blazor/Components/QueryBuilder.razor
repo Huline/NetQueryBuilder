@@ -1,45 +1,46 @@
 ﻿@using NetQueryBuilder.Blazor.Components.Conditions
 @typeparam TEntity where TEntity : class
 
-<MudStack Spacing="10">
-    <div>
-        <MudText Typo="Typo.h5">SELECT</MudText>
-        <MudSelect Label="Fields" T="SelectPropertyPath" SelectedValues="_selectedPropertyPaths.Where(s => s.IsSelected)" SelectedValuesChanged="SelectedValuesChanged" MultiSelection="true" SelectAll="true"
-                   ToStringFunc="@(prop => prop!.Property.DisplayName())">
-            @foreach (var property in _selectedPropertyPaths)
-            {
-                <MudSelectItem T="SelectPropertyPath" Value="property">
-                    @property.Property.DisplayName()
-                </MudSelectItem>
-            }
-        </MudSelect>
-    </div>
-
-    <div>
-        <MudText Typo="Typo.h5" GutterBottom="true">WHERE</MudText>
-        <CascadingValue Value="@_query">
-            <ConditionComponent Condition="@_query.Condition"/>
-        </CascadingValue>
-        <MudItem xs="4" lg="4">
-            <MudCard>
-                <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h6">_lambda Expression</MudText>
-                    </CardHeaderContent>
-                    <CardHeaderActions>
-                        <MudIconButton Icon="@Icons.Material.Filled.CopyAll" Color="Color.Default"/>
-                    </CardHeaderActions>
-                </MudCardHeader>
-                <MudCardContent>
-                    <code>@Expression</code>
-                </MudCardContent>
-            </MudCard>
+<MudPaper Elevation="3" Class="pa-4 mb-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">SELECT</MudText>
+            <MudSelect Label="Champs à sélectionner" T="SelectPropertyPath"
+                       SelectedValues="_selectedPropertyPaths.Where(s => s.IsSelected)"
+                       SelectedValuesChanged="SelectedValuesChanged"
+                       MultiSelection="true" SelectAll="true"
+                       AdornmentIcon="@Icons.Material.Filled.Checklist"
+                       AdornmentColor="Color.Primary"
+                       ToStringFunc="@(prop => prop!.Property.DisplayName())">
+                @foreach (var property in _selectedPropertyPaths)
+                {
+                    <MudSelectItem T="SelectPropertyPath" Value="property">
+                        @property.Property.DisplayName()
+                    </MudSelectItem>
+                }
+            </MudSelect>
         </MudItem>
-    </div>
 
-    <div>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="RunQuery">Run Query</MudButton>
-    </div>
+        <MudItem xs="12" Class="mt-4">
+            <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">WHERE</MudText>
+            <MudPaper Elevation="0" Class="pa-3 mb-3" Style="border: 1px solid var(--mud-palette-lines-default);">
+                <CascadingValue Value="@_query">
+                    <ConditionComponent Condition="@_query.Condition"/>
+                </CascadingValue>
+            </MudPaper>
+        </MudItem>
 
+        <MudItem xs="12" Class="d-flex justify-center mt-4">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.PlayArrow"
+                       Size="Size.Large"
+                       OnClick="RunQuery">Exécuter la requête
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudPaper Elevation="3" Class="pa-4">
+    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">RÉSULTATS</MudText>
     <QueryResultTable TEntity="TEntity" Data="_data" Properties="_selectedPropertyPaths"/>
-</MudStack>
+</MudPaper>

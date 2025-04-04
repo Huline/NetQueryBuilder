@@ -6,19 +6,30 @@
     @switch (Condition.PropertyPath.PropertyType)
     {
         case { } intType when intType == typeof(int):
-            <MudTextField Label="Value" T="int" Value="@((int)Condition.Value!)" ValueChanged="@UpdateValue"/>
+            <MudNumericField Label="Valeur" Variant="Variant.Outlined" T="int"
+                             Value="@((int)Condition.Value!)"
+                             ValueChanged="@UpdateValue"
+                             Adornment="Adornment.End"
+                             AdornmentIcon="@Icons.Material.Filled.Numbers"/>
             break;
         case { } stringType when stringType == typeof(string):
-            <MudTextField Label="Value" T="string" Value="@(Condition.Value?.ToString())" ValueChanged="@UpdateValue"/>
+            <MudTextField Label="Valeur" Variant="Variant.Outlined" T="string"
+                          Value="@(Condition.Value?.ToString())"
+                          ValueChanged="@UpdateValue"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.TextFields"/>
             break;
         case { } boolType when boolType == typeof(bool):
-            <MudSelect Label="Value" T="bool" Value="@((bool)Condition.Value!)" ValueChanged="@UpdateValue">
-                <MudSelectItem Value="true">True</MudSelectItem>
-                <MudSelectItem Value="false">False</MudSelectItem>
-            </MudSelect>
+            <MudSwitch Label="Valeur" Color="Color.Primary" T="bool"
+                       Value="@((bool)Condition.Value!)"
+                       ValueChanged="@UpdateValue"/>
             break;
         case { } dateTimeType when dateTimeType == typeof(DateTime):
-            <MudDatePicker Label="Value" Date="@((DateTime)Condition.Value!)" DateChanged="@UpdateValue"/>
+            <MudDatePicker Label="Valeur" Variant="Variant.Outlined"
+                           Date="@((DateTime)Condition.Value!)"
+                           DateChanged="@UpdateValue"
+                           Adornment="Adornment.End"
+                           AdornmentIcon="@Icons.Material.Filled.DateRange"/>
             break;
     }
 }

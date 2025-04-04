@@ -22,7 +22,7 @@ public class MudTestLayout : ComponentBase
 // Composant wrapper qui inclut les providers MudBlazor
 public class MudProvidersComponent : ComponentBase
 {
-    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {

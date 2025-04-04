@@ -1,12 +1,20 @@
 ﻿@using NetQueryBuilder.Blazor.Components.Conditions.Relations
 @using NetQueryBuilder.Conditions
-<MudStack Row Spacing="4">
-    <MudItem xs="8" lg="8">
-        <RelationalPredicateField Condition="@Condition"></RelationalPredicateField>
-        <RelationalOperators Condition="@Condition"></RelationalOperators>
-        <RelationalValue Condition="@Condition"></RelationalValue>
-    </MudItem>
-</MudStack>
+<MudCard Elevation="0" Outlined="true" Class="mb-2">
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" sm="4">
+                <RelationalPredicateField Condition="@Condition"></RelationalPredicateField>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <RelationalOperators Condition="@Condition"></RelationalOperators>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <RelationalValue Condition="@Condition"></RelationalValue>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
 
 @code {
     [Parameter] public required SimpleCondition Condition { get; set; }

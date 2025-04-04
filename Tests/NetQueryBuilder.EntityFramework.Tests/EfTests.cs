@@ -43,4 +43,41 @@ public class EfTests
         Assert.NotNull(results);
         Assert.Single(results);
     }
+
+
+    [Theory]
+    [InlineData("Jones")]
+    [InlineData("jones")]
+    [InlineData("Jon")]
+    [InlineData("ones")]
+    [InlineData("on")]
+    public async Task LikeOperator(string nameToSearch)
+    {
+        var query = _queryConfigurator.BuildFor<Person>();
+        var lastName = query.ConditionPropertyPaths.First(p => p.PropertyFullName == "LastName");
+        query.Condition.CreateNew(lastName, lastName.GetCompatibleOperators().First(o => o.ToString() == "Like"), nameToSearch);
+        var results = (await query.Execute()).OfType<object>().ToList();
+
+        Assert.NotNull(results);
+        Assert.Single(results);
+        Assert.True(results.All(r => ((Person)r).LastName?.Contains(nameToSearch, StringComparison.OrdinalIgnoreCase) ?? false));
+    }
+
+    [Theory]
+    [InlineData("Jones")]
+    [InlineData("jones")]
+    [InlineData("Jon")]
+    [InlineData("ones")]
+    [InlineData("on")]
+    public async Task NotLikeOperator(string nameToSearch)
+    {
+        var query = _queryConfigurator.BuildFor<Person>();
+        var lastName = query.ConditionPropertyPaths.First(p => p.PropertyFullName == "LastName");
+        query.Condition.CreateNew(lastName, lastName.GetCompatibleOperators().First(o => o.ToString() == "Not like"), nameToSearch);
+        var results = (await query.Execute()).OfType<object>().ToList();
+
+        Assert.NotNull(results);
+        Assert.Single(results);
+        Assert.True(results.All(r => !((Person)r).LastName?.Contains(nameToSearch, StringComparison.OrdinalIgnoreCase) ?? true));
+    }
 }

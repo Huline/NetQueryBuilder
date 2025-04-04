@@ -94,7 +94,7 @@ public class BlockCondition : ICondition
     public BlockCondition? Group(IEnumerable<ICondition> childrenToGroup)
     {
         var children = Conditions.Where(childrenToGroup.Contains).ToList();
-        if (children.Count == 0) return null;
+        if (children.Count < 2) return null;
 
         var block = new BlockCondition(children, children.First().LogicalOperator, this);
 
@@ -120,19 +120,24 @@ public class BlockCondition : ICondition
             return;
         if (conditions.Count == 0) return;
 
-        foreach (var condition in conditions)
-        {
-            _children.Remove(condition);
-            UnsubscribeChildCondition(condition);
-            condition.Parent = Parent;
-            Parent._children.Add(condition);
-            condition.ConditionChanged -= ChildConditionChanged;
-            condition.ConditionChanged += Parent.ChildConditionChanged;
-        }
+        foreach (var condition in conditions) RemoveChild(condition);
+
+        if (_children.Count == 1) RemoveChild(_children.First());
 
         if (_children.Count == 0) Parent.Remove(this);
 
         NotifyConditionChanged();
+    }
+
+    private void RemoveChild(ICondition condition)
+    {
+        _children.Remove(condition);
+        UnsubscribeChildCondition(condition);
+        condition.ConditionChanged -= ChildConditionChanged;
+        condition.Parent = Parent;
+        if (Parent == null) return;
+        Parent._children.Add(condition);
+        condition.ConditionChanged += Parent.ChildConditionChanged;
     }
 
     public SimpleCondition CreateNew<TOperator>(PropertyPath property, object? valueOverride = null)

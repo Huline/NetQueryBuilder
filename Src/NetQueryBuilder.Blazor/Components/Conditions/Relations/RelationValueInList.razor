@@ -1,31 +1,49 @@
 ﻿@using System.Linq.Expressions
 @typeparam T
 
-<MudStack>
-    <MudStack>
-        <MudChip T="T" OnClick="@OpenDialog" Size="Size.Small" Text="Add value" Icon="@Icons.Material.Filled.Add"/>
-        <MudChipSet T="T" Size="Size.Small">
-            @foreach (var item in Items)
-            {
-                <MudChip T="T" Color="Color.Default" Variant="Variant.Text" OnClose="@RemoveListItem" Value="@item"/>
-            }
-        </MudChipSet>
-    </MudStack>
-</MudStack>
+<MudPaper Elevation="0" Class="pa-2" Outlined="true">
+    <MudText Typo="Typo.subtitle2" Class="mb-2">Valeurs de la liste</MudText>
+    <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Class="mb-3">
+        <MudButton StartIcon="@Icons.Material.Filled.Add"
+                   Color="Color.Primary"
+                   OnClick="@OpenDialog">
+            Ajouter une valeur
+        </MudButton>
+    </MudButtonGroup>
+
+    @* MultiSelection="true" Filter="true" *@
+    <MudChipSet T="T" Class="mb-2">
+        @foreach (var item in Items)
+        {
+            <MudChip Color="Color.Primary"
+                     Size="Size.Small"
+                     T="T"
+                     OnClose="@(value => RemoveListItem(item))"
+                     Label="true"
+                     CloseIcon="@Icons.Material.Filled.Close">
+                @item?.ToString()
+            </MudChip>
+        }
+    </MudChipSet>
+</MudPaper>
 
 <MudDialog @bind-Visible="_showListItemDialog" Options="_listItemDialogOptions">
     <TitleContent>
-        <MudText Typo="Typo.h6">
-            Add list value
-        </MudText>
+        <MudText Typo="Typo.h6">Ajouter une valeur</MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField Label="Value" T="T" @bind-Value="_listItemInputValue"/>
+        <MudTextField Label="Valeur" T="T" @bind-Value="_listItemInputValue" Variant="Variant.Outlined"/>
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="px-10" OnClick="@AddListItem">Ok</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="@(() => _showListItemDialog = false)">
+            Annuler
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@AddListItem">
+            Ajouter
+        </MudButton>
     </DialogActions>
 </MudDialog>
+
 
 @code {
     [Parameter] public required MethodCallExpression MethodCallExpression { get; set; }
@@ -70,10 +88,13 @@
         UpdateValues(_items);
     }
 
-    private void RemoveListItem(MudChip<T> item)
+    private void RemoveListItem(T item)
     {
-        if (item.Value is not null)
-            _items.Remove(item.Value);
+        if (item is null) return;
+        var chip = _items.FirstOrDefault(i => i?.Equals(item) == true);
+        if (chip is null)
+            return;
+        _items.Remove(chip);
         UpdateValues(_items);
     }
 

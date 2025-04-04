@@ -108,21 +108,4 @@ public abstract class Query<TEntity> : IQuery where TEntity : class
     {
         OnChanged?.Invoke(this, e);
     }
-
-
-    private static Expression<Func<T, bool>> CreateRelationalPredicate<T>(
-        string propertyName,
-        ParameterExpression parameter,
-        object comparisonValue,
-        ExpressionType expressionType)
-    {
-        var property = typeof(T).GetProperty(propertyName);
-
-        var memberAccess = Expression.MakeMemberAccess(parameter, property!);
-        var right = Expression.Constant(comparisonValue);
-        var binary = Expression.MakeBinary(expressionType, memberAccess, right);
-
-        var expression = Expression.Lambda(binary, parameter) as Expression<Func<T, bool>>;
-        return expression ?? throw new InvalidOperationException("Expression is not valid");
-    }
 }
