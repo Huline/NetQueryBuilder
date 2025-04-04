@@ -1,29 +1,4 @@
-﻿namespace NetQueryBuilder.Tests;
-
-public class Person
-{
-    public int Id { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public DateTime BirthDate { get; set; }
-    public Address? Address { get; set; }
-    public List<Contact> Contacts { get; set; } = new();
-    public bool IsActive { get; set; }
-}
-
-public class Address
-{
-    public string Street { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
-    public string ZipCode { get; set; } = string.Empty;
-    public string Country { get; set; } = string.Empty;
-}
-
-public class Contact
-{
-    public string Type { get; set; } = string.Empty;
-    public string Value { get; set; } = string.Empty;
-}
+namespace NetQueryBuilder.Tests.Mocks;
 
 public static class TestData
 {

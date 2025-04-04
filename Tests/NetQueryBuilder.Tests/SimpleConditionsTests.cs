@@ -1,5 +1,6 @@
 ﻿using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Tests.Mocks;
 
 namespace NetQueryBuilder.Tests;
 

@@ -1,30 +1,26 @@
 ﻿@using NetQueryBuilder.Configurations
 @inject IQueryConfigurator QueryConfigurator
 
-<MudToolBar Gutters="false" Class="mb-4">
-    <MudStack Row Spacing="3">
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="NewQuery">New Query</MudButton>
-    </MudStack>
-</MudToolBar>
-
-
 <MudStack Spacing="5">
-    <MudStack Spacing="10">
-        <MudStack Spacing="2">
-            <MudItem xs="12">
-                <MudText Typo="Typo.h5">FROM</MudText>
-                <MudSelect T="Type" Label="Entity" ValueChanged="OnEntitySelect">
+    <MudGrid Spacing="10">
+        <MudItem xs="4">
+            <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="NewQuery" Style="margin: auto; vertical-align: center">New Query</MudButton>
+        </MudItem>
+        <MudItem xs="8">
+            <MudStack Row Spacing="4">
+                <MudText Typo="Typo.h5" Style="margin: auto; vertical-align: center">FROM</MudText>
+                <MudSelect T="Type" Label="Entity" ValueChanged="OnEntitySelect" Style="margin: auto; vertical-align: center">
                     @foreach (var entity in _entities)
                     {
                         <MudSelectItem Value="@entity">@entity.Name</MudSelectItem>
                     }
                 </MudSelect>
-            </MudItem>
-        </MudStack>
-        <div @key="_queryBuilderKey">
-            @CreateQueryBuilder()
-        </div>
-    </MudStack>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+    <div @key="_queryBuilderKey">
+        @CreateQueryBuilder()
+    </div>
 </MudStack>
 
 @code {
