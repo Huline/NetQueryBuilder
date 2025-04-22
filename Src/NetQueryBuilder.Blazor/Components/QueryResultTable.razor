@@ -1,4 +1,6 @@
-﻿@typeparam TEntity where TEntity : class
+﻿
+@typeparam TEntity where TEntity : class
+@implements IDisposable
 
 <MudPaper Elevation="0" Class="mt-2">
     <MudTable Items="@Data"
@@ -10,9 +12,11 @@
               Dense="@Dense"
               Virtualize="true"
               FixedHeader="true"
-              Height="400px">
+              Height="400px"
+              CurrentPage="@PageState.CurrentPage"
+              RowsPerPage="@PageState.PageSize">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Results (@Data.Count)</MudText>
+            <MudText Typo="Typo.h6">Results (@TotalItems)</MudText>
             <MudSpacer/>
             <MudTextField
                 T="string"
@@ -44,7 +48,10 @@
             <MudText Class="ms-2">Loading...</MudText>
         </LoadingContent>
         <PagerContent>
-            <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"/>
+            <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"
+                           PageChanged="@((int page) => PageState.OnPageChanged(page))"
+                           PageSizeChanged="@((int size) => PageState.OnPageSizeChanged(size))"
+                           Count="@TotalItems"/>
         </PagerContent>
     </MudTable>
 </MudPaper>
