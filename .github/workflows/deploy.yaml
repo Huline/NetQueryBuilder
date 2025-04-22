@@ -1,0 +1,51 @@
+name: Build, Test, and Publish NuGet
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Nécessaire pour Qodana
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+            9.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Qodana Scan
+        uses: JetBrains/qodana-action@v2023.2
+        with:
+          fail-threshold: 'error'
+
+      - name: Pack NuGet packages
+        if: github.event_name != 'pull_request'
+        run: |
+          dotnet pack Src/NetQueryBuilder/NetQueryBuilder.csproj --configuration Release --output packages --no-build
+          dotnet pack Src/NetQueryBuilder.Blazor/NetQueryBuilder.Blazor.csproj --configuration Release --output packages --no-build
+          dotnet pack Src/NetQueryBuilder.EntityFramework/NetQueryBuilder.EntityFramework.csproj --configuration Release --output packages --no-build
+
+      - name: Publish NuGet packages
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          dotnet nuget push packages/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
