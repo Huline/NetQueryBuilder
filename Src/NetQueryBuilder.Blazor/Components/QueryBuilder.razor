@@ -5,7 +5,7 @@
     <MudGrid>
         <MudItem xs="12">
             <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">SELECT</MudText>
-            <MudSelect Label="Champs à sélectionner" T="SelectPropertyPath"
+            <MudSelect Label="Select fields" T="SelectPropertyPath"
                        SelectedValues="_selectedPropertyPaths.Where(s => s.IsSelected)"
                        SelectedValuesChanged="SelectedValuesChanged"
                        MultiSelection="true" SelectAll="true"
@@ -34,7 +34,7 @@
             <MudButton Color="Color.Primary" Variant="Variant.Filled"
                        StartIcon="@Icons.Material.Filled.PlayArrow"
                        Size="Size.Large"
-                       OnClick="RunQuery">Exécuter la requête
+                       OnClick="RunQuery">Run Query
             </MudButton>
         </MudItem>
     </MudGrid>
@@ -42,5 +42,5 @@
 
 <MudPaper Elevation="3" Class="pa-4">
     <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">RÉSULTATS</MudText>
-    <QueryResultTable TEntity="TEntity" Data="_data" Properties="_selectedPropertyPaths"/>
+    <QueryResultTable @ref="_queryResult" TEntity="TEntity" Data="_data" Properties="_selectedPropertyPaths"/>
 </MudPaper>

@@ -46,16 +46,16 @@
 
 
 @code {
-    [Parameter] public required MethodCallExpression MethodCallExpression { get; set; }
+    [Parameter] public MethodCallExpression MethodCallExpression { get; set; } = null!;
 
-    [Parameter] public required Action<T> OnUpdateValue { get; set; }
+    [Parameter] public Action<T> OnUpdateValue { get; set; } = null!;
 
-    [Parameter] public required Action<IEnumerable<T>> OnUpdateValues { get; set; }
+    [Parameter] public Action<IEnumerable<T>> OnUpdateValues { get; set; } = null!;
 
     private T? _listItemInputValue;
     private List<T> _items = new();
     private bool _showListItemDialog;
-    private DialogOptions _listItemDialogOptions = new() { CloseButton = true };
+    private readonly DialogOptions _listItemDialogOptions = new() { CloseButton = true };
 
     // Propriété pour accéder aux éléments de manière cohérente
     private IEnumerable<T> Items => _items;

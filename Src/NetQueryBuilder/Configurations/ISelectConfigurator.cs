@@ -1,10 +1,13 @@
-﻿namespace NetQueryBuilder.Configurations;
+﻿using System;
 
-public interface ISelectConfigurator
+namespace NetQueryBuilder.Configurations
 {
-    ISelectConfigurator LimitToFields(params string[] fields);
-    ISelectConfigurator RemoveFields(params string[] fields);
-    ISelectConfigurator UseStringifier(IPropertyStringifier propertyStringifier);
-    ISelectConfigurator LimitDepth(int depth);
-    ISelectConfigurator ExcludeRelationships(params Type[] relationships);
+    public interface ISelectConfigurator
+    {
+        ISelectConfigurator LimitToFields(params string[]? fields);
+        ISelectConfigurator RemoveFields(params string[]? fields);
+        ISelectConfigurator UseStringifier(IPropertyStringifier propertyStringifier);
+        ISelectConfigurator LimitDepth(int depth);
+        ISelectConfigurator ExcludeRelationships(params Type[]? relationships);
+    }
 }

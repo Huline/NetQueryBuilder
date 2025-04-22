@@ -21,6 +21,35 @@ public class SimpleConditionsTests
     }
 
     [Fact]
+    public async Task BuildDefaultQueryWithLimit_ShouldLimitResults()
+    {
+        var people = TestData.GetPeople();
+        var configurator = new QueryableQueryConfigurator<Person>(people);
+
+        var query = configurator
+            .BuildFor<Person>();
+        var results = await query.Execute(1) as List<Person>;
+
+        Assert.NotNull(results);
+        Assert.Single(results);
+    }
+
+    [Fact]
+    public async Task BuildDefaultQueryWithSkip_ReturnsSkippedResults()
+    {
+        var people = TestData.GetPeople();
+        var configurator = new QueryableQueryConfigurator<Person>(people);
+
+        var query = configurator
+            .BuildFor<Person>();
+        var results = await query.Execute(offset: 1) as List<Person>;
+
+        Assert.NotNull(results);
+        Assert.Equal(people.Count() - 1, results.Count);
+    }
+
+
+    [Fact]
     public async Task BuildEqualConditionQuery_ReturnsFilteredResults()
     {
         var people = TestData.GetPeople();

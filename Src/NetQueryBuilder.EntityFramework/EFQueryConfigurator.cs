@@ -5,16 +5,22 @@ using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.EntityFramework;
 
-public class EfQueryConfigurator<TDbContext>(TDbContext dbContext) : IQueryConfigurator
+public class EfQueryConfigurator<TDbContext> : IQueryConfigurator
     where TDbContext : DbContext
 {
-    private ConditionConfiguration _conditionConfiguration = new(ArraySegment<string>.Empty, ArraySegment<string>.Empty, -1, [], null);
+    private readonly TDbContext _dbContext;
+    private ConditionConfiguration _conditionConfiguration = new(ArraySegment<string>.Empty, ArraySegment<string>.Empty, -1, ArraySegment<Type>.Empty, null);
     private IExpressionStringifier _expressionStringifier = new UpperSeparatorExpressionStringifier();
-    private SelectConfiguration _selectConfiguration = new(ArraySegment<string>.Empty, ArraySegment<string>.Empty, -1, [], null);
+    private SelectConfiguration _selectConfiguration = new(ArraySegment<string>.Empty, ArraySegment<string>.Empty, -1, ArraySegment<Type>.Empty, null);
+
+    public EfQueryConfigurator(TDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
     public IEnumerable<Type> GetEntities()
     {
-        return dbContext
+        return _dbContext
             .Model
             .GetEntityTypes()
             .Select(t => t.ClrType)
@@ -45,11 +51,11 @@ public class EfQueryConfigurator<TDbContext>(TDbContext dbContext) : IQueryConfi
 
     public IQuery BuildFor<T>() where T : class
     {
-        return new EfQuery<T>(dbContext, _selectConfiguration, _conditionConfiguration, new EfOperatorFactory(_expressionStringifier));
+        return new EfQuery<T>(_dbContext, _selectConfiguration, _conditionConfiguration, new EfOperatorFactory(_expressionStringifier));
     }
 
     public IQuery BuildFor(Type type)
     {
-        return (IQuery)Activator.CreateInstance(typeof(EfQuery<>).MakeGenericType(dbContext.Model.GetEntityTypes().First().ClrType), dbContext, _selectConfiguration, _conditionConfiguration, new EfOperatorFactory(_expressionStringifier)) !;
+        return (IQuery)Activator.CreateInstance(typeof(EfQuery<>).MakeGenericType(_dbContext.Model.GetEntityTypes().First().ClrType), _dbContext, _selectConfiguration, _conditionConfiguration, new EfOperatorFactory(_expressionStringifier)) !;
     }
 }

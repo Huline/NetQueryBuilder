@@ -1,8 +1,9 @@
 ﻿using System.Linq.Expressions;
 
-namespace NetQueryBuilder.Operators;
-
-public interface IExpressionStringifier
+namespace NetQueryBuilder.Operators
 {
-    string GetString(ExpressionType expressionType, string name);
+    public interface IExpressionStringifier
+    {
+        string GetString(ExpressionType expressionType, string name);
+    }
 }

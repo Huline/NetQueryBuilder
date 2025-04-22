@@ -1,10 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <RazorLangVersion>9.0</RazorLangVersion>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>NetQueryBuilder.Blazor</Title>
+        <Description>UI using blazor for NetQueryBuilder</Description>
+        <TargetFrameworks>net8.0;net9.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,10 +17,6 @@
         <Content Update="Components\QueryBuilderContainer.razor">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="MudBlazor" Version="7.15.0"/>
     </ItemGroup>
 
     <ItemGroup>

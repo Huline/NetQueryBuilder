@@ -17,9 +17,11 @@ public class EfOperatorFactory : DefaultOperatorFactory
         var result = base.GetAllForProperty(propertyPath);
         if (propertyPath.PropertyType != typeof(string))
             return result;
-        return result.Concat([
-            new EfLikeOperator(_expressionStringifier),
-            new EfLikeOperator(_expressionStringifier, true)
-        ]);
+        return result.Concat(new List<ExpressionOperator>
+            {
+                new EfLikeOperator(_expressionStringifier),
+                new EfLikeOperator(_expressionStringifier, true)
+            }
+        );
     }
 }

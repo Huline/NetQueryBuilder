@@ -29,7 +29,7 @@
 
 
 @code {
-    [Parameter] public required SimpleCondition Condition { get; set; }
+    [Parameter] public SimpleCondition Condition { get; set; } = null!;
 
     private MethodCallExpression? _methodCallExpression;
     private Type? _memberType;

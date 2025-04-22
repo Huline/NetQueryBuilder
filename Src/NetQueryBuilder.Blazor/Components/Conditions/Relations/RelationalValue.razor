@@ -41,9 +41,9 @@
 
 @code {
 
-    [CascadingParameter] public required IQuery Query { get; set; }
+    [CascadingParameter] public IQuery Query { get; set; } = null!;
 
-    [Parameter] public required SimpleCondition Condition { get; set; }
+    [Parameter] public SimpleCondition Condition { get; set; } = null!;
 
     private void UpdateValue(DateTime? dateTime)
     {

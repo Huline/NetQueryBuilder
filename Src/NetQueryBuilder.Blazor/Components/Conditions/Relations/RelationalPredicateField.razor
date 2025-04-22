@@ -11,8 +11,8 @@
 
 @code {
 
-    [CascadingParameter] public required IQuery Query { get; set; }
-    [Parameter] public required SimpleCondition Condition { get; set; }
+    [CascadingParameter] public IQuery Query { get; set; } = null!;
+    [Parameter] public SimpleCondition Condition { get; set; } = null!;
 
     private PropertyPath? _selectedPropertyName;
     private IEnumerable<PropertyPath> _properties = new List<PropertyPath>();

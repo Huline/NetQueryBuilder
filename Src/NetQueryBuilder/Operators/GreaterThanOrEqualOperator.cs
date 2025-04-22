@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
 
-namespace NetQueryBuilder.Operators;
-
-public class GreaterThanOrEqualOperator : BinaryOperator
+namespace NetQueryBuilder.Operators
 {
-    public GreaterThanOrEqualOperator(IExpressionStringifier expressionStringifier)
-        : base(ExpressionType.GreaterThanOrEqual, "GreaterThanOrEqual", expressionStringifier)
+    public class GreaterThanOrEqualOperator : BinaryOperator
     {
+        public GreaterThanOrEqualOperator(IExpressionStringifier expressionStringifier)
+            : base(ExpressionType.GreaterThanOrEqual, "GreaterThanOrEqual", expressionStringifier)
+        {
+        }
     }
 }

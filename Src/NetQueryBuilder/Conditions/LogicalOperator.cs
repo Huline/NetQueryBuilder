@@ -1,7 +1,8 @@
-﻿namespace NetQueryBuilder.Conditions;
-
-public enum LogicalOperator
+﻿namespace NetQueryBuilder.Conditions
 {
-    And,
-    Or
+    public enum LogicalOperator
+    {
+        And,
+        Or
+    }
 }

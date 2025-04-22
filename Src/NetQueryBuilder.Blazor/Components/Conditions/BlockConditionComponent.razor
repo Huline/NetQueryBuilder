@@ -40,14 +40,14 @@
 </MudPaper>
 
 @code {
-    [Parameter] public required BlockCondition Condition { get; set; }
+    [Parameter] public BlockCondition Condition { get; set; } = null!;
 
-    [Parameter] public int IndentationLevel { get; set; } = 0;
+    [Parameter] public int IndentationLevel { get; set; }
 
 
-    List<ICondition> SelectedConditions { get; set; } = new();
+    List<ICondition> SelectedConditions { get; } = new();
 
-    IEnumerable<LogicalOperator> _operators = Enum.GetValues<LogicalOperator>();
+    readonly IEnumerable<LogicalOperator> _operators = Enum.GetValues<LogicalOperator>();
 
     private void GroupConditions()
     {

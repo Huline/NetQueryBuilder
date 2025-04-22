@@ -9,8 +9,9 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
     private List<TEntity> _data = new();
     private IQuery _query = null!;
     private IReadOnlyCollection<SelectPropertyPath> _selectedPropertyPaths = new List<SelectPropertyPath>();
+    private QueryResultTable<TEntity> _queryResult = null!;
     [Inject] private IQueryConfigurator QueryConfigurator { get; set; } = null!;
-    [Parameter] public required string Expression { get; set; }
+    [Parameter] public string Expression { get; set; } = String.Empty;
     public List<PropertyPath> SelectedProperty => _selectedPropertyPaths.Select(s => s.Property).ToList();
 
     public ValueTask DisposeAsync()

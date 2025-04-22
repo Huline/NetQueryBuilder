@@ -1,12 +1,14 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 
-namespace NetQueryBuilder.Conditions;
-
-public interface ICondition
+namespace NetQueryBuilder.Conditions
 {
-    internal BlockCondition? Parent { get; set; }
-    EventHandler? ConditionChanged { get; set; }
-    LogicalOperator LogicalOperator { get; set; }
-    ICondition GetRoot();
-    Expression? Compile();
+    public interface ICondition
+    {
+        public BlockCondition? Parent { get; set; }
+        EventHandler? ConditionChanged { get; set; }
+        LogicalOperator LogicalOperator { get; set; }
+        ICondition GetRoot();
+        Expression? Compile();
+    }
 }

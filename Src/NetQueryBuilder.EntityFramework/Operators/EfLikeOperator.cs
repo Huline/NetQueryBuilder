@@ -7,7 +7,7 @@ namespace NetQueryBuilder.EntityFramework.Operators;
 public class EfLikeOperator : MethodCallOperator
 {
     public EfLikeOperator(IExpressionStringifier expressionStringifier, bool isNegated = false)
-        : base(isNegated ? "NotLike" : "Like", expressionStringifier, typeof(DbFunctionsExtensions).GetMethod("Like", [typeof(DbFunctions), typeof(string), typeof(string)]), isNegated)
+        : base(isNegated ? "NotLike" : "Like", expressionStringifier, typeof(DbFunctionsExtensions).GetMethod("Like", new[] { typeof(DbFunctions), typeof(string), typeof(string) }), isNegated)
     {
     }
 

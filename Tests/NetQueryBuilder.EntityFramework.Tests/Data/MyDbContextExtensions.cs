@@ -4,12 +4,12 @@ namespace NetQueryBuilder.EntityFramework.Tests.Data;
 
 public static class MyDbContextExtensions
 {
-    private static readonly SemaphoreSlim _lock = new(1, 1);
+    private static readonly SemaphoreSlim Lock = new(1, 1);
     private static bool _isSeeded;
 
     public static async Task SeedDatabase(this MyDbContext context)
     {
-        await _lock.WaitAsync();
+        await Lock.WaitAsync();
         if (!_isSeeded)
             if (!context.Persons.Any())
             {
@@ -79,6 +79,6 @@ public static class MyDbContextExtensions
             }
 
         _isSeeded = true;
-        _lock.Release();
+        Lock.Release();
     }
 }

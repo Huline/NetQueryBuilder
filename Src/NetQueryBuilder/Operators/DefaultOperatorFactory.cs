@@ -1,55 +1,59 @@
-﻿namespace NetQueryBuilder.Operators;
+﻿using System;
+using System.Collections.Generic;
 
-public class DefaultOperatorFactory : IOperatorFactory
+namespace NetQueryBuilder.Operators
 {
-    private readonly IExpressionStringifier _expressionStringifier;
-
-    public DefaultOperatorFactory(IExpressionStringifier expressionStringifier)
+    public class DefaultOperatorFactory : IOperatorFactory
     {
-        _expressionStringifier = expressionStringifier;
-    }
+        private readonly IExpressionStringifier _expressionStringifier;
 
-    public virtual IEnumerable<ExpressionOperator> GetAllForProperty(PropertyPath propertyPath)
-    {
-        return propertyPath.PropertyType switch
+        public DefaultOperatorFactory(IExpressionStringifier expressionStringifier)
         {
-            { } type when type == typeof(int) => new List<ExpressionOperator>
+            _expressionStringifier = expressionStringifier;
+        }
+
+        public virtual IEnumerable<ExpressionOperator> GetAllForProperty(PropertyPath propertyPath)
+        {
+            return propertyPath.PropertyType switch
             {
-                new EqualsOperator(_expressionStringifier),
-                new NotEqualsOperator(_expressionStringifier),
-                new LessThanOperator(_expressionStringifier),
-                new LessThanOrEqualOperator(_expressionStringifier),
-                new GreaterThanOperator(_expressionStringifier),
-                new GreaterThanOrEqualOperator(_expressionStringifier),
-                new InListOperator<int>(_expressionStringifier),
-                new InListOperator<int>(_expressionStringifier, true)
-            },
-            { } type when type == typeof(string) => new List<ExpressionOperator>
-            {
-                new EqualsOperator(_expressionStringifier),
-                new NotEqualsOperator(_expressionStringifier),
-                new InListOperator<string>(_expressionStringifier),
-                new InListOperator<string>(_expressionStringifier, true)
-            },
-            { } type when type == typeof(bool) => new List<ExpressionOperator>
-            {
-                new EqualsOperator(_expressionStringifier),
-                new NotEqualsOperator(_expressionStringifier)
-            },
-            { } type when type == typeof(DateTime) => new List<ExpressionOperator>
-            {
-                new EqualsOperator(_expressionStringifier),
-                new NotEqualsOperator(_expressionStringifier),
-                new LessThanOperator(_expressionStringifier),
-                new LessThanOrEqualOperator(_expressionStringifier),
-                new GreaterThanOperator(_expressionStringifier),
-                new GreaterThanOrEqualOperator(_expressionStringifier)
-            },
-            _ => new List<ExpressionOperator>
-            {
-                new EqualsOperator(_expressionStringifier),
-                new NotEqualsOperator(_expressionStringifier)
-            }
-        };
+                { } type when type == typeof(int) => new List<ExpressionOperator>
+                {
+                    new EqualsOperator(_expressionStringifier),
+                    new NotEqualsOperator(_expressionStringifier),
+                    new LessThanOperator(_expressionStringifier),
+                    new LessThanOrEqualOperator(_expressionStringifier),
+                    new GreaterThanOperator(_expressionStringifier),
+                    new GreaterThanOrEqualOperator(_expressionStringifier),
+                    new InListOperator<int>(_expressionStringifier),
+                    new InListOperator<int>(_expressionStringifier, true)
+                },
+                { } type when type == typeof(string) => new List<ExpressionOperator>
+                {
+                    new EqualsOperator(_expressionStringifier),
+                    new NotEqualsOperator(_expressionStringifier),
+                    new InListOperator<string>(_expressionStringifier),
+                    new InListOperator<string>(_expressionStringifier, true)
+                },
+                { } type when type == typeof(bool) => new List<ExpressionOperator>
+                {
+                    new EqualsOperator(_expressionStringifier),
+                    new NotEqualsOperator(_expressionStringifier)
+                },
+                { } type when type == typeof(DateTime) => new List<ExpressionOperator>
+                {
+                    new EqualsOperator(_expressionStringifier),
+                    new NotEqualsOperator(_expressionStringifier),
+                    new LessThanOperator(_expressionStringifier),
+                    new LessThanOrEqualOperator(_expressionStringifier),
+                    new GreaterThanOperator(_expressionStringifier),
+                    new GreaterThanOrEqualOperator(_expressionStringifier)
+                },
+                _ => new List<ExpressionOperator>
+                {
+                    new EqualsOperator(_expressionStringifier),
+                    new NotEqualsOperator(_expressionStringifier)
+                }
+            };
+        }
     }
 }

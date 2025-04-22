@@ -1,41 +1,44 @@
-﻿namespace NetQueryBuilder.Configurations;
+﻿using System;
 
-public class ConditionConfigurator : IConditionConfigurator
+namespace NetQueryBuilder.Configurations
 {
-    private ConditionConfiguration _configuration = new(Array.Empty<string>(), Array.Empty<string>(), -1, Array.Empty<Type>(), null);
-
-    public IConditionConfigurator LimitToFields(params string[] fields)
+    public class ConditionConfigurator : IConditionConfigurator
     {
-        _configuration = _configuration with { Fields = fields };
-        return this;
-    }
+        private readonly ConditionConfiguration _configuration = new ConditionConfiguration(Array.Empty<string>(), Array.Empty<string>(), -1, Array.Empty<Type>(), null);
 
-    public IConditionConfigurator RemoveFields(params string[] fields)
-    {
-        _configuration = _configuration with { IgnoreFields = fields };
-        return this;
-    }
+        public IConditionConfigurator LimitToFields(params string[]? fields)
+        {
+            _configuration.Fields = fields ?? Array.Empty<string>();
+            return this;
+        }
 
-    public IConditionConfigurator UseStringifier(IPropertyStringifier propertyStringifier)
-    {
-        _configuration = _configuration with { PropertyStringifier = propertyStringifier };
-        return this;
-    }
+        public IConditionConfigurator RemoveFields(params string[]? fields)
+        {
+            _configuration.IgnoreFields = fields ?? Array.Empty<string>();
+            return this;
+        }
 
-    public IConditionConfigurator LimitDepth(int depth)
-    {
-        _configuration = _configuration with { Depth = depth };
-        return this;
-    }
+        public IConditionConfigurator UseStringifier(IPropertyStringifier propertyStringifier)
+        {
+            _configuration.PropertyStringifier = propertyStringifier;
+            return this;
+        }
 
-    public IConditionConfigurator ExcludeRelationships(params Type[] relationships)
-    {
-        _configuration = _configuration with { ExcludedRelationships = relationships };
-        return this;
-    }
+        public IConditionConfigurator LimitDepth(int depth)
+        {
+            _configuration.Depth = depth;
+            return this;
+        }
 
-    public ConditionConfiguration Build()
-    {
-        return _configuration;
+        public IConditionConfigurator ExcludeRelationships(params Type[]? relationships)
+        {
+            _configuration.ExcludedRelationships = relationships ?? Array.Empty<Type>();
+            return this;
+        }
+
+        public ConditionConfiguration Build()
+        {
+            return _configuration;
+        }
     }
 }

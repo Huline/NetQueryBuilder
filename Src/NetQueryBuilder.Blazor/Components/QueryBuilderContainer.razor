@@ -26,7 +26,7 @@
 @code {
     Type? _selectedEntityType;
 
-    private int _queryBuilderKey = 0; // Unique key to force re-render
+    private int _queryBuilderKey; // Unique key to force re-render
     private IReadOnlyList<Type> _entities = Array.Empty<Type>();
 
     RenderFragment CreateQueryBuilder()

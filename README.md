@@ -1,1 +1,181 @@
-NetQueryBuilder
+# NetQueryBuilder
+
+NetQueryBuilder is a comprehensive .NET ecosystem for building and executing dynamic queries across different data sources with extensible UI components.
+
+## Vision
+
+NetQueryBuilder aims to simplify the creation of dynamic query interfaces in .NET applications by providing:
+
+- A type-safe, extensible core for building queries
+- Seamless integration with popular ORMs and data sources
+- Rich UI components for visual query building
+- A consistent API across different implementations
+
+The project enables developers to create powerful search, filter, and reporting functionality without writing complex LINQ expressions or SQL queries manually, while maintaining full control over performance and customization.
+
+## License
+
+**Important:** NetQueryBuilder is open-source under the MIT license for personal, educational, and non-commercial use.
+For commercial use, a valid commercial license must be purchased from [Gumroad link].
+
+## Packages
+
+NetQueryBuilder is structured as a modular ecosystem with these main packages:
+
+| Package                             | Description                                     | Documentation                              |
+|-------------------------------------|-------------------------------------------------|--------------------------------------------|
+| **NetQueryBuilder**                 | Core library with IQueryable-based architecture | [Core Documentation](./core-readme.md)     |
+| **NetQueryBuilder.EntityFramework** | Entity Framework Core integration               | [EF Documentation](./ef-readme.md)         |
+| **NetQueryBuilder.Blazor**          | Blazor UI components for query building         | [Blazor Documentation](./blazor-readme.md) |
+
+## Quick Start
+
+### 1. Install Packages
+
+Choose the packages that match your application's needs:
+
+```shell script
+# Core package (required)
+dotnet add package NetQueryBuilder
+
+# For Entity Framework Core integration
+dotnet add package NetQueryBuilder.EntityFramework
+
+# For Blazor UI components
+dotnet add package NetQueryBuilder.Blazor
+dotnet add package MudBlazor  # Required by NetQueryBuilder.Blazor
+```
+
+### 2. Basic Setup
+
+#### Using with Entity Framework Core
+
+```csharp
+// Register services
+services.AddDbContext<YourDbContext>(options => 
+    options.UseSqlServer(connectionString));
+    
+services.AddScoped<IQueryConfigurator, EfQueryConfigurator<YourDbContext>>();
+```
+
+#### Add Blazor UI Components
+
+In your Blazor page or component:
+
+```cshtml
+@page "/products"
+@using NetQueryBuilder.Blazor.Components
+@using YourNamespace.Models
+
+<h3>Product Query Builder</h3>
+
+<QueryBuilder TEntity="Product" />
+```
+
+## Features Overview
+
+### Core Features
+
+- Dynamic query construction with IQueryable
+- Extensible operator system (Equals, Like, Contains, etc.)
+- Property path navigation for complex object graphs
+- Expression building and stringification
+
+### Entity Framework Features
+
+- Full integration with EF Core's querying capabilities
+- Support for navigation properties and relationships
+- Efficient translation to SQL queries
+- Eager loading configuration
+
+### Blazor UI Features
+
+- Complete query builder component with SELECT and WHERE sections
+- Condition builder for complex filtering logic
+- Results table with dynamic columns
+- Support for saving and loading query expressions
+
+## Use Cases
+
+- **Advanced Search Interfaces**: Create powerful search forms with complex filtering
+- **Dynamic Reporting**: Allow users to define their own report criteria
+- **Admin Dashboards**: Build flexible data exploration tools
+- **Data Export Tools**: Generate filtered data exports with user-defined criteria
+- **API Query Interfaces**: Enable complex filtering in your API endpoints
+
+## Example: Building a Product Search
+
+```csharp
+// In a service class
+public async Task<IEnumerable<Product>> SearchProducts(string category, decimal? minPrice)
+{
+    var query = _queryConfigurator.BuildFor<Product>();
+    
+    if (!string.IsNullOrEmpty(category))
+    {
+        var categoryProperty = query.ConditionPropertyPaths
+            .First(p => p.PropertyFullName == "Category");
+            
+        query.Condition.CreateNew<EqualsOperator>(categoryProperty, category);
+        
+        if (minPrice.HasValue)
+        {
+            query.Condition.And();
+            
+            var priceProperty = query.ConditionPropertyPaths
+                .First(p => p.PropertyFullName == "Price");
+                
+            query.Condition.CreateNew<GreaterThanOrEqualOperator>(priceProperty, minPrice.Value);
+        }
+    }
+    
+    return (await query.Execute()).Cast<Product>();
+}
+```
+
+## Advanced Customization
+
+NetQueryBuilder is designed to be extensible:
+
+- Create custom operators for specialized filtering needs
+- Implement adapters for different data sources
+- Design custom UI components to match your application's look and feel
+- Extend the query building process with your own logic
+
+For details on customization options, see the package-specific documentation.
+
+## Community and Support
+
+- **GitHub Issues**: Report bugs or request features on our GitHub repository
+- **Discussions**: Join our GitHub discussions for questions and ideas
+- **Commercial Support**: Enterprise support is available with commercial licenses
+
+## Contributing
+
+Contributions are welcome! Whether it's:
+
+- Bug fixes
+- Documentation improvements
+- New features
+- Additional integrations
+
+Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## Roadmap
+
+- Additional ORM integrations (Dapper, NHibernate)
+- MAUI UI components
+- GraphQL integration
+- Query optimization features
+- Cloud database adapters
+
+## License Details
+
+The MIT license applies to personal, educational, and non-commercial use. For commercial applications, please purchase a license from [Gumroad link].
+
+Commercial licenses include:
+
+- Unlimited commercial use
+- Priority support
+- Access to premium extensions
+- No attribution requirement

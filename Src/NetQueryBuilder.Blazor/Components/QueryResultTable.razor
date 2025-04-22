@@ -12,11 +12,11 @@
               FixedHeader="true"
               Height="400px">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Résultats (@Data.Count)</MudText>
+            <MudText Typo="Typo.h6">Results (@Data.Count)</MudText>
             <MudSpacer/>
             <MudTextField
                 T="string"
-                Placeholder="Rechercher..."
+                Placeholder="Search..."
                 Adornment="Adornment.Start"
                 AdornmentIcon="@Icons.Material.Filled.Search"
                 IconSize="Size.Medium"
@@ -41,7 +41,7 @@
         </NoRecordsContent>
         <LoadingContent>
             <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
-            <MudText Class="ms-2">Chargement des données...</MudText>
+            <MudText Class="ms-2">Loading...</MudText>
         </LoadingContent>
         <PagerContent>
             <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"/>

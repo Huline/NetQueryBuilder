@@ -1,6 +1,9 @@
-﻿namespace NetQueryBuilder.Operators;
+﻿using System.Collections.Generic;
 
-public interface IOperatorFactory
+namespace NetQueryBuilder.Operators
 {
-    IEnumerable<ExpressionOperator> GetAllForProperty(PropertyPath propertyPath);
+    public interface IOperatorFactory
+    {
+        IEnumerable<ExpressionOperator> GetAllForProperty(PropertyPath propertyPath);
+    }
 }
