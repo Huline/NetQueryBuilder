@@ -5,15 +5,15 @@ NetQueryBuilder.Blazor provides a comprehensive UI component suite for building 
 ## License
 
 **Important:** NetQueryBuilder.Blazor is open-source under the MIT license for personal, educational, and non-commercial use.
-For commercial use, a valid commercial license must be purchased from [Gumroad link].
+For commercial use, a valid commercial license must be purchased from [https://huline.gumroad.com/l/netquerybuilder](https://huline.gumroad.com/l/netquerybuilder).
 
 ## Description
 
 This package extends NetQueryBuilder with Blazor UI components that allow users to visually construct complex queries through an intuitive interface. It's built on top of MudBlazor to provide a rich, responsive user experience while
 leveraging the powerful query building capabilities of NetQueryBuilder.
 
-For information about the core query building functionality, please refer to the [NetQueryBuilder Core documentation](link-to-core-readme). For Entity Framework integration, see
-the [NetQueryBuilder.EntityFramework documentation](link-to-ef-readme).
+For information about the core query building functionality, please refer to the [NetQueryBuilder Core documentation](../NetQueryBuilder/Readme.md). For Entity Framework integration, see
+the [NetQueryBuilder.EntityFramework documentation](../NetQueryBuilder.EntityFramework/Readme.md).
 
 ## Installation
 

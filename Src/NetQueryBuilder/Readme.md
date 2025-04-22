@@ -5,7 +5,7 @@ NetQueryBuilder is a flexible .NET library for building dynamic IQueryable-based
 ## License
 
 **Important:** Net Query Builder is open-source under the MIT license for personal, educational, and non-commercial use.
-For commercial use, a valid commercial license must be purchased from [Gumroad link].
+For commercial use, a valid commercial license must be purchased from [https://huline.gumroad.com/l/netquerybuilder](https://huline.gumroad.com/l/netquerybuilder).
 
 ## Description
 
