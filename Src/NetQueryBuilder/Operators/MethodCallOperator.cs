@@ -7,7 +7,7 @@ namespace NetQueryBuilder.Operators
 {
     public abstract class MethodCallOperator : ExpressionOperator
     {
-        protected MethodCallOperator(string name, IExpressionStringifier expressionStringifier, MethodInfo? methodInfo, bool isNegated = false)
+        protected MethodCallOperator(string name, IExpressionStringifier expressionStringifier, MethodInfo methodInfo, bool isNegated = false)
             : base(ExpressionType.Call, name, expressionStringifier)
         {
             MethodInfo = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
@@ -17,7 +17,7 @@ namespace NetQueryBuilder.Operators
         protected MethodInfo MethodInfo { get; }
         protected bool IsNegated { get; }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return obj != null
                    && obj is MethodCallOperator op
@@ -28,7 +28,13 @@ namespace NetQueryBuilder.Operators
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), MethodInfo, IsNegated);
+            unchecked
+            {
+                int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 397) ^ (MethodInfo != null ? MethodInfo.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ IsNegated.GetHashCode();
+                return hashCode;
+            }
         }
 
         public static bool operator ==(MethodCallOperator left, MethodCallOperator right)

@@ -6,13 +6,13 @@ namespace NetQueryBuilder.Configurations
     {
         private readonly ConditionConfiguration _configuration = new ConditionConfiguration(Array.Empty<string>(), Array.Empty<string>(), -1, Array.Empty<Type>(), null);
 
-        public IConditionConfigurator LimitToFields(params string[]? fields)
+        public IConditionConfigurator LimitToFields(params string[] fields)
         {
             _configuration.Fields = fields ?? Array.Empty<string>();
             return this;
         }
 
-        public IConditionConfigurator RemoveFields(params string[]? fields)
+        public IConditionConfigurator RemoveFields(params string[] fields)
         {
             _configuration.IgnoreFields = fields ?? Array.Empty<string>();
             return this;
@@ -30,7 +30,7 @@ namespace NetQueryBuilder.Configurations
             return this;
         }
 
-        public IConditionConfigurator ExcludeRelationships(params Type[]? relationships)
+        public IConditionConfigurator ExcludeRelationships(params Type[] relationships)
         {
             _configuration.ExcludedRelationships = relationships ?? Array.Empty<Type>();
             return this;

@@ -16,7 +16,7 @@ namespace NetQueryBuilder.Operators
             return Expression.MakeBinary(ExpressionType, left, right);
         }
 
-        public override object? GetDefaultValue(Type type, object? value)
+        public override object GetDefaultValue(Type type, object value)
         {
             if (type == value?.GetType()) return value;
             return type.GetDefaultValue();

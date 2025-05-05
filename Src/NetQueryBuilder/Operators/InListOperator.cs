@@ -20,7 +20,7 @@ namespace NetQueryBuilder.Operators
                 : GetExpression(left, right);
         }
 
-        public override object? GetDefaultValue(Type type, object? value)
+        public override object GetDefaultValue(Type type, object value)
         {
             var listType = typeof(List<>).MakeGenericType(type);
             if (value?.GetType() == listType)

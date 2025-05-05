@@ -20,11 +20,11 @@ public static class TestData
                     ZipCode = "75001",
                     Country = "France"
                 },
-                Contacts = new List<Contact>
-                {
-                    new() { Type = "Email", Value = "jean.dupont@example.com" },
-                    new() { Type = "Phone", Value = "0123456789" }
-                }
+                Contacts =
+                [
+                    new Contact { Type = "Email", Value = "jean.dupont@example.com" },
+                    new Contact { Type = "Phone", Value = "0123456789" }
+                ]
             },
             new()
             {

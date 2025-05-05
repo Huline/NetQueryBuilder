@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using NetQueryBuilder.Conditions;
@@ -17,7 +17,7 @@ namespace NetQueryBuilder.Queries
         private readonly IOperatorFactory _operatorFactory;
         private readonly ParameterExpression _parameter;
         private readonly List<SelectPropertyPath> _selectPropertyPaths;
-        private LambdaExpression? _lambda;
+        private LambdaExpression _lambda;
 
         protected Query(SelectConfiguration selectConfiguration, ConditionConfiguration conditionConfiguration, IOperatorFactory operatorFactory)
         {
@@ -27,43 +27,17 @@ namespace NetQueryBuilder.Queries
             _operatorFactory = operatorFactory;
             _selectPropertyPaths = AvailableProperties(selectConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, selectConfiguration)).Select(p => new SelectPropertyPath(p)).ToList();
             _conditionPropertyPaths = AvailableProperties(conditionConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, conditionConfiguration)).ToList();
-            Condition = new BlockCondition(ArraySegment<ICondition>.Empty, LogicalOperator.And);
+            Condition = new BlockCondition(new List<ICondition>(), LogicalOperator.And);
             _lambda = null;
             Condition.ConditionChanged += OnConditionConditionChanged;
         }
 
-        public EventHandler? OnChanged { get; set; }
+        public EventHandler OnChanged { get; set; }
         public IReadOnlyCollection<SelectPropertyPath> SelectPropertyPaths => _selectPropertyPaths;
         public IReadOnlyCollection<PropertyPath> ConditionPropertyPaths => _conditionPropertyPaths;
         public BlockCondition Condition { get; }
 
-        public virtual async Task<IEnumerable> Execute(int? limit = null, int? offset = null)
-        {
-            var predicate = Compile() as Expression<Func<TEntity, bool>>;
-            var selectedProps = SelectPropertyPaths
-                .Where(p => p.IsSelected)
-                .Select(p => p.Property.PropertyFullName)
-                .ToList();
-            var queryable = GetQueryable(selectedProps);
-
-            if (predicate != null)
-                queryable = queryable.Where(predicate);
-
-            if (limit.HasValue)
-                queryable = queryable.Take(limit.Value);
-            if (offset.HasValue)
-                queryable = queryable.Skip(offset.Value);
-
-            if (selectedProps.Count != 0)
-            {
-                var select = SelectBuilderService<TEntity>.BuildSelect(selectedProps);
-                queryable = queryable.Select(select);
-            }
-
-            return await ToList(queryable);
-        }
-
-        public virtual LambdaExpression? Compile()
+        public virtual LambdaExpression Compile()
         {
             var expression = Condition.Compile();
             if (expression == null)
@@ -74,20 +48,63 @@ namespace NetQueryBuilder.Queries
             return _lambda;
         }
 
-        protected abstract IQueryable<TEntity> GetQueryable(IReadOnlyCollection<string> selectedProperties);
-
-        protected virtual Task<IEnumerable> ToList(IQueryable<TEntity> queryable)
+        public virtual async Task<IReadOnlyCollection<TProjection>> Execute<TProjection>(int? limit = null, int? offset = null)
         {
-            return Task.FromResult<IEnumerable>(queryable.ToList());
+            var queryable = GetFilteredQuery(limit, offset, out var selectedProps);
+            return await ToList(SelectProjectionProperties<TProjection>(selectedProps, queryable));
         }
 
-        private IEnumerable<PropertyPath> AvailableProperties(IPropertyStringifier? propertyStringifier)
+        public virtual async Task<IReadOnlyCollection<dynamic>> Execute(int? limit = null, int? offset = null)
+        {
+            var queryable = GetFilteredQuery(limit, offset, out var selectedProps);
+            return SelectProperties(selectedProps, queryable).AsDynamicEnumerable().ToList();
+        }
+
+        private static IQueryable<TProjection> SelectProjectionProperties<TProjection>(List<PropertyPath> selectedProps, IQueryable<TEntity> queryable)
+        {
+            var select = SelectBuilderService<TEntity>.BuildSelect<TProjection>(selectedProps);
+            return queryable.Select(select);
+        }
+
+        private IQueryable<TEntity> GetFilteredQuery(int? limit, int? offset, out List<PropertyPath> selectedProps)
+        {
+            var predicate = Compile() as Expression<Func<TEntity, bool>>;
+            selectedProps = SelectPropertyPaths
+                .Where(p => p.IsSelected)
+                .Select(p => p.Property)
+                .ToList();
+            var queryable = GetQueryable(selectedProps);
+
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+
+            if (limit.HasValue)
+                queryable = queryable.Take(limit.Value);
+            if (offset.HasValue)
+                queryable = queryable.Skip(offset.Value);
+            return queryable;
+        }
+
+        protected virtual IQueryable SelectProperties(List<PropertyPath> selectedProps, IQueryable<TEntity> queryable)
+        {
+            var select = SelectBuilderService<TEntity>.BuildSelect(selectedProps);
+            return queryable.Select(select);
+        }
+
+        protected abstract IQueryable<TEntity> GetQueryable(IReadOnlyCollection<PropertyPath> selectedProperties);
+
+        protected virtual Task<IReadOnlyCollection<TProjection>> ToList<TProjection>(IQueryable<TProjection> queryable)
+        {
+            return Task.FromResult<IReadOnlyCollection<TProjection>>(queryable.ToList());
+        }
+
+        private IEnumerable<PropertyPath> AvailableProperties(IPropertyStringifier propertyStringifier)
         {
             return PropertyInspector.GetAllPropertyPaths(typeof(TEntity), _parameter, propertyStringifier, _operatorFactory);
         }
 
 
-        private bool MatchConfiguration(PropertyPath propertyPath, SelectConfiguration selectConfiguration)
+        private static bool MatchConfiguration(PropertyPath propertyPath, SelectConfiguration selectConfiguration)
         {
             if (selectConfiguration.Fields.Any() && !selectConfiguration.Fields.Contains(propertyPath.PropertyFullName))
                 return false;
@@ -101,7 +118,7 @@ namespace NetQueryBuilder.Queries
             return true;
         }
 
-        private bool MatchConfiguration(PropertyPath propertyPath, ConditionConfiguration conditionConfiguration)
+        private static bool MatchConfiguration(PropertyPath propertyPath, ConditionConfiguration conditionConfiguration)
         {
             if (conditionConfiguration.Fields.Any() && !conditionConfiguration.Fields.Contains(propertyPath.PropertyFullName))
                 return false;
@@ -114,7 +131,7 @@ namespace NetQueryBuilder.Queries
             return true;
         }
 
-        private void OnConditionConditionChanged(object? sender, EventArgs e)
+        private void OnConditionConditionChanged(object sender, EventArgs e)
         {
             OnChanged?.Invoke(this, e);
         }

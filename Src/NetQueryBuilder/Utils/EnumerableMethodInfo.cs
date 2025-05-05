@@ -42,7 +42,7 @@ namespace NetQueryBuilder.Utils
             this Type type,
             string methodName,
             Type genericTypeDefinition,
-            params Type?[] genericTypeArgs)
+            params Type[] genericTypeArgs)
         {
             return type
                 .GetMethods()

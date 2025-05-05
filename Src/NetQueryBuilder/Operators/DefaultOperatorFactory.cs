@@ -14,9 +14,8 @@ namespace NetQueryBuilder.Operators
 
         public virtual IEnumerable<ExpressionOperator> GetAllForProperty(PropertyPath propertyPath)
         {
-            return propertyPath.PropertyType switch
-            {
-                { } type when type == typeof(int) => new List<ExpressionOperator>
+            if (propertyPath.PropertyType == typeof(int))
+                return new List<ExpressionOperator>
                 {
                     new EqualsOperator(_expressionStringifier),
                     new NotEqualsOperator(_expressionStringifier),
@@ -26,20 +25,16 @@ namespace NetQueryBuilder.Operators
                     new GreaterThanOrEqualOperator(_expressionStringifier),
                     new InListOperator<int>(_expressionStringifier),
                     new InListOperator<int>(_expressionStringifier, true)
-                },
-                { } type when type == typeof(string) => new List<ExpressionOperator>
+                };
+            if (propertyPath.PropertyType == typeof(string))
+                return new List<ExpressionOperator>
                 {
-                    new EqualsOperator(_expressionStringifier),
-                    new NotEqualsOperator(_expressionStringifier),
-                    new InListOperator<string>(_expressionStringifier),
-                    new InListOperator<string>(_expressionStringifier, true)
-                },
-                { } type when type == typeof(bool) => new List<ExpressionOperator>
-                {
-                    new EqualsOperator(_expressionStringifier),
-                    new NotEqualsOperator(_expressionStringifier)
-                },
-                { } type when type == typeof(DateTime) => new List<ExpressionOperator>
+                    new EqualsOperator(_expressionStringifier), new NotEqualsOperator(_expressionStringifier), new InListOperator<string>(_expressionStringifier), new InListOperator<string>(_expressionStringifier, true)
+                };
+            if (propertyPath.PropertyType == typeof(bool))
+                return new List<ExpressionOperator> { new EqualsOperator(_expressionStringifier), new NotEqualsOperator(_expressionStringifier) };
+            if (propertyPath.PropertyType == typeof(DateTime))
+                return new List<ExpressionOperator>
                 {
                     new EqualsOperator(_expressionStringifier),
                     new NotEqualsOperator(_expressionStringifier),
@@ -47,13 +42,8 @@ namespace NetQueryBuilder.Operators
                     new LessThanOrEqualOperator(_expressionStringifier),
                     new GreaterThanOperator(_expressionStringifier),
                     new GreaterThanOrEqualOperator(_expressionStringifier)
-                },
-                _ => new List<ExpressionOperator>
-                {
-                    new EqualsOperator(_expressionStringifier),
-                    new NotEqualsOperator(_expressionStringifier)
-                }
-            };
+                };
+            return new List<ExpressionOperator> { new EqualsOperator(_expressionStringifier), new NotEqualsOperator(_expressionStringifier) };
         }
     }
 }

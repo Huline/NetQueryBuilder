@@ -11,14 +11,14 @@ namespace NetQueryBuilder.Utils
             return e.Compile()();
         }
 
-        internal static object GetDefaultValue(this Type? type)
+        internal static object GetDefaultValue(this Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             var e = Expression.Lambda<Func<object>>(Expression.Convert(Expression.Default(type), typeof(object)));
             return e.Compile()();
         }
 
-        internal static bool IsGenericInstance(this Type type, Type genTypeDef, params Type?[] args)
+        internal static bool IsGenericInstance(this Type type, Type genTypeDef, params Type[] args)
         {
             if (type.GetGenericTypeDefinition() != genTypeDef)
                 return false;

@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>NetQueryBuilder</Title>
         <Description>A framework to create and customize query from code. Allowing an UI an so far an user to create it's own queries.</Description>
-        <TargetFrameworks>net6.0;net8.0;net9.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;net8.0;net9.0;netstandard2.1;net48</TargetFrameworks>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <PackageProjectUrl>https://github.com/remihenache/ThreadSafeDbContext</PackageProjectUrl>
-        <PackageLicenseFile>../../LICENSE</PackageLicenseFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/remihenache/ThreadSafeDbContext</RepositoryUrl>
     </PropertyGroup>
@@ -16,8 +16,13 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.12.0"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="4.12.0"/>
-        <PackageReference Include="MudBlazor" Version="6.21.0"/>
         <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0.2"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="..\..\LICENSE" Pack="true" PackagePath="\">
+        <Link>LICENSE</Link>
+      </None>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 </Project>

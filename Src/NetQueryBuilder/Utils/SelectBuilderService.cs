@@ -8,27 +8,34 @@ namespace NetQueryBuilder.Utils
 {
     internal static class SelectBuilderService<TEntity>
     {
-        internal static Expression<Func<TEntity, TEntity>> BuildSelect(IEnumerable<string> propertyPaths)
+        internal static string BuildSelect(IEnumerable<PropertyPath> propertyPaths)
         {
-            var param = Expression.Parameter(typeof(TEntity), "entity");
-            var newEntity = Expression.New(typeof(TEntity));
+            var selectString = "new { " + string.Join(", ", propertyPaths.GroupBy(p => p.PropertyName).Select(p =>
+                                            $"it.{p.First().PropertyFullName} as {p.First().PropertyName}"))
+                                        + " }";
+            return selectString;
+        }
+
+        internal static Expression<Func<TEntity, TProjection>> BuildSelect<TProjection>(IEnumerable<PropertyPath> propertyPaths)
+        {
+            var param = Expression.Parameter(typeof(TProjection), "entity");
+            var newEntity = Expression.New(typeof(TProjection));
 
             var propertiesGroupedPaths = propertyPaths
-                .Select(path => new PathDescriptor(path.Split('.')))
-                .GroupBy(x => x.Parts[0]);
+                .Select(path => path.GetParts())
+                .GroupBy(x => x.GetCurrentPath());
 
             var bindings = propertiesGroupedPaths
                 .Select(propertyPathGroup => CreateBindingsForProperties(propertyPathGroup, param))
                 .Where(mb => mb != null)
-                .OfType<MemberBinding>()
                 .ToList();
 
             var memberInit = Expression.MemberInit(newEntity, bindings);
-            return Expression.Lambda<Func<TEntity, TEntity>>(memberInit, param);
+            return Expression.Lambda<Func<TEntity, TProjection>>(memberInit, param);
         }
 
 
-        private static MemberBinding? CreateBindingsForProperties(IGrouping<string, PathDescriptor> propertyPathGroup, ParameterExpression param)
+        private static MemberBinding CreateBindingsForProperties(IGrouping<string, PathDescriptor> propertyPathGroup, ParameterExpression param)
         {
             var topPropName = propertyPathGroup.Key;
             var topPropertyInfo = typeof(TEntity).GetProperty(topPropName);
@@ -45,14 +52,14 @@ namespace NetQueryBuilder.Utils
 
         private static bool HasOnlyOnePath(IGrouping<string, PathDescriptor> propertyPathGroup)
         {
-            return propertyPathGroup.All(x => x.Parts.Length == 1);
+            return propertyPathGroup.All(x => !x.HasChild);
         }
 
         private static MemberBinding BindingsForSubProperty(IGrouping<string, PathDescriptor> group, Expression param, PropertyInfo topPropertyInfo)
         {
             var subPropertyNames = group
-                .Where(x => x.Parts.Length > 1)
-                .Select(x => string.Join('.', x.Parts.Skip(1)))
+                .Where(x => x.HasChild)
+                .Select(x => x.GetChildPath())
                 .Distinct();
 
             var subInstance = Expression.Property(param, topPropertyInfo);
@@ -68,24 +75,22 @@ namespace NetQueryBuilder.Utils
             return assignment;
         }
 
-        private static Expression BuildSubSelect(Type subType, Expression subInstance, IEnumerable<string> propertyPaths)
+        private static Expression BuildSubSelect(Type subType, Expression subInstance, IEnumerable<PathDescriptor> propertyPaths)
         {
             var newSub = Expression.New(subType);
 
             var groupedPaths = propertyPaths
-                .Select(path => new PathDescriptor(path.Split('.')))
-                .GroupBy(x => x.Parts[0]);
+                .GroupBy(x => x.GetCurrentPath());
 
             var subBindings = groupedPaths
                 .Select(group => CreateSubBindingsForSubProperties(subType, subInstance, group))
                 .Where(mb => mb != null)
-                .OfType<MemberBinding>()
                 .ToList();
 
             return Expression.MemberInit(newSub, subBindings);
         }
 
-        private static MemberBinding? CreateSubBindingsForSubProperties(Type subType, Expression subInstance, IGrouping<string, PathDescriptor> propertyPathGroup)
+        private static MemberBinding CreateSubBindingsForSubProperties(Type subType, Expression subInstance, IGrouping<string, PathDescriptor> propertyPathGroup)
         {
             var propName = propertyPathGroup.Key;
             var propInfo = subType.GetProperty(propName);
@@ -112,16 +117,6 @@ namespace NetQueryBuilder.Utils
                    || type == typeof(DateTimeOffset)
                    || type == typeof(TimeSpan)
                    || type == typeof(Guid);
-        }
-
-        private class PathDescriptor
-        {
-            public PathDescriptor(string[] parts)
-            {
-                Parts = parts;
-            }
-
-            public string[] Parts { get; }
         }
     }
 }

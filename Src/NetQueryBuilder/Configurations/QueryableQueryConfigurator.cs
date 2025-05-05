@@ -9,9 +9,9 @@ namespace NetQueryBuilder.Configurations
     public class QueryableQueryConfigurator<TEntity> : IQueryConfigurator
     {
         private readonly IQueryable<TEntity> _queryable;
-        private ConditionConfiguration _conditionConfiguration = new ConditionConfiguration(ArraySegment<string>.Empty, ArraySegment<string>.Empty, -1, ArraySegment<Type>.Empty, null);
+        private ConditionConfiguration _conditionConfiguration = new ConditionConfiguration(new List<string>(), new List<string>(), -1, new List<Type>(), null);
         private IExpressionStringifier _expressionStringifier = new UpperSeparatorExpressionStringifier();
-        private SelectConfiguration _selectConfiguration = new SelectConfiguration(ArraySegment<string>.Empty, ArraySegment<string>.Empty, -1, ArraySegment<Type>.Empty, null);
+        private SelectConfiguration _selectConfiguration = new SelectConfiguration(new List<string>(), new List<string>(), -1, new List<Type>(), null);
 
         public QueryableQueryConfigurator(IQueryable<TEntity> queryable)
         {
@@ -47,12 +47,12 @@ namespace NetQueryBuilder.Configurations
 
         public IQuery BuildFor<T>() where T : class
         {
-            return new QueryableQuery<T>((_queryable as IQueryable<T>)!, _selectConfiguration, _conditionConfiguration, new DefaultOperatorFactory(_expressionStringifier));
+            return new QueryableQuery<T>(_queryable as IQueryable<T>, _selectConfiguration, _conditionConfiguration, new DefaultOperatorFactory(_expressionStringifier));
         }
 
         public IQuery BuildFor(Type type)
         {
-            return (IQuery)Activator.CreateInstance(typeof(QueryableQuery<>).MakeGenericType(type), _queryable, _selectConfiguration, _conditionConfiguration, new DefaultOperatorFactory(_expressionStringifier)) !;
+            return (IQuery)Activator.CreateInstance(typeof(QueryableQuery<>).MakeGenericType(type), _queryable, _selectConfiguration, _conditionConfiguration, new DefaultOperatorFactory(_expressionStringifier));
         }
     }
 }

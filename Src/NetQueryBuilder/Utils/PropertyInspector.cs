@@ -11,12 +11,15 @@ namespace NetQueryBuilder.Utils
     {
         internal static IEnumerable<PropertyPath> GetAllPropertyPaths(Type type,
             ParameterExpression parameter,
-            IPropertyStringifier? propertyStringifier,
+            IPropertyStringifier propertyStringifier,
             IOperatorFactory operatorFactory,
             string parentPath = "",
-            HashSet<Type>? visitedTypes = null)
+            HashSet<Type> visitedTypes = null)
         {
-            visitedTypes ??= new HashSet<Type>();
+            if (visitedTypes == null)
+            {
+                visitedTypes = new HashSet<Type>();
+            }
 
             if (!visitedTypes.Add(type))
                 yield break;

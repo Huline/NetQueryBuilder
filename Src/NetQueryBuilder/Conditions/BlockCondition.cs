@@ -9,10 +9,10 @@ namespace NetQueryBuilder.Conditions
     public class BlockCondition : ICondition
     {
         private readonly List<ICondition> _children = new List<ICondition>();
-        private Expression? _compiledExpression;
+        private Expression _compiledExpression;
         private LogicalOperator _logicalOperator;
 
-        public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator, BlockCondition? parent = null)
+        public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator, BlockCondition parent = null)
         {
             _children.AddRange(children);
             foreach (var condition in _children)
@@ -26,8 +26,8 @@ namespace NetQueryBuilder.Conditions
         }
 
         public IReadOnlyCollection<ICondition> Conditions => _children.AsReadOnly();
-        public EventHandler? ConditionChanged { get; set; }
-        public BlockCondition? Parent { get; set; }
+        public EventHandler ConditionChanged { get; set; }
+        public BlockCondition Parent { get; set; }
 
         public LogicalOperator LogicalOperator
         {
@@ -45,7 +45,7 @@ namespace NetQueryBuilder.Conditions
             return Parent == null ? this : Parent.GetRoot();
         }
 
-        public Expression? Compile()
+        public Expression Compile()
         {
             if (_compiledExpression != null)
                 return _compiledExpression;
@@ -68,12 +68,15 @@ namespace NetQueryBuilder.Conditions
 
         private static ExpressionType ToExpression(LogicalOperator logicalOperator)
         {
-            return logicalOperator switch
+            switch (logicalOperator)
             {
-                LogicalOperator.And => ExpressionType.AndAlso,
-                LogicalOperator.Or => ExpressionType.OrElse,
-                _ => throw new ArgumentOutOfRangeException(nameof(logicalOperator), logicalOperator, null)
-            };
+                case LogicalOperator.And:
+                    return ExpressionType.AndAlso;
+                case LogicalOperator.Or:
+                    return ExpressionType.OrElse;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(logicalOperator), logicalOperator, null);
+            }
         }
 
         public ICondition Add(ICondition condition)
@@ -94,7 +97,7 @@ namespace NetQueryBuilder.Conditions
             NotifyConditionChanged();
         }
 
-        public BlockCondition? Group(IEnumerable<ICondition> childrenToGroup)
+        public BlockCondition Group(IEnumerable<ICondition> childrenToGroup)
         {
             var children = Conditions.Where(childrenToGroup.Contains).ToList();
             if (children.Count < 2) return null;
@@ -143,21 +146,21 @@ namespace NetQueryBuilder.Conditions
             condition.ConditionChanged += Parent.ChildConditionChanged;
         }
 
-        public SimpleCondition CreateNew<TOperator>(PropertyPath property, object? valueOverride = null)
+        public SimpleCondition CreateNew<TOperator>(PropertyPath property, object valueOverride = null)
             where TOperator : ExpressionOperator
         {
             return CreateNew(property, property.GetCompatibleOperators().OfType<TOperator>().FirstOrDefault(), valueOverride);
         }
 
 
-        public SimpleCondition CreateNew(PropertyPath property, ExpressionOperator? operatorOverride = null, object? valueOverride = null)
+        public SimpleCondition CreateNew(PropertyPath property, ExpressionOperator operatorOverride = null, object valueOverride = null)
         {
             var newLogicalCondition = new SimpleCondition(property, LogicalOperator.And);
             if (operatorOverride != null)
                 newLogicalCondition.Operator = operatorOverride;
             if (valueOverride != null)
                 newLogicalCondition.Value = valueOverride;
-            return (Add(newLogicalCondition) as SimpleCondition)!;
+            return Add(newLogicalCondition) as SimpleCondition;
         }
 
         public SimpleCondition CreateNew()
@@ -165,15 +168,15 @@ namespace NetQueryBuilder.Conditions
             var lastLogicalCondition = FindLogicalCondition();
             if (lastLogicalCondition == null) throw new InvalidOperationException("No logical condition found to create a new one. Use CreateNew(PropertyPath property) instead.");
             var newLogicalCondition = new SimpleCondition(lastLogicalCondition.PropertyPath, lastLogicalCondition.LogicalOperator);
-            return (Add(newLogicalCondition) as SimpleCondition)!;
+            return Add(newLogicalCondition) as SimpleCondition;
         }
 
-        private SimpleCondition? FindLogicalCondition()
+        private SimpleCondition FindLogicalCondition()
         {
             return Conditions.OfType<SimpleCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>().Select(c => c.FindLogicalCondition()).FirstOrDefault();
         }
 
-        private void ChildConditionChanged(object? sender, EventArgs args)
+        private void ChildConditionChanged(object sender, EventArgs args)
         {
             NotifyConditionChanged();
         }

@@ -19,9 +19,9 @@ namespace NetQueryBuilder.Operators
         }
 
         public abstract Expression ToExpression(Expression left, Expression right);
-        public abstract object? GetDefaultValue(Type type, object? value);
+        public abstract object GetDefaultValue(Type type, object value);
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return obj != null
                    && obj is ExpressionOperator op
@@ -30,15 +30,15 @@ namespace NetQueryBuilder.Operators
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ExpressionType);
+            return ExpressionType.GetHashCode();
         }
 
-        public static bool operator ==(ExpressionOperator? left, ExpressionOperator? right)
+        public static bool operator ==(ExpressionOperator left, ExpressionOperator right)
         {
-            return EqualityComparer<ExpressionOperator>.Default.Equals(left!, right!);
+            return EqualityComparer<ExpressionOperator>.Default.Equals(left, right);
         }
 
-        public static bool operator !=(ExpressionOperator? left, ExpressionOperator? right)
+        public static bool operator !=(ExpressionOperator left, ExpressionOperator right)
         {
             return !(left == right);
         }

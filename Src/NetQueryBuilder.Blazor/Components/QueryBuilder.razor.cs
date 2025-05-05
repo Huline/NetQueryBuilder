@@ -56,14 +56,14 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
         var offset = currentPage * pageSize;
 
         // Exécuter la requête avec pagination
-        var result = await _query.Execute(pageSize, offset);
+        var result = await _query.Execute<TEntity>(pageSize, offset);
 
         // Mettre à jour les données affichées
-        _data = (result as IEnumerable<TEntity>)?.ToList() ?? new List<TEntity>();
+        _data = result?.ToList() ?? new List<TEntity>();
 
         // Mettre à jour le nombre total d'éléments (requête distincte)
         var countResult = await _query.Execute();
-        _totalItems = (countResult as IEnumerable<TEntity>)?.Count() ?? 0;
+        _totalItems = countResult?.Count() ?? 0;
 
         // Forcer la mise à jour de l'interface
         StateHasChanged();

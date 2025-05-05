@@ -15,7 +15,8 @@ namespace NetQueryBuilder.Queries
             _queryable = queryable;
         }
 
-        protected override IQueryable<T> GetQueryable(IReadOnlyCollection<string> selectedProperties)
+
+        protected override IQueryable<T> GetQueryable(IReadOnlyCollection<PropertyPath> selectedProperties)
         {
             return _queryable;
         }

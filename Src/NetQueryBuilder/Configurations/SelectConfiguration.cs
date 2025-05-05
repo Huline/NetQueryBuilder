@@ -5,7 +5,7 @@ namespace NetQueryBuilder.Configurations
 {
     public class SelectConfiguration
     {
-        public SelectConfiguration(IEnumerable<string> fields, IEnumerable<string> ignoreFields, int depth, IEnumerable<Type> excludedRelationships, IPropertyStringifier? propertyStringifier)
+        public SelectConfiguration(IEnumerable<string> fields, IEnumerable<string> ignoreFields, int depth, IEnumerable<Type> excludedRelationships, IPropertyStringifier propertyStringifier)
         {
             Fields = fields;
             IgnoreFields = ignoreFields;
@@ -18,6 +18,6 @@ namespace NetQueryBuilder.Configurations
         public IEnumerable<string> IgnoreFields { get; set; }
         public int Depth { get; set; }
         public IEnumerable<Type> ExcludedRelationships { get; set; }
-        public IPropertyStringifier? PropertyStringifier { get; set; }
+        public IPropertyStringifier PropertyStringifier { get; set; }
     }
 }

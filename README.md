@@ -17,6 +17,7 @@ The project enables developers to create powerful search, filter, and reporting 
 
 **Important:** NetQueryBuilder is open-source under the MIT license for personal, educational, and non-commercial use.
 For commercial use, a valid commercial license must be purchased from [https://huline.gumroad.com/l/netquerybuilder](https://huline.gumroad.com/l/netquerybuilder).
+See [LICENSE](./Src/NetQueryBuilder/LICENSE) for more details.
 
 ## Packages
 

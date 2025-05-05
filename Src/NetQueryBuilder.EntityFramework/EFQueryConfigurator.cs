@@ -56,6 +56,6 @@ public class EfQueryConfigurator<TDbContext> : IQueryConfigurator
 
     public IQuery BuildFor(Type type)
     {
-        return (IQuery)Activator.CreateInstance(typeof(EfQuery<>).MakeGenericType(_dbContext.Model.GetEntityTypes().First().ClrType), _dbContext, _selectConfiguration, _conditionConfiguration, new EfOperatorFactory(_expressionStringifier)) !;
+        return (IQuery)Activator.CreateInstance(typeof(EfQuery<>).MakeGenericType(type), _dbContext, _selectConfiguration, _conditionConfiguration, new EfOperatorFactory(_expressionStringifier)) !;
     }
 }

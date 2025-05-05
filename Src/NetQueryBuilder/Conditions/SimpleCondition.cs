@@ -8,21 +8,21 @@ namespace NetQueryBuilder.Conditions
 {
     public class SimpleCondition : ICondition
     {
-        private Expression? _compiledExpression;
+        private Expression _compiledExpression;
         private Expression _left;
         private LogicalOperator _logicalOperator;
         private ExpressionOperator _operator;
         private PropertyPath _propertyPath;
         private Expression _right;
 
-        private object? _value;
+        private object _value;
 
-        public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, BlockCondition? parent = null)
+        public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, BlockCondition parent = null)
             : this(propertyPath, logicalOperator, propertyPath.GetCompatibleOperators().First(), propertyPath.GetDefaultValue(), parent)
         {
         }
 
-        public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, ExpressionOperator @operator, object value, BlockCondition? parent = null)
+        public SimpleCondition(PropertyPath propertyPath, LogicalOperator logicalOperator, ExpressionOperator @operator, object value, BlockCondition parent = null)
         {
             _propertyPath = propertyPath;
             _logicalOperator = logicalOperator;
@@ -46,7 +46,7 @@ namespace NetQueryBuilder.Conditions
             }
         }
 
-        public object? Value
+        public object Value
         {
             get => _value;
             set
@@ -79,11 +79,11 @@ namespace NetQueryBuilder.Conditions
             }
         }
 
-        public BlockCondition? Parent { get; set; }
+        public BlockCondition Parent { get; set; }
 
-        public EventHandler? ConditionChanged { get; set; }
+        public EventHandler ConditionChanged { get; set; }
 
-        public Expression? Compile()
+        public Expression Compile()
         {
             if (_compiledExpression != null)
                 return _compiledExpression;

@@ -77,4 +77,21 @@ public class SelectConfigTests
 
         Assert.True(query.SelectPropertyPaths.All(p => p.Property.DisplayName() == p.Property.PropertyFullName.ToUpper()));
     }
+
+    [Fact]
+    public async Task SelectProperties_WhenExecuted_ShouldOnlyThem()
+    {
+        _queryConfigurator.ConfigureSelect(s => s.RemoveFields(nameof(Person.FirstName)));
+        var query = _queryConfigurator
+            .BuildFor<Person>();
+
+        var results = await query.Execute<Person>();
+        Assert.NotNull(results);
+        Assert.All(results, r =>
+        {
+            var person = r;
+            Assert.Null(person.FirstName);
+            Assert.NotNull(person.LastName);
+        });
+    }
 }
