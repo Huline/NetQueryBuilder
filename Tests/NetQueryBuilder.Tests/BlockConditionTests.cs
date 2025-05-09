@@ -18,10 +18,10 @@ public class BlockConditionsTests
         query.Condition.CreateNew<EqualsOperator>(query.ConditionPropertyPaths.First(p => p.PropertyFullName == "FirstName"), "Jean");
         var condition = query.Condition.CreateNew<EqualsOperator>(query.ConditionPropertyPaths.First(p => p.PropertyFullName == "FirstName"), "Marie");
         condition.LogicalOperator = LogicalOperator.Or;
-        var results = await query.Execute();
+        var results = await query.Execute(50);
 
         Assert.NotNull(results);
-        Assert.Equal(2, results.Count);
+        Assert.Equal(2, results.TotalItems);
     }
 
 
@@ -38,10 +38,10 @@ public class BlockConditionsTests
         var conditionTwoToBlock = query.Condition.CreateNew<EqualsOperator>(query.ConditionPropertyPaths.First(p => p.PropertyFullName == "LastName"), "Dupont");
         conditionTwoToBlock.LogicalOperator = LogicalOperator.Or;
         query.Condition.Group([conditionOneToBlock, conditionTwoToBlock]);
-        var results = await query.Execute();
+        var results = await query.Execute(50);
 
         Assert.NotNull(results);
-        Assert.Single(results);
+        Assert.Single(results.Items);
     }
 
     [Fact]
@@ -58,10 +58,10 @@ public class BlockConditionsTests
         conditionTwoToBlock.LogicalOperator = LogicalOperator.Or;
         var block = query.Condition.Group([conditionOneToBlock, conditionTwoToBlock])!;
         block.LogicalOperator = LogicalOperator.Or;
-        var results = await query.Execute();
+        var results = await query.Execute(50);
 
         Assert.NotNull(results);
-        Assert.Equal(2, results.Count);
+        Assert.Equal(2, results.TotalItems);
     }
 
     [Fact]
@@ -78,12 +78,12 @@ public class BlockConditionsTests
         conditionTwoToBlock.LogicalOperator = LogicalOperator.Or;
         var block = query.Condition.Group([conditionOneToBlock])!;
 
-        var results = await query.Execute<Person>();
+        var results = await query.Execute<Person>(50);
 
         Assert.Null(block);
         Assert.True(query.Condition.Conditions.All(c => c is not BlockCondition));
         Assert.NotNull(results);
-        Assert.Single(results);
+        Assert.Single(results.Items);
     }
 
     [Fact]
@@ -101,11 +101,11 @@ public class BlockConditionsTests
         var block = query.Condition.Group([conditionOneToBlock, conditionTwoToBlock])!;
 
         block.Ungroup([conditionOneToBlock, conditionTwoToBlock]);
-        var results = await query.Execute();
+        var results = await query.Execute(50);
 
         Assert.NotNull(results);
         Assert.Equal(3, query.Condition.Conditions.Count);
-        Assert.Single(results);
+        Assert.Single(results.Items);
     }
 
     [Fact]
@@ -123,11 +123,11 @@ public class BlockConditionsTests
         var block = query.Condition.Group([conditionOneToBlock, conditionTwoToBlock])!;
 
         block.Ungroup([conditionOneToBlock]);
-        var results = await query.Execute();
+        var results = await query.Execute(50);
 
         Assert.NotNull(results);
         Assert.Equal(3, query.Condition.Conditions.Count);
         Assert.True(query.Condition.Conditions.All(c => c is not BlockCondition));
-        Assert.Single(results);
+        Assert.Single(results.Items);
     }
 }

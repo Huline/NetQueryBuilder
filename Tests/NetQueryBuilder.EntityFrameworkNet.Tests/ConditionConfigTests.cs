@@ -20,7 +20,7 @@ namespace NetQueryBuilder.EntityFrameworkNet.Tests
             serviceCollection.AddScoped<IQueryConfigurator, EfQueryConfigurator<MyDbContext>>();
             Database.SetInitializer(new TestDbInitializer());
             _dbContext = new MyDbContext();
-            serviceCollection.AddScoped<MyDbContext>(_ => _dbContext);
+            serviceCollection.AddScoped(_ => _dbContext);
             var provider = serviceCollection.BuildServiceProvider();
             _queryConfigurator = provider.GetRequiredService<IQueryConfigurator>();
         }

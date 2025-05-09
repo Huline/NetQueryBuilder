@@ -154,7 +154,7 @@ You can use individual components instead of the full QueryBuilder for more gran
 @code {
     private async Task ExecuteQuery()
     {
-        var results = await _query.Execute();
+        var results = await _query.Execute(50);
         // Process results
     }
 }

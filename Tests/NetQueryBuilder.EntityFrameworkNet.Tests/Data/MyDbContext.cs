@@ -5,13 +5,17 @@ namespace NetQueryBuilder.EntityFrameworkNet.Tests.Data
 {
     public class MyDbContext : DbContext
     {
-        public MyDbContext() : base("MyDbContext") { }
+        public MyDbContext() : base("MyDbContext")
+        {
+        }
 
         public DbSet<Person> Persons { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Utility> Utility { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        { // Table pour Person
+        {
+            // Table pour Person
             modelBuilder.Entity<Person>()
                 .ToTable("Person") // Table nommée "Person"
                 .HasKey(p => p.PersonId);
@@ -26,8 +30,6 @@ namespace NetQueryBuilder.EntityFrameworkNet.Tests.Data
                 .HasMany(p => p.Addresses)
                 .WithRequired(a => a.Person)
                 .HasForeignKey(a => a.PersonId);
-
         }
-
     }
 }

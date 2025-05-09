@@ -55,7 +55,7 @@ public class ProductService
     public async Task<IEnumerable<Product>> GetAllProductsAsync()
     {
         var query = _queryConfigurator.BuildFor<Product>();
-        return (await query.Execute()).Cast<Product>();
+        return (await query.Execute(50)).Cast<Product>();
     }
 }
 ```
@@ -73,7 +73,7 @@ public async Task<IEnumerable<Product>> GetProductsByCategory(string category)
         category
     );
     
-    return (await query.Execute()).Cast<Product>();
+    return (await query.Execute(50)).Cast<Product>();
 }
 ```
 
@@ -90,7 +90,7 @@ public async Task<IEnumerable<Order>> GetOrdersByCustomerCity(string city)
         city
     );
     
-    return (await query.Execute()).Cast<Order>();
+    return (await query.Execute(50)).Cast<Order>();
 }
 ```
 
@@ -109,7 +109,7 @@ public async Task<IEnumerable<Product>> SearchProductsByName(string searchTerm)
         searchTerm
     );
     
-    return (await query.Execute()).Cast<Product>();
+    return (await query.Execute(50)).Cast<Product>();
 }
 
 public async Task<IEnumerable<Product>> GetProductsInPriceRange(decimal minPrice, decimal maxPrice)
@@ -132,7 +132,7 @@ public async Task<IEnumerable<Product>> GetProductsInPriceRange(decimal minPrice
         maxPrice
     );
     
-    return (await query.Execute()).Cast<Product>();
+    return (await query.Execute(50)).Cast<Product>();
 }
 ```
 

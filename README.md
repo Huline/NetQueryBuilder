@@ -130,7 +130,7 @@ public async Task<IEnumerable<Product>> SearchProducts(string category, decimal?
         }
     }
     
-    return (await query.Execute()).Cast<Product>();
+    return (await query.Execute(50)).Cast<Product>();
 }
 ```
 

@@ -57,7 +57,7 @@ IQueryConfigurator queryConfigurator = new QueryableQueryConfigurator();
 IQuery query = queryConfigurator.BuildFor<YourEntityType>();
 
 // Execute the query
-var results = await query.Execute();
+var results = await query.Execute(50);
 ```
 
 ### Custom Operators

@@ -48,16 +48,36 @@ namespace NetQueryBuilder.Queries
             return _lambda;
         }
 
-        public virtual async Task<IReadOnlyCollection<TProjection>> Execute<TProjection>(int? limit = null, int? offset = null)
+        public virtual Task<QueryResult<TProjection>> Execute<TProjection>(int pageSize)
         {
-            var queryable = GetFilteredQuery(limit, offset, out var selectedProps);
-            return await ToList(SelectProjectionProperties<TProjection>(selectedProps, queryable));
+            return QueryResult<TProjection>.FromQuery(Count(), ExecuteProjection<TProjection>, pageSize);
         }
 
-        public virtual async Task<IReadOnlyCollection<dynamic>> Execute(int? limit = null, int? offset = null)
+        public virtual Task<QueryResult<dynamic>> Execute(int pageSize)
+        {
+            return QueryResult<dynamic>.FromQuery(Count(), ExecuteDynamic, pageSize);
+        }
+
+        protected virtual int Count()
+        {
+            var predicate = Compile() as Expression<Func<TEntity, bool>>;
+            var queryable = GetQueryable(_selectPropertyPaths.Select(p => p.Property).ToList());
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+            return queryable.Count();
+        }
+
+        private Task<IReadOnlyCollection<TProjection>> ExecuteProjection<TProjection>(int limit, int offset)
         {
             var queryable = GetFilteredQuery(limit, offset, out var selectedProps);
-            return SelectProperties(selectedProps, queryable).AsDynamicEnumerable().ToList();
+            return ToList(SelectProjectionProperties<TProjection>(selectedProps, queryable));
+        }
+
+
+        private Task<IReadOnlyCollection<dynamic>> ExecuteDynamic(int limit, int offset)
+        {
+            var queryable = GetFilteredQuery(limit, offset, out var selectedProps);
+            return Task.FromResult<IReadOnlyCollection<dynamic>>(SelectProperties(selectedProps, queryable).AsDynamicEnumerable().ToList());
         }
 
         private static IQueryable<TProjection> SelectProjectionProperties<TProjection>(List<PropertyPath> selectedProps, IQueryable<TEntity> queryable)
@@ -66,7 +86,7 @@ namespace NetQueryBuilder.Queries
             return queryable.Select(select);
         }
 
-        private IQueryable<TEntity> GetFilteredQuery(int? limit, int? offset, out List<PropertyPath> selectedProps)
+        private IQueryable<TEntity> GetFilteredQuery(int limit, int offset, out List<PropertyPath> selectedProps)
         {
             var predicate = Compile() as Expression<Func<TEntity, bool>>;
             selectedProps = SelectPropertyPaths
@@ -78,10 +98,10 @@ namespace NetQueryBuilder.Queries
             if (predicate != null)
                 queryable = queryable.Where(predicate);
 
-            if (limit.HasValue)
-                queryable = queryable.Take(limit.Value);
-            if (offset.HasValue)
-                queryable = queryable.Skip(offset.Value);
+            if (limit > 0)
+                queryable = queryable.Take(limit);
+            if (offset > 0)
+                queryable = queryable.Skip(offset);
             return queryable;
         }
 

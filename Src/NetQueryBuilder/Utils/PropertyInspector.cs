@@ -16,10 +16,7 @@ namespace NetQueryBuilder.Utils
             string parentPath = "",
             HashSet<Type> visitedTypes = null)
         {
-            if (visitedTypes == null)
-            {
-                visitedTypes = new HashSet<Type>();
-            }
+            if (visitedTypes == null) visitedTypes = new HashSet<Type>();
 
             if (!visitedTypes.Add(type))
                 yield break;

@@ -8,7 +8,6 @@ using NetQueryBuilder.EntityFrameworkNet.Tests.Data.Models;
 
 namespace NetQueryBuilder.EntityFrameworkNet.Tests.Data
 {
-    
     public class TestDbInitializer : DropCreateDatabaseAlways<MyDbContext>
     {
         protected override void Seed(MyDbContext context)
@@ -19,7 +18,7 @@ namespace NetQueryBuilder.EntityFrameworkNet.Tests.Data
 
     public static class MyDbContextExtensions
     {
-        private static readonly SemaphoreSlim Lock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim Lock = new(1, 1);
         private static bool _isSeeded;
 
         public static async Task SeedDatabase(this MyDbContext context)

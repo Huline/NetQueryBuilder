@@ -27,10 +27,10 @@ public class EfTests
     public async Task GetAll()
     {
         var query = _queryConfigurator.BuildFor<Person>();
-        var results = await query.Execute();
+        var results = await query.Execute(50);
 
         Assert.NotNull(results);
-        Assert.Equal(2, results.Count);
+        Assert.Equal(2, results.TotalItems);
     }
 
     [Fact]
@@ -38,10 +38,10 @@ public class EfTests
     {
         var query = _queryConfigurator.BuildFor<Address>();
         query.Condition.CreateNew<EqualsOperator>(query.ConditionPropertyPaths.First(p => p.PropertyFullName == "Person.FirstName"), "Alice");
-        var results = await query.Execute();
+        var results = await query.Execute(50);
 
         Assert.NotNull(results);
-        Assert.Single(results);
+        Assert.Single(results.Items);
     }
 
 
@@ -56,11 +56,11 @@ public class EfTests
         var query = _queryConfigurator.BuildFor<Person>();
         var lastName = query.ConditionPropertyPaths.First(p => p.PropertyFullName == "LastName");
         query.Condition.CreateNew(lastName, lastName.GetCompatibleOperators().First(o => o.ToString() == "Like"), nameToSearch);
-        var results = await query.Execute<Person>();
+        var results = await query.Execute<Person>(50);
 
         Assert.NotNull(results);
-        Assert.Single(results);
-        Assert.True(results.All(r => r.LastName?.Contains(nameToSearch, StringComparison.OrdinalIgnoreCase) ?? false));
+        Assert.Single(results.Items);
+        Assert.True(results.Items.All(r => r.LastName?.Contains(nameToSearch, StringComparison.OrdinalIgnoreCase) ?? false));
     }
 
     [Theory]
@@ -74,10 +74,10 @@ public class EfTests
         var query = _queryConfigurator.BuildFor<Person>();
         var lastName = query.ConditionPropertyPaths.First(p => p.PropertyFullName == "LastName");
         query.Condition.CreateNew(lastName, lastName.GetCompatibleOperators().First(o => o.ToString() == "Not like"), nameToSearch);
-        var results = await query.Execute<Person>();
+        var results = await query.Execute<Person>(50);
 
         Assert.NotNull(results);
-        Assert.Single(results);
-        Assert.True(results.All(r => !r.LastName?.Contains(nameToSearch, StringComparison.OrdinalIgnoreCase) ?? true));
+        Assert.Single(results.Items);
+        Assert.True(results.Items.All(r => !r.LastName?.Contains(nameToSearch, StringComparison.OrdinalIgnoreCase) ?? true));
     }
 }

@@ -6,7 +6,7 @@ namespace NetQueryBuilder.Blazor.Components;
 
 public partial class QueryBuilder<TEntity> : IAsyncDisposable
 {
-    private List<TEntity> _data = new();
+    private IReadOnlyCollection<TEntity> _data = new List<TEntity>();
     private IQuery _query = null!;
     private QueryResultTable<TEntity> _queryResult = null!;
     private IReadOnlyCollection<SelectPropertyPath> _selectedPropertyPaths = new List<SelectPropertyPath>();
@@ -56,14 +56,13 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
         var offset = currentPage * pageSize;
 
         // Exécuter la requête avec pagination
-        var result = await _query.Execute<TEntity>(pageSize, offset);
+        var result = await _query.Execute<TEntity>(pageSize);
 
         // Mettre à jour les données affichées
-        _data = result?.ToList() ?? new List<TEntity>();
+        _data = result.Items ?? new List<TEntity>();
 
         // Mettre à jour le nombre total d'éléments (requête distincte)
-        var countResult = await _query.Execute();
-        _totalItems = countResult?.Count() ?? 0;
+        _totalItems = result.TotalItems;
 
         // Forcer la mise à jour de l'interface
         StateHasChanged();

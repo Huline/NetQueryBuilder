@@ -31,10 +31,10 @@ namespace NetQueryBuilder.EntityFrameworkNet.Tests
         public async Task GetAll()
         {
             var query = _queryConfigurator.BuildFor<Person>();
-            var results = (await query.Execute()).ToList();
+            var results = await query.Execute(50);
 
-            Assert.NotNull(results);
-            Assert.Equal(2, results.Count);
+            Assert.NotNull(results.Items);
+            Assert.Equal(2, results.TotalItems);
         }
 
         [Fact]
@@ -42,11 +42,10 @@ namespace NetQueryBuilder.EntityFrameworkNet.Tests
         {
             var query = _queryConfigurator.BuildFor<Address>();
             query.Condition.CreateNew<EqualsOperator>(query.ConditionPropertyPaths.First(p => p.PropertyFullName == "Person.FirstName"), "Alice");
-            var enumerable = await query.Execute();
-            var results = enumerable.ToList();
+            var results = await query.Execute(50);
 
             Assert.NotNull(results);
-            Assert.Single(results);
+            Assert.Single(results.Items);
         }
     }
 }

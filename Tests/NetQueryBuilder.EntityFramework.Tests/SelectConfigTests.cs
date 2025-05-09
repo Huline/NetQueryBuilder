@@ -85,9 +85,9 @@ public class SelectConfigTests
         var query = _queryConfigurator
             .BuildFor<Person>();
 
-        var results = await query.Execute<Person>();
+        var results = await query.Execute<Person>(50);
         Assert.NotNull(results);
-        Assert.All(results, r =>
+        Assert.All(results.Items, r =>
         {
             var person = r;
             Assert.Null(person.FirstName);

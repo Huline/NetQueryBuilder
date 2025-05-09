@@ -20,9 +20,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="..\..\LICENSE" Pack="true" PackagePath="\">
-        <Link>LICENSE</Link>
-      </None>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\">
+            <Link>LICENSE</Link>
+        </None>
         <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 </Project>

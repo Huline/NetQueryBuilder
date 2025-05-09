@@ -30,7 +30,7 @@ namespace NetQueryBuilder.Operators
         {
             unchecked
             {
-                int hashCode = base.GetHashCode();
+                var hashCode = base.GetHashCode();
                 hashCode = (hashCode * 397) ^ (MethodInfo != null ? MethodInfo.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ IsNegated.GetHashCode();
                 return hashCode;
