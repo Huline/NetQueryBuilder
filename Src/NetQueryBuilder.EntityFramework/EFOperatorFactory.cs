@@ -1,5 +1,6 @@
 ﻿using NetQueryBuilder.EntityFramework.Operators;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Properties;
 
 namespace NetQueryBuilder.EntityFramework;
 

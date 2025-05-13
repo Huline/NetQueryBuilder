@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Properties;
 
 namespace NetQueryBuilder.Conditions
 {

@@ -1,0 +1,51 @@
+<UserControl x:Class="NetQueryBuilder.WPF.Controls.QueryEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Sélection des propriétés à retourner -->
+        <GroupBox Header="Sélection des propriétés" Grid.Row="0" Margin="0,0,0,8">
+            <ScrollViewer Height="120">
+                <ItemsControl ItemsSource="{Binding Query.SelectPropertyPaths}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Property.PropertyFullName}"
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </GroupBox>
+
+        <!-- Construction des conditions -->
+        <GroupBox Header="Conditions (filter)" Grid.Row="1" Margin="0,0,0,8">
+            <!-- Ceci peut être remplacé par un contrôle plus sophistiqué plus tard -->
+            <StackPanel>
+                <ItemsControl ItemsSource="{Binding Query.ConditionPropertyPaths}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding PropertyFullName}" />
+                            <!-- Ajouter ici des contrôles de saisie pour la valeur de condition -->
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="L'édition avancée des conditions pourra se faire dans un contrôle dédié."
+                           Foreground="Gray" FontStyle="Italic" Margin="4" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Actions et aperçu -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Exécuter" Command="{Binding ExecuteQueryCommand}" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding QuerySummary}" VerticalAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</UserControl>

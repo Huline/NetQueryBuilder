@@ -1,3 +1,5 @@
+using NetQueryBuilder.Properties;
+
 namespace NetQueryBuilder.Tests.Mocks;
 
 public class TestStringifier : IPropertyStringifier

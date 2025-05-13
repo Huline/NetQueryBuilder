@@ -1,3 +1,5 @@
+using NetQueryBuilder.Properties;
+
 namespace NetQueryBuilder.EntityFramework.Tests.Data;
 
 public class TestStringifier : IPropertyStringifier

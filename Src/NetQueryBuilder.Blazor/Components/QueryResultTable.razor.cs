@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using NetQueryBuilder.Properties;
+using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.Blazor.Components;
 
 public partial class QueryResultTable<TEntity> : ComponentBase
 {
-    [Parameter] [EditorRequired] public IReadOnlyCollection<TEntity> Data { get; set; } = new List<TEntity>();
+    [Parameter] public QueryResult<TEntity>? Results { get; set; }
     [Parameter] [EditorRequired] public IReadOnlyCollection<SelectPropertyPath> Properties { get; set; } = new List<SelectPropertyPath>();
     [Parameter] public int TotalItems { get; set; }
 
@@ -16,18 +18,16 @@ public partial class QueryResultTable<TEntity> : ComponentBase
     [Parameter] public bool Hover { get; set; } = true;
     [Parameter] public bool Dense { get; set; }
 
-    public QueryResultPageState PageState { get; } = new();
 
     private IEnumerable<SelectPropertyPath> SelectedProperties => Properties.Where(p => p.IsSelected);
 
     public void Dispose()
     {
-        PageState.StateChanged -= OnPageStateChanged;
     }
+
 
     protected override void OnInitialized()
     {
-        PageState.StateChanged += OnPageStateChanged;
         base.OnInitialized();
     }
 

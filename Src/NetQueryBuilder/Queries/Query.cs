@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NetQueryBuilder.Conditions;
 using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Properties;
 using NetQueryBuilder.Utils;
 
 namespace NetQueryBuilder.Queries

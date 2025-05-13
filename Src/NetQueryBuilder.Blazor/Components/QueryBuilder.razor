@@ -1,4 +1,5 @@
 ﻿@using NetQueryBuilder.Blazor.Components.Conditions
+@using NetQueryBuilder.Properties
 @typeparam TEntity where TEntity : class
 
 <MudPaper Elevation="3" Class="pa-4 mb-4">
@@ -42,5 +43,5 @@
 
 <MudPaper Elevation="3" Class="pa-4">
     <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">RÉSULTATS</MudText>
-    <QueryResultTable @ref="_queryResult" TEntity="TEntity" Data="_data" Properties="_selectedPropertyPaths" TotalItems="_totalItems"/>
+    <QueryResultTable @ref="_queryResult" TEntity="TEntity" Properties="_selectedPropertyPaths" TotalItems="_totalItems" />
 </MudPaper>

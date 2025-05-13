@@ -1,20 +1,19 @@
 ﻿using Microsoft.AspNetCore.Components;
 using NetQueryBuilder.Configurations;
+using NetQueryBuilder.Properties;
 using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.Blazor.Components;
 
 public partial class QueryBuilder<TEntity> : IAsyncDisposable
 {
-    private IReadOnlyCollection<TEntity> _data = new List<TEntity>();
     private IQuery _query = null!;
-    private QueryResultTable<TEntity> _queryResult = null!;
+    private QueryResultTable<TEntity> _queryResult;
     private IReadOnlyCollection<SelectPropertyPath> _selectedPropertyPaths = new List<SelectPropertyPath>();
     private int _totalItems;
 
     [Inject] private IQueryConfigurator QueryConfigurator { get; set; } = null!;
     [Parameter] public string Expression { get; set; } = string.Empty;
-    public List<PropertyPath> SelectedProperty => _selectedPropertyPaths.Select(s => s.Property).ToList();
 
     public ValueTask DisposeAsync()
     {
@@ -31,11 +30,6 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
         await base.OnInitializedAsync();
     }
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender) _queryResult.PageState.StateChanged += OnPageStateChanged;
-        base.OnAfterRender(firstRender);
-    }
 
     private void OnConditionConditionChanged(object? sender, EventArgs args)
     {
@@ -50,21 +44,7 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 
     private async Task RunQuery()
     {
-        // Obtenir l'état de pagination actuel
-        var pageSize = _queryResult.PageState.PageSize;
-        var currentPage = _queryResult.PageState.CurrentPage;
-        var offset = currentPage * pageSize;
-
-        // Exécuter la requête avec pagination
-        var result = await _query.Execute<TEntity>(pageSize);
-
-        // Mettre à jour les données affichées
-        _data = result.Items ?? new List<TEntity>();
-
-        // Mettre à jour le nombre total d'éléments (requête distincte)
-        _totalItems = result.TotalItems;
-
-        // Forcer la mise à jour de l'interface
+        _queryResult.Results = await _query.Execute<TEntity>(10);
         StateHasChanged();
     }
 

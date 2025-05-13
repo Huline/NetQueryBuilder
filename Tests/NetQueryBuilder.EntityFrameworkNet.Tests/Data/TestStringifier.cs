@@ -1,4 +1,5 @@
 using System;
+using NetQueryBuilder.Properties;
 
 namespace NetQueryBuilder.EntityFrameworkNet.Tests.Data
 {

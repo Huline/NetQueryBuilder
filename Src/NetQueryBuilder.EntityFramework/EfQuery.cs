@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Properties;
 using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.EntityFramework;

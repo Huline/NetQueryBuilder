@@ -3,55 +3,61 @@
 @implements IDisposable
 
 <MudPaper Elevation="0" Class="mt-2">
-    <MudTable Items="@Data"
-              Bordered="@Bordered"
-              Striped="@Striped"
-              Loading="@Loading"
-              LoadingProgressColor="@LoadingColor"
-              Hover="@Hover"
-              Dense="@Dense"
-              Virtualize="true"
-              FixedHeader="true"
-              Height="400px"
-              CurrentPage="@PageState.CurrentPage"
-              RowsPerPage="@PageState.PageSize">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Results (@TotalItems)</MudText>
-            <MudSpacer/>
-            <MudTextField
-                T="string"
-                Placeholder="Search..."
-                Adornment="Adornment.Start"
-                AdornmentIcon="@Icons.Material.Filled.Search"
-                IconSize="Size.Medium"
-                Class="mt-0"/>
-        </ToolBarContent>
-        <HeaderContent>
-            @foreach (var property in SelectedProperties)
-            {
-                <MudTh>
-                    <MudText Typo="Typo.subtitle2">@property.Property.DisplayName()</MudText>
-                </MudTh>
-            }
-        </HeaderContent>
-        <RowTemplate>
-            @foreach (var propertyPath in SelectedProperties)
-            {
-                <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
-            }
-        </RowTemplate>
-        <NoRecordsContent>
-            <MudAlert Severity="Severity.Info" Class="my-2">Aucun résultat trouvé</MudAlert>
-        </NoRecordsContent>
-        <LoadingContent>
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
-            <MudText Class="ms-2">Loading...</MudText>
-        </LoadingContent>
-        <PagerContent>
-            <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"
-                           PageChanged="@((int page) => PageState.OnPageChanged(page))"
-                           PageSizeChanged="@((int size) => PageState.OnPageSizeChanged(size))"
-                           Count="@TotalItems"/>
-        </PagerContent>
-    </MudTable>
+    @if (Results == null)
+    {
+        <label>Run a query</label>
+    }
+    else
+    {
+        <MudTable Items="@Results.Items"
+                  Bordered="@Bordered"
+                  Striped="@Striped"
+                  Loading="@Loading"
+                  LoadingProgressColor="@LoadingColor"
+                  Hover="@Hover"
+                  Dense="@Dense"
+                  Virtualize="true"
+                  FixedHeader="true"
+                  Height="400px"
+                  CurrentPage="@Results.CurrentPage"
+                  RowsPerPage="@Results.PageSize">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Results (@Results.TotalItems)</MudText>
+                <MudSpacer/>
+                <MudTextField
+                    T="string"
+                    Placeholder="Search..."
+                    Adornment="Adornment.Start"
+                    AdornmentIcon="@Icons.Material.Filled.Search"
+                    IconSize="Size.Medium"
+                    Class="mt-0"/>
+            </ToolBarContent>
+            <HeaderContent>
+                @foreach (var property in SelectedProperties)
+                {
+                    <MudTh>
+                        <MudText Typo="Typo.subtitle2">@property.Property.DisplayName()</MudText>
+                    </MudTh>
+                }
+            </HeaderContent>
+            <RowTemplate>
+                @foreach (var propertyPath in SelectedProperties)
+                {
+                    <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
+                }
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudAlert Severity="Severity.Info" Class="my-2">Aucun résultat trouvé</MudAlert>
+            </NoRecordsContent>
+            <LoadingContent>
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                <MudText Class="ms-2">Loading...</MudText>
+            </LoadingContent>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"
+                               PageChanged="@((int page) => Results.GoToPage(page))"
+                               Count="@Results.TotalItems"/>
+            </PagerContent>
+        </MudTable>
+    }
 </MudPaper>

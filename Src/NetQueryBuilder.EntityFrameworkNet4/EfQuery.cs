@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Properties;
 using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.EntityFrameworkNet4

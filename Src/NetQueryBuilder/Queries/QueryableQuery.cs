@@ -2,6 +2,7 @@
 using System.Linq;
 using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Operators;
+using NetQueryBuilder.Properties;
 
 namespace NetQueryBuilder.Queries
 {
