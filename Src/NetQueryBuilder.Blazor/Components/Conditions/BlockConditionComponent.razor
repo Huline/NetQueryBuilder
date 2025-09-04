@@ -1,43 +1,45 @@
 ﻿@using System.Linq.Expressions
 @using NetQueryBuilder.Conditions
-<MudPaper Class="pa-2" Style=@("margin-left:" + IndentationLevel * 20 + "px;")>
-    <MudGrid Spacing="3">
-        <MudItem xs="12" sm="12">
-            <MudStack Row Spacing="3">
-                <MudButton Variant="Variant.Outlined" OnClick="@(() => AddPredicate(ExpressionType.AndAlso))">And/Or</MudButton>
-                <MudButton Variant="Variant.Outlined" OnClick="@(() => GroupConditions())">Group</MudButton>
+<div class="nqb-paper" style="padding: 16px; margin-left: @(IndentationLevel * 20)px;">
+    <div class="nqb-grid nqb-grid-cols-1" style="gap: 24px;">
+        <div>
+            <div class="nqb-stack nqb-stack-horizontal" style="gap: 12px;">
+                <Button Variant="outlined" OnClick="@(() => AddPredicate(ExpressionType.AndAlso))">And/Or</Button>
+                <Button Variant="outlined" OnClick="@(() => GroupConditions())">Group</Button>
                 @if (Condition.Parent != null)
                 {
-                    <MudButton Variant="Variant.Outlined" OnClick="@(() => UnGroupConditions())">Ungroup</MudButton>
+                    <Button Variant="outlined" OnClick="@(() => UnGroupConditions())">Ungroup</Button>
                 }
-            </MudStack>
-        </MudItem>
+            </div>
+        </div>
         @foreach (var childCondition in Condition.Conditions)
         {
             if (childCondition != Condition.Conditions.First())
             {
-                <MudItem xs="12" sm="12">
-                    <MudSelect T="LogicalOperator" Label="Operator" Value="@childCondition.LogicalOperator" ValueChanged="@(v => ChangeOperator(childCondition, v))">
-                        @foreach (var item in _operators)
-                        {
-                            <MudSelectItem T="LogicalOperator" Value="@item">@item.ToString()</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
+                <div>
+                    <Select T="LogicalOperator" Label="Operator" Value="@childCondition.LogicalOperator" ValueChanged="@(v => ChangeOperator(childCondition, v))" Items="@_operators" ToStringFunc="@(item => item.ToString())" />
+                </div>
             }
 
-            <MudItem xs="12" sm="2">
-                <MudStack Row Spacing="3">
-                    <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(childCondition)"></MudIconButton>
-                    <MudCheckBox T="bool" Label="Group" ValueChanged="@(e => Select(e, childCondition))"/>
-                </MudStack>
-            </MudItem>
-            <MudItem xs="12" sm="10">
+            <div>
+                <div class="nqb-stack nqb-stack-horizontal" style="gap: 12px;">
+                    <button type="button" class="nqb-button nqb-button-outlined nqb-button-icon" @onclick="@(e => RemovePredicate(childCondition))">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <label class="nqb-checkbox-wrapper">
+                        <input type="checkbox" class="nqb-checkbox" @onchange="@(e => Select((bool)e.Value!, childCondition))" />
+                        <span>Group</span>
+                    </label>
+                </div>
+            </div>
+            <div style="grid-column: span 10;">
                 <ConditionComponent Condition="childCondition"></ConditionComponent>
-            </MudItem>
+            </div>
         }
-    </MudGrid>
-</MudPaper>
+    </div>
+</div>
 
 @code {
     [Parameter] public BlockCondition Condition { get; set; } = null!;

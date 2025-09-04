@@ -1,0 +1,126 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+
+<span class="@GetChipClass()" @onclick="HandleClick">
+    @if (Icon != null)
+    {
+        <span class="nqb-chip-icon">
+            @Icon
+        </span>
+    }
+    
+    <span class="nqb-chip-text">
+        @if (!string.IsNullOrEmpty(Text))
+        {
+            @Text
+        }
+        else
+        {
+            @ChildContent
+        }
+    </span>
+    
+    @if (OnDelete.HasDelegate)
+    {
+        <span class="nqb-chip-delete" @onclick="HandleDelete" @onclick:stopPropagation="true">
+            @if (DeleteIcon != null)
+            {
+                @DeleteIcon
+            }
+            else
+            {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" fill="currentColor"/>
+                </svg>
+            }
+        </span>
+    }
+</span>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public RenderFragment? DeleteIcon { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnDelete { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string Variant { get; set; } = "filled"; // "filled", "outlined"
+    [Parameter] public string Color { get; set; } = "default"; // "default", "primary", "secondary", etc.
+    [Parameter] public string Size { get; set; } = "medium"; // "small", "medium", "large"
+    [Parameter] public bool Clickable { get; set; }
+    [Parameter] public string? Class { get; set; }
+
+    private string GetChipClass()
+    {
+        var cssClass = "nqb-chip";
+        
+        // Variant
+        if (Variant == "outlined")
+            cssClass += " nqb-chip-outlined";
+        
+        // Color
+        switch (Color.ToLowerInvariant())
+        {
+            case "primary":
+                cssClass += " nqb-chip-primary";
+                break;
+            case "secondary":
+                cssClass += " nqb-chip-secondary";
+                break;
+            case "success":
+                cssClass += " nqb-chip-success";
+                break;
+            case "error":
+                cssClass += " nqb-chip-error";
+                break;
+            case "warning":
+                cssClass += " nqb-chip-warning";
+                break;
+            case "info":
+                cssClass += " nqb-chip-info";
+                break;
+        }
+        
+        // Size
+        switch (Size.ToLowerInvariant())
+        {
+            case "small":
+                cssClass += " nqb-chip-small";
+                break;
+            case "large":
+                cssClass += " nqb-chip-large";
+                break;
+        }
+        
+        // State
+        if (Disabled)
+            cssClass += " nqb-chip-disabled";
+        
+        if (Clickable || OnClick.HasDelegate)
+            cssClass += " nqb-chip-clickable";
+            
+        if (OnDelete.HasDelegate)
+            cssClass += " nqb-chip-deletable";
+        
+        if (!string.IsNullOrEmpty(Class))
+            cssClass += $" {Class}";
+            
+        return cssClass;
+    }
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        if (!Disabled && (Clickable || OnClick.HasDelegate))
+        {
+            await OnClick.InvokeAsync(e);
+        }
+    }
+
+    private async Task HandleDelete(MouseEventArgs e)
+    {
+        if (!Disabled && OnDelete.HasDelegate)
+        {
+            await OnDelete.InvokeAsync(e);
+        }
+    }
+}

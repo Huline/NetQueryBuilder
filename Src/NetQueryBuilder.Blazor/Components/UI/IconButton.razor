@@ -1,0 +1,108 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+
+<button @ref="_buttonElement"
+        type="@ButtonType"
+        class="@GetButtonClass()"
+        disabled="@Disabled"
+        @onclick="HandleClick"
+        @attributes="AdditionalAttributes"
+        title="@Title">
+    
+    @if (Icon != null)
+    {
+        @Icon
+    }
+    else if (!string.IsNullOrEmpty(IconClass))
+    {
+        <i class="@IconClass"></i>
+    }
+    else
+    {
+        @ChildContent
+    }
+</button>
+
+@code {
+    private ElementReference _buttonElement;
+
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public string? IconClass { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string Variant { get; set; } = "text"; // "text", "outlined", "filled"
+    [Parameter] public string Color { get; set; } = "default"; // "default", "primary", "secondary", etc.
+    [Parameter] public string Size { get; set; } = "medium"; // "small", "medium", "large"
+    [Parameter] public string ButtonType { get; set; } = "button";
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetButtonClass()
+    {
+        var cssClass = "nqb-button nqb-button-icon";
+        
+        // Variant
+        switch (Variant.ToLowerInvariant())
+        {
+            case "outlined":
+                cssClass += " nqb-button-outlined";
+                break;
+            case "filled":
+            case "contained":
+                cssClass += " nqb-button-filled";
+                break;
+            default:
+                cssClass += " nqb-button-text";
+                break;
+        }
+        
+        // Color
+        switch (Color.ToLowerInvariant())
+        {
+            case "primary":
+                cssClass += " nqb-button-primary";
+                break;
+            case "secondary":
+                cssClass += " nqb-button-secondary";
+                break;
+            case "success":
+                cssClass += " nqb-button-success";
+                break;
+            case "error":
+            case "danger":
+                cssClass += " nqb-button-error";
+                break;
+            case "warning":
+                cssClass += " nqb-button-warning";
+                break;
+            case "info":
+                cssClass += " nqb-button-info";
+                break;
+        }
+        
+        // Size
+        switch (Size.ToLowerInvariant())
+        {
+            case "small":
+                cssClass += " nqb-button-icon-small";
+                break;
+            case "large":
+                cssClass += " nqb-button-icon-large";
+                break;
+        }
+        
+        if (!string.IsNullOrEmpty(Class))
+            cssClass += $" {Class}";
+            
+        return cssClass;
+    }
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        if (!Disabled && OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(e);
+        }
+    }
+}

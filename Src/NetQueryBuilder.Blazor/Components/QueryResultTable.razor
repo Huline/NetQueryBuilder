@@ -2,62 +2,100 @@
 @typeparam TEntity where TEntity : class
 @implements IDisposable
 
-<MudPaper Elevation="0" Class="mt-2">
+<div class="nqb-paper" style="margin-top: 16px;">
     @if (Results == null)
     {
         <label>Run a query</label>
     }
     else
     {
-        <MudTable Items="@Results.Items"
-                  Bordered="@Bordered"
-                  Striped="@Striped"
-                  Loading="@Loading"
-                  LoadingProgressColor="@LoadingColor"
-                  Hover="@Hover"
-                  Dense="@Dense"
-                  Virtualize="true"
-                  FixedHeader="true"
-                  Height="400px"
-                  CurrentPage="@Results.CurrentPage"
-                  RowsPerPage="@Results.PageSize">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Results (@Results.TotalItems)</MudText>
-                <MudSpacer/>
-                <MudTextField
-                    T="string"
+        <div>
+            <!-- Toolbar -->
+            <div class="nqb-stack nqb-stack-horizontal" style="padding: 16px; justify-content: space-between; align-items: center;">
+                <h6 class="nqb-text-h6">Results (@Results.TotalItems)</h6>
+                <div class="nqb-spacer"></div>
+                <TextField 
                     Placeholder="Search..."
-                    Adornment="Adornment.Start"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    IconSize="Size.Medium"
-                    Class="mt-0"/>
-            </ToolBarContent>
-            <HeaderContent>
-                @foreach (var property in SelectedProperties)
-                {
-                    <MudTh>
-                        <MudText Typo="Typo.subtitle2">@property.Property.DisplayName()</MudText>
-                    </MudTh>
-                }
-            </HeaderContent>
-            <RowTemplate>
-                @foreach (var propertyPath in SelectedProperties)
-                {
-                    <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
-                }
-            </RowTemplate>
-            <NoRecordsContent>
-                <MudAlert Severity="Severity.Info" Class="my-2">Aucun résultat trouvé</MudAlert>
-            </NoRecordsContent>
-            <LoadingContent>
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
-                <MudText Class="ms-2">Loading...</MudText>
-            </LoadingContent>
-            <PagerContent>
-                <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"
-                               PageChanged="@((int page) => Results.GoToPage(page))"
-                               Count="@Results.TotalItems"/>
-            </PagerContent>
-        </MudTable>
+                    @bind-Value="@_searchTerm" />
+            </div>
+            
+            <!-- Table -->
+            @if (Loading)
+            {
+                <div style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+                    <Progress Variant="circular" Color="@LoadingColor" />
+                    <span style="margin-left: 16px;">Loading...</span>
+                </div>
+            }
+            else
+            {
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="@GetTableClass()">
+                        <thead>
+                            <tr>
+                                @foreach (var property in SelectedProperties)
+                                {
+                                    <th>
+                                        <span class="nqb-text-subtitle2">@property.Property.DisplayName()</span>
+                                    </th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Results.Items?.Any() == true)
+                            {
+                                @foreach (var item in Results.Items)
+                                {
+                                    <tr>
+                                        @foreach (var propertyPath in SelectedProperties)
+                                        {
+                                            <td>@propertyPath.Property.DisplayValue(item)</td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="@SelectedProperties.Count()">
+                                        <Alert Severity="info" style="margin: 16px 0;">
+                                            Aucun résultat trouvé
+                                        </Alert>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="nqb-pagination">
+                    <div class="nqb-pagination-info">
+                        Page @Results.CurrentPage de @((Results.TotalItems + Results.PageSize - 1) / Results.PageSize)
+                    </div>
+                    <div class="nqb-pagination-controls">
+                        <button type="button" class="nqb-button nqb-button-icon" 
+                                @onclick="@(() => Results.GoToPage(Results.CurrentPage - 1))" 
+                                disabled="@(Results.CurrentPage <= 1)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <span style="margin: 0 16px;">@Results.CurrentPage</span>
+                        <button type="button" class="nqb-button nqb-button-icon" 
+                                @onclick="@(() => Results.GoToPage(Results.CurrentPage + 1))" 
+                                disabled="@(Results.CurrentPage >= (Results.TotalItems + Results.PageSize - 1) / Results.PageSize)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12L10 6Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
     }
-</MudPaper>
+</div>
+
+@code {
+    private string _searchTerm = "";
+}

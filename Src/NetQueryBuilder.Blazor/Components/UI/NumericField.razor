@@ -1,0 +1,376 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+@using System.Globalization
+@typeparam T where T : struct
+
+<div class="@GetWrapperClass()" style="@Style">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="nqb-numericfield-label @GetLabelClass()" for="@_inputId">
+            @Label
+            @if (Required && ShowRequiredAsterisk)
+            {
+                <span class="nqb-required-asterisk">*</span>
+            }
+        </label>
+    }
+    
+    <div class="nqb-numericfield-input-container @GetInputContainerClass()">
+        @if (StartAdornment != null)
+        {
+            <div class="nqb-numericfield-adornment nqb-numericfield-adornment-start">
+                @StartAdornment
+            </div>
+        }
+        
+        <input @ref="_inputElement"
+               id="@_inputId"
+               type="number"
+               class="@GetInputClass()"
+               value="@_stringValue"
+               @onchange="HandleChange"
+               @oninput="HandleInput"
+               @onfocus="HandleFocus"
+               @onblur="HandleBlur"
+               disabled="@Disabled"
+               readonly="@ReadOnly"
+               placeholder="@GetPlaceholder()"
+               min="@Min"
+               max="@Max"
+               step="@Step"
+               required="@Required"
+               inputmode="@GetInputMode()" />
+        
+        @if (ShowSpinButtons && !Disabled && !ReadOnly)
+        {
+            <div class="nqb-numericfield-spin-buttons">
+                <button type="button" class="nqb-numericfield-spin-button nqb-numericfield-spin-up" 
+                        @onclick="IncrementValue" tabindex="-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 15.41L12 10.83L16.59 15.41L18 14L12 8L6 14L7.41 15.41Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button type="button" class="nqb-numericfield-spin-button nqb-numericfield-spin-down" 
+                        @onclick="DecrementValue" tabindex="-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        }
+        
+        @if (EndAdornment != null || Adornment != null)
+        {
+            <div class="nqb-numericfield-adornment nqb-numericfield-adornment-end">
+                @(EndAdornment ?? Adornment)
+            </div>
+        }
+        
+        @if (ShowClearButton && HasValue && !Disabled && !ReadOnly)
+        {
+            <button type="button" class="nqb-numericfield-clear-button" @onclick="ClearValue" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        }
+    </div>
+    
+    @if (!string.IsNullOrEmpty(HelperText) && !Error)
+    {
+        <div class="nqb-numericfield-helper-text">
+            @HelperText
+        </div>
+    }
+    
+    @if (Error && !string.IsNullOrEmpty(ErrorText))
+    {
+        <div class="nqb-numericfield-error-text">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="nqb-error-icon">
+                <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12S17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="currentColor"/>
+            </svg>
+            @ErrorText
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference _inputElement;
+    private string _inputId = $"nqb-numericfield-{Guid.NewGuid():N}";
+    private string _stringValue = "";
+    private bool _isFocused = false;
+
+    // Core parameters
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public EventCallback<T?> ValueChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? HelperText { get; set; }
+    [Parameter] public string? ErrorText { get; set; }
+    [Parameter] public bool Error { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    
+    // Numeric configuration
+    [Parameter] public double? Min { get; set; }
+    [Parameter] public double? Max { get; set; }
+    [Parameter] public double Step { get; set; } = 1;
+    [Parameter] public int DecimalPlaces { get; set; } = -1;
+    [Parameter] public string NumberFormat { get; set; } = "";
+    [Parameter] public CultureInfo? Culture { get; set; }
+    
+    // Styling and behavior
+    [Parameter] public string Variant { get; set; } = "outlined"; // outlined, filled, standard
+    [Parameter] public string Size { get; set; } = "medium"; // small, medium, large
+    [Parameter] public string Density { get; set; } = "default"; // compact, default, spacious
+    [Parameter] public bool Immediate { get; set; }
+    [Parameter] public bool ShowSpinButtons { get; set; } = true;
+    [Parameter] public bool ShowClearButton { get; set; }
+    [Parameter] public bool ShowRequiredAsterisk { get; set; } = true;
+    [Parameter] public bool FullWidth { get; set; } = true;
+    [Parameter] public bool AllowNegative { get; set; } = true;
+    [Parameter] public bool HideSpinButtonsOnMobile { get; set; } = true;
+    
+    // Adornments
+    [Parameter] public RenderFragment? StartAdornment { get; set; }
+    [Parameter] public RenderFragment? EndAdornment { get; set; }
+    [Parameter] public RenderFragment? Adornment { get; set; } // Legacy support
+    
+    // Events
+    [Parameter] public EventCallback<FocusEventArgs> OnFocus { get; set; }
+    [Parameter] public EventCallback<FocusEventArgs> OnBlur { get; set; }
+    [Parameter] public EventCallback<T?> OnIncrement { get; set; }
+    [Parameter] public EventCallback<T?> OnDecrement { get; set; }
+    
+    // Customization
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+
+    private CultureInfo EffectiveCulture => Culture ?? CultureInfo.CurrentCulture;
+    private bool HasValue => Value.HasValue;
+
+    protected override void OnParametersSet()
+    {
+        if (Value.HasValue)
+        {
+            if (!string.IsNullOrEmpty(NumberFormat))
+            {
+                _stringValue = string.Format(EffectiveCulture, $"{{0:{NumberFormat}}}", Value);
+            }
+            else if (DecimalPlaces >= 0)
+            {
+                _stringValue = string.Format(EffectiveCulture, $"{{0:F{DecimalPlaces}}}", Value);
+            }
+            else
+            {
+                _stringValue = Value.Value.ToString();
+            }
+        }
+        else
+        {
+            _stringValue = "";
+        }
+    }
+
+    private string GetWrapperClass()
+    {
+        var classes = new List<string> { "nqb-numericfield" };
+        
+        if (FullWidth) classes.Add("nqb-numericfield-fullwidth");
+        if (Disabled) classes.Add("nqb-numericfield-disabled");
+        if (ReadOnly) classes.Add("nqb-numericfield-readonly");
+        if (Error) classes.Add("nqb-numericfield-error");
+        if (_isFocused) classes.Add("nqb-numericfield-focused");
+        
+        classes.Add($"nqb-numericfield-{Variant}");
+        classes.Add($"nqb-numericfield-{Size}");
+        classes.Add($"nqb-numericfield-density-{Density}");
+        
+        if (!string.IsNullOrEmpty(Class)) classes.Add(Class);
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string GetLabelClass()
+    {
+        var classes = new List<string>();
+        
+        if (_isFocused || HasValue) classes.Add("nqb-numericfield-label-focused");
+        if (Error) classes.Add("nqb-numericfield-label-error");
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string GetInputContainerClass()
+    {
+        var classes = new List<string>();
+        
+        if (StartAdornment != null) classes.Add("nqb-numericfield-has-start-adornment");
+        if (EndAdornment != null || Adornment != null) classes.Add("nqb-numericfield-has-end-adornment");
+        if (ShowSpinButtons) classes.Add("nqb-numericfield-has-spin-buttons");
+        if (ShowClearButton && HasValue) classes.Add("nqb-numericfield-has-clear-button");
+        
+        return string.Join(" ", classes);
+    }
+
+    private string GetInputClass()
+    {
+        return "nqb-numericfield-input";
+    }
+    
+    private string? GetPlaceholder()
+    {
+        return Placeholder;
+    }
+    
+    private string GetInputMode()
+    {
+        if (!AllowNegative && (Min ?? 0) >= 0)
+            return "numeric";
+        return "decimal";
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (!Immediate)
+        {
+            await UpdateValue(e.Value?.ToString());
+        }
+    }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        var inputValue = e.Value?.ToString();
+        _stringValue = inputValue ?? "";
+        
+        if (Immediate)
+        {
+            await UpdateValue(inputValue);
+        }
+    }
+    
+    private async Task HandleFocus(FocusEventArgs e)
+    {
+        _isFocused = true;
+        if (OnFocus.HasDelegate)
+            await OnFocus.InvokeAsync(e);
+    }
+    
+    private async Task HandleBlur(FocusEventArgs e)
+    {
+        _isFocused = false;
+        if (OnBlur.HasDelegate)
+            await OnBlur.InvokeAsync(e);
+    }
+
+    private async Task UpdateValue(string? stringValue)
+    {
+        T? newValue = null;
+        
+        if (!string.IsNullOrEmpty(stringValue))
+        {
+            var type = typeof(T);
+            var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+            
+            try
+            {
+                object convertedValue;
+                
+                if (underlyingType == typeof(decimal))
+                {
+                    convertedValue = decimal.Parse(stringValue, EffectiveCulture);
+                }
+                else if (underlyingType == typeof(double))
+                {
+                    convertedValue = double.Parse(stringValue, EffectiveCulture);
+                }
+                else if (underlyingType == typeof(float))
+                {
+                    convertedValue = float.Parse(stringValue, EffectiveCulture);
+                }
+                else
+                {
+                    convertedValue = Convert.ChangeType(stringValue, underlyingType, EffectiveCulture);
+                }
+                
+                newValue = (T)convertedValue;
+                
+                // Apply min/max constraints
+                if (Min.HasValue && Convert.ToDouble(newValue) < Min.Value)
+                    newValue = (T)Convert.ChangeType(Min.Value, underlyingType);
+                else if (Max.HasValue && Convert.ToDouble(newValue) > Max.Value)
+                    newValue = (T)Convert.ChangeType(Max.Value, underlyingType);
+                
+            }
+            catch
+            {
+                // Invalid value, keep current value
+                return;
+            }
+        }
+        
+        Value = newValue;
+        await ValueChanged.InvokeAsync(Value);
+    }
+    
+    private async Task IncrementValue()
+    {
+        var currentValue = Value.HasValue ? Convert.ToDouble(Value) : 0;
+        var newValue = currentValue + Step;
+        
+        if (Max.HasValue && newValue > Max.Value)
+            newValue = Max.Value;
+            
+        await SetNumericValue(newValue);
+        
+        if (OnIncrement.HasDelegate)
+            await OnIncrement.InvokeAsync(Value);
+    }
+    
+    private async Task DecrementValue()
+    {
+        var currentValue = Value.HasValue ? Convert.ToDouble(Value) : 0;
+        var newValue = currentValue - Step;
+        
+        if (Min.HasValue && newValue < Min.Value)
+            newValue = Min.Value;
+            
+        await SetNumericValue(newValue);
+        
+        if (OnDecrement.HasDelegate)
+            await OnDecrement.InvokeAsync(Value);
+    }
+    
+    private async Task SetNumericValue(double numericValue)
+    {
+        var type = typeof(T);
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+        
+        try
+        {
+            var convertedValue = Convert.ChangeType(numericValue, underlyingType);
+            Value = (T)convertedValue;
+            await ValueChanged.InvokeAsync(Value);
+            
+            // Update string representation
+            OnParametersSet();
+        }
+        catch
+        {
+            // Conversion failed, ignore
+        }
+    }
+    
+    private async Task ClearValue()
+    {
+        Value = null;
+        _stringValue = "";
+        await ValueChanged.InvokeAsync(Value);
+        await _inputElement.FocusAsync();
+    }
+    
+    // Public methods for external access
+    public async Task FocusAsync() => await _inputElement.FocusAsync();
+    public async Task IncrementAsync() => await IncrementValue();
+    public async Task DecrementAsync() => await DecrementValue();
+}

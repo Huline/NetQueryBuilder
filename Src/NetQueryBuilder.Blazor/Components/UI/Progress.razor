@@ -1,0 +1,119 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+
+<div class="@GetProgressClass()" style="@GetProgressStyle()">
+    @if (Variant == "circular")
+    {
+        <svg viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="4" opacity="0.2" />
+            <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="4" 
+                    stroke-dasharray="@GetCircleDashArray()" stroke-dashoffset="@GetCircleDashOffset()" 
+                    stroke-linecap="round" transform="rotate(-90 20 20)" />
+        </svg>
+    }
+    else if (Variant == "linear")
+    {
+        <div class="nqb-progress-track">
+            <div class="nqb-progress-bar" style="width: @(Value)%"></div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Variant { get; set; } = "circular"; // "circular", "linear"
+    [Parameter] public string Color { get; set; } = "primary";
+    [Parameter] public string Size { get; set; } = "medium"; // "small", "medium", "large"
+    [Parameter] public double Value { get; set; } = 0; // 0-100
+    [Parameter] public bool Indeterminate { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+
+    private string GetProgressClass()
+    {
+        var cssClass = $"nqb-progress nqb-progress-{Variant}";
+        
+        // Color
+        switch (Color.ToLowerInvariant())
+        {
+            case "primary":
+                cssClass += " nqb-progress-primary";
+                break;
+            case "secondary":
+                cssClass += " nqb-progress-secondary";
+                break;
+            case "success":
+                cssClass += " nqb-progress-success";
+                break;
+            case "error":
+                cssClass += " nqb-progress-error";
+                break;
+            case "warning":
+                cssClass += " nqb-progress-warning";
+                break;
+            case "info":
+                cssClass += " nqb-progress-info";
+                break;
+        }
+        
+        // Size
+        switch (Size.ToLowerInvariant())
+        {
+            case "small":
+                cssClass += " nqb-progress-small";
+                break;
+            case "large":
+                cssClass += " nqb-progress-large";
+                break;
+        }
+        
+        if (Indeterminate)
+            cssClass += " nqb-progress-indeterminate";
+        
+        if (!string.IsNullOrEmpty(Class))
+            cssClass += $" {Class}";
+            
+        return cssClass;
+    }
+
+    private string GetProgressStyle()
+    {
+        var styles = new List<string>();
+        
+        if (Variant == "circular")
+        {
+            var size = Size.ToLowerInvariant() switch
+            {
+                "small" => "24px",
+                "large" => "64px",
+                _ => "40px"
+            };
+            styles.Add($"width: {size}");
+            styles.Add($"height: {size}");
+        }
+        else if (Variant == "linear")
+        {
+            var height = Size.ToLowerInvariant() switch
+            {
+                "small" => "2px",
+                "large" => "8px",
+                _ => "4px"
+            };
+            styles.Add($"height: {height}");
+        }
+        
+        return string.Join("; ", styles);
+    }
+
+    private string GetCircleDashArray()
+    {
+        var circumference = 2 * Math.PI * 18; // radius = 18
+        return circumference.ToString("F1");
+    }
+
+    private string GetCircleDashOffset()
+    {
+        if (Indeterminate) return "0";
+        
+        var circumference = 2 * Math.PI * 18;
+        var offset = circumference - (Value / 100.0 * circumference);
+        return offset.ToString("F1");
+    }
+}

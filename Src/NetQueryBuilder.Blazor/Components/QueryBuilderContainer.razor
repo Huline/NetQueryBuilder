@@ -1,27 +1,22 @@
 ﻿@using NetQueryBuilder.Configurations
 @inject IQueryConfigurator QueryConfigurator
 
-<MudStack Spacing="5">
-    <MudGrid Spacing="10">
-        <MudItem xs="4">
-            <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="NewQuery" Style="margin: auto; vertical-align: center">New Query</MudButton>
-        </MudItem>
-        <MudItem xs="8">
-            <MudStack Row Spacing="4">
-                <MudText Typo="Typo.h5" Style="margin: auto; vertical-align: center">FROM</MudText>
-                <MudSelect T="Type" Label="Entity" ValueChanged="OnEntitySelect" Style="margin: auto; vertical-align: center">
-                    @foreach (var entity in _entities)
-                    {
-                        <MudSelectItem Value="@entity">@entity.Name</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudStack>
-        </MudItem>
-    </MudGrid>
+<div class="nqb-stack nqb-stack-vertical" style="gap: 40px;">
+    <div class="nqb-grid nqb-grid-cols-12" style="gap: 40px; align-items: center;">
+        <div style="grid-column: span 4;">
+            <Button Color="primary" Variant="outlined" OnClick="NewQuery" style="margin: auto;">New Query</Button>
+        </div>
+        <div style="grid-column: span 8;">
+            <div class="nqb-stack nqb-stack-horizontal" style="gap: 32px; align-items: center;">
+                <h5 class="nqb-text-h5" style="margin: 0;">FROM</h5>
+                <Select T="Type" Label="Entity" ValueChanged="OnEntitySelect" Items="_entities" ToStringFunc="@(entity => entity.Name)" />
+            </div>
+        </div>
+    </div>
     <div @key="_queryBuilderKey">
         @CreateQueryBuilder()
     </div>
-</MudStack>
+</div>
 
 @code {
     Type? _selectedEntityType;

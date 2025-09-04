@@ -1,48 +1,50 @@
 ﻿@using System.Linq.Expressions
 @typeparam T
 
-<MudPaper Elevation="0" Class="pa-2" Outlined="true">
-    <MudText Typo="Typo.subtitle2" Class="mb-2">Valeurs de la liste</MudText>
-    <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Class="mb-3">
-        <MudButton StartIcon="@Icons.Material.Filled.Add"
-                   Color="Color.Primary"
-                   OnClick="@OpenDialog">
-            Ajouter une valeur
-        </MudButton>
-    </MudButtonGroup>
+<div class="nqb-paper nqb-paper-outlined" style="padding: 16px;">
+    <h6 class="nqb-text-subtitle2" style="margin-bottom: 16px;">Valeurs de la liste</h6>
+    <div class="nqb-button-group" style="margin-bottom: 24px;">
+        <Button Variant="outlined" 
+                Size="small" 
+                Color="primary"
+                OnClick="@OpenDialog">
+            <Icon Name="add" Size="small" /> Ajouter une valeur
+        </Button>
+    </div>
 
-    @* MultiSelection="true" Filter="true" *@
-    <MudChipSet T="T" Class="mb-2">
+    <div class="nqb-chipset" style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px;">
         @foreach (var item in Items)
         {
-            <MudChip Color="Color.Primary"
-                     Size="Size.Small"
-                     T="T"
-                     OnClose="@(value => RemoveListItem(item))"
-                     Label="true"
-                     CloseIcon="@Icons.Material.Filled.Close">
+            <Chip Color="primary"
+                  Size="small"
+                  OnDelete="@(() => RemoveListItem(item))">
                 @item?.ToString()
-            </MudChip>
+            </Chip>
         }
-    </MudChipSet>
-</MudPaper>
+    </div>
+</div>
 
-<MudDialog @bind-Visible="_showListItemDialog" Options="_listItemDialogOptions">
-    <TitleContent>
-        <MudText Typo="Typo.h6">Ajouter une valeur</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudTextField Label="Valeur" T="T" @bind-Value="_listItemInputValue" Variant="Variant.Outlined"/>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="@(() => _showListItemDialog = false)">
-            Annuler
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@AddListItem">
-            Ajouter
-        </MudButton>
-    </DialogActions>
-</MudDialog>
+@if (_showListItemDialog)
+{
+    <div class="nqb-dialog-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;" @onclick="@(() => _showListItemDialog = false)">
+        <div class="nqb-dialog" style="background: var(--nqb-surface); border-radius: var(--nqb-border-radius); min-width: 400px; max-width: 90vw;" @onclick:stopPropagation="true">
+            <div class="nqb-dialog-title" style="padding: 24px 24px 16px; border-bottom: 1px solid var(--nqb-border-color);">
+                <h6 class="nqb-text-h6" style="margin: 0;">Ajouter une valeur</h6>
+            </div>
+            <div class="nqb-dialog-content" style="padding: 24px;">
+                <TextField Label="Valeur" @bind-Value="_inputStringValue" Variant="outlined"/>
+            </div>
+            <div class="nqb-dialog-actions" style="padding: 16px 24px 24px; display: flex; gap: 8px; justify-content: flex-end;">
+                <Button Variant="text" Color="default" OnClick="@(() => _showListItemDialog = false)">
+                    Annuler
+                </Button>
+                <Button Variant="filled" Color="primary" OnClick="@AddListItem">
+                    Ajouter
+                </Button>
+            </div>
+        </div>
+    </div>
+}
 
 
 @code {
@@ -53,9 +55,10 @@
     [Parameter] public Action<IEnumerable<T>> OnUpdateValues { get; set; } = null!;
 
     private T? _listItemInputValue;
+    private string _inputStringValue = "";
     private List<T> _items = new();
     private bool _showListItemDialog;
-    private readonly DialogOptions _listItemDialogOptions = new() { CloseButton = true };
+    // Removed DialogOptions - now using simple boolean for dialog visibility
 
     // Propriété pour accéder aux éléments de manière cohérente
     private IEnumerable<T> Items => _items;
@@ -81,11 +84,47 @@
 
     private void AddListItem()
     {
-        if (_listItemInputValue is not null)
-            _items.Add(_listItemInputValue);
+        if (!string.IsNullOrEmpty(_inputStringValue))
+        {
+            // Try to convert string input to type T
+            var convertedValue = ConvertStringToT(_inputStringValue);
+            if (convertedValue is not null)
+            {
+                _items.Add(convertedValue);
+            }
+        }
         _showListItemDialog = false;
-        _listItemInputValue = default;
+        _inputStringValue = "";
         UpdateValues(_items);
+    }
+    
+    private T? ConvertStringToT(string value)
+    {
+        try
+        {
+            var type = typeof(T);
+            var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+            
+            if (underlyingType == typeof(string))
+            {
+                return (T)(object)value;
+            }
+            else if (underlyingType.IsEnum)
+            {
+                if (Enum.TryParse(underlyingType, value, true, out var enumValue))
+                    return (T)enumValue;
+            }
+            else
+            {
+                var converted = Convert.ChangeType(value, underlyingType, System.Globalization.CultureInfo.InvariantCulture);
+                return (T)converted;
+            }
+        }
+        catch
+        {
+            // Ignore conversion errors
+        }
+        return default(T);
     }
 
     private void RemoveListItem(T item)

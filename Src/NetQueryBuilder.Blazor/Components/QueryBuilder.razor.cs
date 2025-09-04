@@ -54,4 +54,10 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
         var selectPropertyPaths = obj.ToHashSet();
         foreach (var selectedPropertyPath in _selectedPropertyPaths) selectedPropertyPath.IsSelected = selectPropertyPaths.Contains(selectedPropertyPath);
     }
+    
+    private void TogglePropertySelection(SelectPropertyPath property, bool isSelected)
+    {
+        property.IsSelected = isSelected;
+        StateHasChanged();
+    }
 }

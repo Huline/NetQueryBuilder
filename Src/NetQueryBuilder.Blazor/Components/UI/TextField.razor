@@ -1,0 +1,253 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+
+<div class="@GetWrapperClass()" style="@Style">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="nqb-textfield-label @GetLabelClass()" for="@_inputId">
+            @Label
+            @if (Required && ShowRequiredAsterisk)
+            {
+                <span class="nqb-required-asterisk">*</span>
+            }
+        </label>
+    }
+    
+    <div class="nqb-textfield-input-container @GetInputContainerClass()">
+        @if (StartAdornment != null)
+        {
+            <div class="nqb-textfield-adornment nqb-textfield-adornment-start">
+                @StartAdornment
+            </div>
+        }
+        
+        @if (InputType == "text" || InputType == "email" || InputType == "password" || InputType == "search" || InputType == "url" || InputType == "tel")
+        {
+            <input @ref="_inputElement"
+                   id="@_inputId"
+                   type="@InputType"
+                   class="@GetInputClass()"
+                   value="@Value"
+                   @onchange="HandleChange"
+                   @oninput="HandleInput"
+                   @onfocus="HandleFocus"
+                   @onblur="HandleBlur"
+                   disabled="@Disabled"
+                   readonly="@ReadOnly"
+                   placeholder="@GetPlaceholder()"
+                   required="@Required"
+                   maxlength="@MaxLength"
+                   minlength="@MinLength"
+                   autocomplete="@AutoComplete" />
+        }
+        else if (InputType == "textarea")
+        {
+            <textarea @ref="_textareaElement"
+                      id="@_inputId"
+                      class="@GetInputClass()"
+                      value="@Value"
+                      @onchange="HandleChange"
+                      @oninput="HandleInput"
+                      @onfocus="HandleFocus"
+                      @onblur="HandleBlur"
+                      disabled="@Disabled"
+                      readonly="@ReadOnly"
+                      placeholder="@GetPlaceholder()"
+                      rows="@Rows"
+                      required="@Required"
+                      maxlength="@MaxLength"
+                      minlength="@MinLength"></textarea>
+        }
+        
+        @if (EndAdornment != null || Adornment != null)
+        {
+            <div class="nqb-textfield-adornment nqb-textfield-adornment-end">
+                @(EndAdornment ?? Adornment)
+            </div>
+        }
+        
+        @if (ShowClearButton && !string.IsNullOrEmpty(Value) && !Disabled && !ReadOnly)
+        {
+            <button type="button" class="nqb-textfield-clear-button" @onclick="ClearValue" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        }
+    </div>
+    
+    @if (ShowCharacterCount && MaxLength > 0)
+    {
+        <div class="nqb-textfield-character-count">
+            @(Value?.Length ?? 0)/@MaxLength
+        </div>
+    }
+    
+    @if (!string.IsNullOrEmpty(HelperText) && !Error)
+    {
+        <div class="nqb-textfield-helper-text">
+            @HelperText
+        </div>
+    }
+    
+    @if (Error && !string.IsNullOrEmpty(ErrorText))
+    {
+        <div class="nqb-textfield-error-text">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="nqb-error-icon">
+                <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12S17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="currentColor"/>
+            </svg>
+            @ErrorText
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference _inputElement;
+    private ElementReference _textareaElement;
+    private string _inputId = $"nqb-textfield-{Guid.NewGuid():N}";
+    private bool _isFocused = false;
+
+    // Core parameters
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? HelperText { get; set; }
+    [Parameter] public string? ErrorText { get; set; }
+    [Parameter] public bool Error { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    
+    // Input configuration
+    [Parameter] public string InputType { get; set; } = "text";
+    [Parameter] public int Rows { get; set; } = 3;
+    [Parameter] public int MaxLength { get; set; } = 0;
+    [Parameter] public int MinLength { get; set; } = 0;
+    [Parameter] public string? AutoComplete { get; set; }
+    
+    // Styling and behavior
+    [Parameter] public string Variant { get; set; } = "outlined"; // outlined, filled, standard
+    [Parameter] public string Size { get; set; } = "medium"; // small, medium, large
+    [Parameter] public string Density { get; set; } = "default"; // compact, default, spacious
+    [Parameter] public bool Immediate { get; set; }
+    [Parameter] public bool ShowClearButton { get; set; }
+    [Parameter] public bool ShowCharacterCount { get; set; }
+    [Parameter] public bool ShowRequiredAsterisk { get; set; } = true;
+    [Parameter] public bool FullWidth { get; set; } = true;
+    
+    // Adornments
+    [Parameter] public RenderFragment? StartAdornment { get; set; }
+    [Parameter] public RenderFragment? EndAdornment { get; set; }
+    [Parameter] public RenderFragment? Adornment { get; set; } // Legacy support
+    
+    // Events
+    [Parameter] public EventCallback<FocusEventArgs> OnFocus { get; set; }
+    [Parameter] public EventCallback<FocusEventArgs> OnBlur { get; set; }
+    
+    // Customization
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+
+    private string GetWrapperClass()
+    {
+        var classes = new List<string> { "nqb-textfield" };
+        
+        if (FullWidth) classes.Add("nqb-textfield-fullwidth");
+        if (Disabled) classes.Add("nqb-textfield-disabled");
+        if (ReadOnly) classes.Add("nqb-textfield-readonly");
+        if (Error) classes.Add("nqb-textfield-error");
+        if (_isFocused) classes.Add("nqb-textfield-focused");
+        
+        classes.Add($"nqb-textfield-{Variant}");
+        classes.Add($"nqb-textfield-{Size}");
+        classes.Add($"nqb-textfield-density-{Density}");
+        
+        if (!string.IsNullOrEmpty(Class)) classes.Add(Class);
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string GetLabelClass()
+    {
+        var classes = new List<string>();
+        
+        if (_isFocused || !string.IsNullOrEmpty(Value)) classes.Add("nqb-textfield-label-focused");
+        if (Error) classes.Add("nqb-textfield-label-error");
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string GetInputContainerClass()
+    {
+        var classes = new List<string>();
+        
+        if (StartAdornment != null) classes.Add("nqb-textfield-has-start-adornment");
+        if (EndAdornment != null || Adornment != null) classes.Add("nqb-textfield-has-end-adornment");
+        if (ShowClearButton && !string.IsNullOrEmpty(Value)) classes.Add("nqb-textfield-has-clear-button");
+        
+        return string.Join(" ", classes);
+    }
+
+    private string GetInputClass()
+    {
+        var classes = new List<string> { "nqb-textfield-input" };
+        
+        if (InputType == "textarea") classes.Add("nqb-textfield-textarea");
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string? GetPlaceholder()
+    {
+        // Only show placeholder when not focused or when field is empty and not using floating label
+        return (Variant == "standard" || !string.IsNullOrEmpty(Value) || _isFocused) ? Placeholder : null;
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (!Immediate)
+        {
+            Value = e.Value?.ToString();
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        if (Immediate)
+        {
+            Value = e.Value?.ToString();
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+    
+    private async Task HandleFocus(FocusEventArgs e)
+    {
+        _isFocused = true;
+        if (OnFocus.HasDelegate)
+            await OnFocus.InvokeAsync(e);
+    }
+    
+    private async Task HandleBlur(FocusEventArgs e)
+    {
+        _isFocused = false;
+        if (OnBlur.HasDelegate)
+            await OnBlur.InvokeAsync(e);
+    }
+    
+    private async Task ClearValue()
+    {
+        Value = string.Empty;
+        await ValueChanged.InvokeAsync(Value);
+        
+        // Focus back to input after clearing
+        if (InputType == "textarea")
+            await _textareaElement.FocusAsync();
+        else
+            await _inputElement.FocusAsync();
+    }
+    
+    // Public methods for external access
+    public async Task FocusAsync() => await (InputType == "textarea" ? _textareaElement.FocusAsync() : _inputElement.FocusAsync());
+    public async Task SelectAsync() => await (InputType == "textarea" ? _textareaElement.FocusAsync() : _inputElement.FocusAsync());
+}

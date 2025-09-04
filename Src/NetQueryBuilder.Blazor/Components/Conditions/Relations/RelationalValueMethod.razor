@@ -7,7 +7,7 @@
     }
     else if (_methodCallExpression.Method.Name.Contains("Like", StringComparison.OrdinalIgnoreCase))
     {
-        <MudTextField Label="Value" T="string" Value="@GetStringValue(_methodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
+        <TextField Label="Value" Value="@GetStringValue(_methodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
     }
     else if (_methodCallExpression.Method.Name.Contains("Contains", StringComparison.OrdinalIgnoreCase))
     {

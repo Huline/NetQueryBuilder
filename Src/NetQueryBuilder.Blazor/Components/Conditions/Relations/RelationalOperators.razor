@@ -1,12 +1,7 @@
 ﻿@using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Operators
 @using NetQueryBuilder.Queries
-<MudSelect T="ExpressionOperator" Label="Operator" Value="Operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o?.ToString())">
-    @foreach (var item in _operators)
-    {
-        <MudSelectItem Value="@item">@item.ToString()</MudSelectItem>
-    }
-</MudSelect>
+<Select T="ExpressionOperator" Label="Operator" Value="Operator" ValueChanged="OperatorChanged" Items="_operators" ToStringFunc="@(o => o?.ToString())" />
 
 @code {
 

@@ -6,30 +6,30 @@
     @switch (Condition.PropertyPath.PropertyType)
     {
         case { } intType when intType == typeof(int):
-            <MudNumericField Label="Valeur" Variant="Variant.Outlined" T="int"
-                             Value="@((int)Condition.Value!)"
-                             ValueChanged="@UpdateValue"
-                             Adornment="Adornment.End"
-                             AdornmentIcon="@Icons.Material.Filled.Numbers"/>
+            <NumericField Label="Valeur" Variant="outlined" T="int"
+                         Value="@((int?)Condition.Value)"
+                         ValueChanged="@UpdateValue" />
             break;
         case { } stringType when stringType == typeof(string):
-            <MudTextField Label="Valeur" Variant="Variant.Outlined" T="string"
-                          Value="@(Condition.Value?.ToString())"
-                          ValueChanged="@UpdateValue"
-                          Adornment="Adornment.End"
-                          AdornmentIcon="@Icons.Material.Filled.TextFields"/>
+            <TextField Label="Valeur" Variant="outlined"
+                      Value="@(Condition.Value?.ToString())"
+                      ValueChanged="@UpdateValue" />
             break;
         case { } boolType when boolType == typeof(bool):
-            <MudSwitch Label="Valeur" Color="Color.Primary" T="bool"
-                       Value="@((bool)Condition.Value!)"
-                       ValueChanged="@UpdateValue"/>
+            <label class="nqb-switch-wrapper">
+                <span>Valeur</span>
+                <div class="nqb-switch">
+                    <input type="checkbox" class="nqb-switch-input" 
+                           checked="@((bool)Condition.Value!)" 
+                           @onchange="@(e => UpdateValue((bool)e.Value!))" />
+                    <span class="nqb-switch-slider"></span>
+                </div>
+            </label>
             break;
         case { } dateTimeType when dateTimeType == typeof(DateTime):
-            <MudDatePicker Label="Valeur" Variant="Variant.Outlined"
-                           Date="@((DateTime)Condition.Value!)"
-                           DateChanged="@UpdateValue"
-                           Adornment="Adornment.End"
-                           AdornmentIcon="@Icons.Material.Filled.DateRange"/>
+            <DatePicker Label="Valeur" Variant="outlined"
+                       Date="@((DateTime?)Condition.Value)"
+                       DateChanged="@UpdateValue" />
             break;
     }
 }

@@ -1,0 +1,117 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+
+<button @ref="_buttonElement"
+        type="@ButtonType"
+        class="@GetButtonClass()"
+        disabled="@Disabled"
+        @onclick="HandleClick"
+        @attributes="AdditionalAttributes">
+    
+    @if (StartIcon != null)
+    {
+        <span class="nqb-button-icon-start" style="margin-right: 8px;">
+            @StartIcon
+        </span>
+    }
+    
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        @Text
+    }
+    else
+    {
+        @ChildContent
+    }
+    
+    @if (EndIcon != null)
+    {
+        <span class="nqb-button-icon-end" style="margin-left: 8px;">
+            @EndIcon
+        </span>
+    }
+</button>
+
+@code {
+    private ElementReference _buttonElement;
+
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string Variant { get; set; } = "text"; // "text", "outlined", "filled"
+    [Parameter] public string Color { get; set; } = "default"; // "default", "primary", "secondary", "success", "error", "warning", "info"
+    [Parameter] public string Size { get; set; } = "medium"; // "small", "medium", "large"
+    [Parameter] public string ButtonType { get; set; } = "button";
+    [Parameter] public RenderFragment? StartIcon { get; set; }
+    [Parameter] public RenderFragment? EndIcon { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetButtonClass()
+    {
+        var cssClass = "nqb-button";
+        
+        // Variant
+        switch (Variant.ToLowerInvariant())
+        {
+            case "outlined":
+                cssClass += " nqb-button-outlined";
+                break;
+            case "filled":
+            case "contained":
+                cssClass += " nqb-button-filled";
+                break;
+            default:
+                cssClass += " nqb-button-text";
+                break;
+        }
+        
+        // Color
+        switch (Color.ToLowerInvariant())
+        {
+            case "primary":
+                cssClass += " nqb-button-primary";
+                break;
+            case "secondary":
+                cssClass += " nqb-button-secondary";
+                break;
+            case "success":
+                cssClass += " nqb-button-success";
+                break;
+            case "error":
+            case "danger":
+                cssClass += " nqb-button-error";
+                break;
+            case "warning":
+                cssClass += " nqb-button-warning";
+                break;
+            case "info":
+                cssClass += " nqb-button-info";
+                break;
+        }
+        
+        // Size
+        switch (Size.ToLowerInvariant())
+        {
+            case "small":
+                cssClass += " nqb-button-small";
+                break;
+            case "large":
+                cssClass += " nqb-button-large";
+                break;
+        }
+        
+        if (!string.IsNullOrEmpty(Class))
+            cssClass += $" {Class}";
+            
+        return cssClass;
+    }
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        if (!Disabled && OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(e);
+        }
+    }
+}

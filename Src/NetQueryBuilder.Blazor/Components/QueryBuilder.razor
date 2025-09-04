@@ -2,46 +2,44 @@
 @using NetQueryBuilder.Properties
 @typeparam TEntity where TEntity : class
 
-<MudPaper Elevation="3" Class="pa-4 mb-4">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">SELECT</MudText>
-            <MudSelect Label="Select fields" T="SelectPropertyPath"
-                       SelectedValues="_selectedPropertyPaths.Where(s => s.IsSelected)"
-                       SelectedValuesChanged="SelectedValuesChanged"
-                       MultiSelection="true" SelectAll="true"
-                       AdornmentIcon="@Icons.Material.Filled.Checklist"
-                       AdornmentColor="Color.Primary"
-                       ToStringFunc="@(prop => prop!.Property.DisplayName())">
-                @foreach (var property in _selectedPropertyPaths)
-                {
-                    <MudSelectItem T="SelectPropertyPath" Value="property">
-                        @property.Property.DisplayName()
-                    </MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
+<div class="nqb-paper" style="padding: 32px; margin-bottom: 32px; box-shadow: var(--nqb-shadow-md);">
+    <div class="nqb-grid nqb-grid-cols-1" style="gap: 32px;">
+        <div>
+            <h5 class="nqb-text-h5 nqb-text-primary" style="margin-bottom: 24px;">SELECT</h5>
+            <div class="nqb-form-control">
+                <label class="nqb-label">Select fields</label>
+                <div style="border: 1px solid var(--nqb-border-color); border-radius: var(--nqb-border-radius); padding: 12px;">
+                    @foreach (var property in _selectedPropertyPaths)
+                    {
+                        <label class="nqb-checkbox-wrapper" style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="nqb-checkbox" 
+                                   checked="@property.IsSelected" 
+                                   @onchange="@(e => TogglePropertySelection(property, (bool)e.Value!))" />
+                            <span>@property.Property.DisplayName()</span>
+                        </label>
+                    }
+                </div>
+            </div>
+        </div>
 
-        <MudItem xs="12" Class="mt-4">
-            <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">WHERE</MudText>
-            <MudPaper Elevation="0" Class="pa-3 mb-3" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <div style="margin-top: 32px;">
+            <h5 class="nqb-text-h5 nqb-text-primary" style="margin-bottom: 24px;">WHERE</h5>
+            <div class="nqb-paper nqb-paper-outlined" style="padding: 24px; margin-bottom: 24px;">
                 <CascadingValue Value="@_query">
                     <ConditionComponent Condition="@_query.Condition"/>
                 </CascadingValue>
-            </MudPaper>
-        </MudItem>
+            </div>
+        </div>
 
-        <MudItem xs="12" Class="d-flex justify-center mt-4">
-            <MudButton Color="Color.Primary" Variant="Variant.Filled"
-                       StartIcon="@Icons.Material.Filled.PlayArrow"
-                       Size="Size.Large"
-                       OnClick="RunQuery">Run Query
-            </MudButton>
-        </MudItem>
-    </MudGrid>
-</MudPaper>
+        <div style="display: flex; justify-content: center; margin-top: 32px;">
+            <Button Color="primary" Variant="filled" Size="large" OnClick="RunQuery">
+                <Icon Name="play-arrow" /> Run Query
+            </Button>
+        </div>
+    </div>
+</div>
 
-<MudPaper Elevation="3" Class="pa-4">
-    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">RÉSULTATS</MudText>
+<div class="nqb-paper" style="padding: 32px; box-shadow: var(--nqb-shadow-md);">
+    <h5 class="nqb-text-h5 nqb-text-primary" style="margin-bottom: 24px;">RÉSULTATS</h5>
     <QueryResultTable @ref="_queryResult" TEntity="TEntity" Properties="_selectedPropertyPaths" TotalItems="_totalItems" />
-</MudPaper>
+</div>

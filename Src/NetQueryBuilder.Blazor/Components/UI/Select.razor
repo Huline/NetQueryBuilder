@@ -1,0 +1,286 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+@typeparam T
+
+<div class="@GetWrapperClass()" style="@Style">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="nqb-select-label @GetLabelClass()" for="@_selectId">
+            @Label
+            @if (Required && ShowRequiredAsterisk)
+            {
+                <span class="nqb-required-asterisk">*</span>
+            }
+        </label>
+    }
+    
+    <div class="nqb-select-input-container @GetInputContainerClass()">
+        @if (StartAdornment != null)
+        {
+            <div class="nqb-select-adornment nqb-select-adornment-start">
+                @StartAdornment
+            </div>
+        }
+        
+        <select @ref="_selectElement"
+                id="@_selectId"
+                class="@GetSelectInputClass()"
+                @onchange="HandleChange"
+                @onfocus="HandleFocus"
+                @onblur="HandleBlur"
+                disabled="@Disabled"
+                required="@Required">
+            
+            @if (!string.IsNullOrEmpty(Placeholder))
+            {
+                <option value="" disabled="@(!AllowDeselect)" hidden="@(!AllowDeselect)">@GetPlaceholder()</option>
+            }
+            
+            @if (Items != null)
+            {
+                @foreach (var item in Items)
+                {
+                    var itemValue = GetItemValue(item);
+                    var itemText = GetItemText(item);
+                    <option value="@itemValue" selected="@(EqualityComparer<T>.Default.Equals(Value, item))">
+                        @itemText
+                    </option>
+                }
+            }
+            
+            @if (ChildContent != null)
+            {
+                @ChildContent
+            }
+        </select>
+        
+        <div class="nqb-select-dropdown-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+            </svg>
+        </div>
+        
+        @if (EndAdornment != null || Adornment != null)
+        {
+            <div class="nqb-select-adornment nqb-select-adornment-end">
+                @(EndAdornment ?? Adornment)
+            </div>
+        }
+        
+        @if (ShowClearButton && HasValue && !Disabled)
+        {
+            <button type="button" class="nqb-select-clear-button" @onclick="ClearValue" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" fill="currentColor"/>
+                </svg>
+            </button>
+        }
+    </div>
+    
+    @if (!string.IsNullOrEmpty(HelperText) && !Error)
+    {
+        <div class="nqb-select-helper-text">
+            @HelperText
+        </div>
+    }
+    
+    @if (Error && !string.IsNullOrEmpty(ErrorText))
+    {
+        <div class="nqb-select-error-text">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="nqb-error-icon">
+                <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12S17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="currentColor"/>
+            </svg>
+            @ErrorText
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference _selectElement;
+    private string _selectId = $"nqb-select-{Guid.NewGuid():N}";
+    private bool _isFocused = false;
+
+    // Core parameters
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public EventCallback<T?> ValueChanged { get; set; }
+    [Parameter] public IEnumerable<T>? Items { get; set; }
+    [Parameter] public Func<T, string>? ToStringFunc { get; set; }
+    [Parameter] public Func<T, object>? ValueFunc { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? HelperText { get; set; }
+    [Parameter] public string? ErrorText { get; set; }
+    [Parameter] public bool Error { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    
+    // Styling and behavior
+    [Parameter] public string Variant { get; set; } = "outlined"; // outlined, filled, standard
+    [Parameter] public string Size { get; set; } = "medium"; // small, medium, large
+    [Parameter] public string Density { get; set; } = "default"; // compact, default, spacious
+    [Parameter] public bool ShowClearButton { get; set; }
+    [Parameter] public bool ShowRequiredAsterisk { get; set; } = true;
+    [Parameter] public bool FullWidth { get; set; } = true;
+    [Parameter] public bool AllowDeselect { get; set; } = true;
+    
+    // Adornments
+    [Parameter] public RenderFragment? StartAdornment { get; set; }
+    [Parameter] public RenderFragment? EndAdornment { get; set; }
+    [Parameter] public RenderFragment? Adornment { get; set; } // Legacy support
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    // Events
+    [Parameter] public EventCallback<FocusEventArgs> OnFocus { get; set; }
+    [Parameter] public EventCallback<FocusEventArgs> OnBlur { get; set; }
+    
+    // Customization
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+
+    private bool HasValue => Value != null && !EqualityComparer<T>.Default.Equals(Value, default(T));
+
+    private string GetWrapperClass()
+    {
+        var classes = new List<string> { "nqb-select" };
+        
+        if (FullWidth) classes.Add("nqb-select-fullwidth");
+        if (Disabled) classes.Add("nqb-select-disabled");
+        if (Error) classes.Add("nqb-select-error");
+        if (_isFocused) classes.Add("nqb-select-focused");
+        
+        classes.Add($"nqb-select-{Variant}");
+        classes.Add($"nqb-select-{Size}");
+        classes.Add($"nqb-select-density-{Density}");
+        
+        if (!string.IsNullOrEmpty(Class)) classes.Add(Class);
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string GetLabelClass()
+    {
+        var classes = new List<string>();
+        
+        if (_isFocused || HasValue) classes.Add("nqb-select-label-focused");
+        if (Error) classes.Add("nqb-select-label-error");
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string GetInputContainerClass()
+    {
+        var classes = new List<string>();
+        
+        if (StartAdornment != null) classes.Add("nqb-select-has-start-adornment");
+        if (EndAdornment != null || Adornment != null) classes.Add("nqb-select-has-end-adornment");
+        if (ShowClearButton && HasValue) classes.Add("nqb-select-has-clear-button");
+        
+        return string.Join(" ", classes);
+    }
+
+    private string GetSelectInputClass()
+    {
+        return "nqb-select-input";
+    }
+    
+    private string? GetPlaceholder()
+    {
+        return Placeholder;
+    }
+
+    private string GetItemText(T item)
+    {
+        if (ToStringFunc != null)
+            return ToStringFunc(item);
+        
+        return item?.ToString() ?? "";
+    }
+
+    private string GetItemValue(T item)
+    {
+        if (ValueFunc != null)
+        {
+            var value = ValueFunc(item);
+            return value?.ToString() ?? "";
+        }
+        
+        return item?.ToString() ?? "";
+    }
+
+    private async Task HandleFocus(FocusEventArgs e)
+    {
+        _isFocused = true;
+        if (OnFocus.HasDelegate)
+            await OnFocus.InvokeAsync(e);
+    }
+    
+    private async Task HandleBlur(FocusEventArgs e)
+    {
+        _isFocused = false;
+        if (OnBlur.HasDelegate)
+            await OnBlur.InvokeAsync(e);
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        var stringValue = e.Value?.ToString();
+        
+        if (string.IsNullOrEmpty(stringValue) && AllowDeselect)
+        {
+            // Empty selection with placeholder
+            Value = default(T);
+            await ValueChanged.InvokeAsync(Value);
+            return;
+        }
+        
+        if (Items != null)
+        {
+            foreach (var item in Items)
+            {
+                var itemValue = GetItemValue(item);
+                if (itemValue == stringValue)
+                {
+                    Value = item;
+                    await ValueChanged.InvokeAsync(Value);
+                    return;
+                }
+            }
+        }
+        
+        // Try direct conversion for simple types
+        if (typeof(T) == typeof(string))
+        {
+            Value = (T)(object)stringValue;
+        }
+        else if (typeof(T).IsEnum)
+        {
+            if (Enum.TryParse(typeof(T), stringValue, out var enumValue))
+            {
+                Value = (T)enumValue;
+            }
+        }
+        else
+        {
+            try
+            {
+                var convertedValue = Convert.ChangeType(stringValue, typeof(T));
+                Value = (T)convertedValue;
+            }
+            catch
+            {
+                Value = default(T);
+            }
+        }
+        
+        await ValueChanged.InvokeAsync(Value);
+    }
+    
+    private async Task ClearValue()
+    {
+        Value = default(T);
+        await ValueChanged.InvokeAsync(Value);
+        await _selectElement.FocusAsync();
+    }
+    
+    // Public methods for external access
+    public async Task FocusAsync() => await _selectElement.FocusAsync();
+}

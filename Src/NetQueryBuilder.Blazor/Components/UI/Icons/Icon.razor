@@ -1,0 +1,158 @@
+@namespace NetQueryBuilder.Blazor.Components.UI.Icons
+
+<span class="nqb-icon @GetIconClass()" style="@GetIconStyle()">
+    @if (IconType == "svg")
+    {
+        @GetSvgIcon()
+    }
+    else if (!string.IsNullOrEmpty(IconClass))
+    {
+        <i class="@IconClass"></i>
+    }
+</span>
+
+@code {
+    [Parameter] public string Name { get; set; } = "";
+    [Parameter] public string Size { get; set; } = "medium"; // "small", "medium", "large"
+    [Parameter] public string Color { get; set; } = "inherit";
+    [Parameter] public string? IconClass { get; set; } // For external icon fonts like FontAwesome
+    [Parameter] public string IconType { get; set; } = "svg"; // "svg", "font"
+    [Parameter] public string? Class { get; set; }
+
+    private string GetIconClass()
+    {
+        var cssClass = "";
+        
+        switch (Size.ToLowerInvariant())
+        {
+            case "small":
+                cssClass += " nqb-icon-small";
+                break;
+            case "large":
+                cssClass += " nqb-icon-large";
+                break;
+            default:
+                cssClass += " nqb-icon-medium";
+                break;
+        }
+        
+        if (!string.IsNullOrEmpty(Class))
+            cssClass += $" {Class}";
+            
+        return cssClass.Trim();
+    }
+
+    private string GetIconStyle()
+    {
+        var styles = new List<string>();
+        
+        if (Color != "inherit")
+        {
+            styles.Add($"color: {GetColorValue()}");
+        }
+        
+        return string.Join("; ", styles);
+    }
+
+    private string GetColorValue()
+    {
+        return Color.ToLowerInvariant() switch
+        {
+            "primary" => "var(--nqb-primary)",
+            "secondary" => "var(--nqb-secondary)",
+            "success" => "var(--nqb-success)",
+            "error" => "var(--nqb-error)",
+            "warning" => "var(--nqb-warning)",
+            "info" => "var(--nqb-info)",
+            _ => Color
+        };
+    }
+
+    private RenderFragment GetSvgIcon()
+    {
+        var iconName = Name.ToLowerInvariant().Replace("_", "-");
+        
+        return iconName switch
+        {
+            "search" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3S3 5.91 3 9.5S5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5S14 7.01 14 9.5S11.99 14 9.5 14Z" fill="currentColor"/>
+            </svg>,
+            
+            "checklist" or "check-list" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 5.18L10.59 16.6L6.41 12.42L7.82 11L10.59 13.77L20.59 3.77L22 5.18ZM19.79 10.22C19.92 10.79 20 11.39 20 12C20 16.42 16.42 20 12 20S4 16.42 4 12S7.58 4 12 4C13.58 4 15.04 4.46 16.28 5.25L17.72 3.81C16.1 2.67 14.13 2 12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12C22 11.32 21.91 10.66 21.74 10.03L19.79 10.22Z" fill="currentColor"/>
+            </svg>,
+            
+            "play-arrow" or "play" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+            </svg>,
+            
+            "delete" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/>
+            </svg>,
+            
+            "add" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
+            </svg>,
+            
+            "close" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" fill="currentColor"/>
+            </svg>,
+            
+            "numbers" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 19H8V17H7V14H8V12H5V14.5H6V15.5H5V19ZM14 7H16V17H14V7ZM18 7H20V9H18V17H16V7C16 5.9 16.9 5 18 5H20C21.1 5 22 5.9 22 7V9C22 10.1 21.1 11 20 11H18V7ZM2 9V7C2 5.9 2.9 5 4 5H6C7.1 5 8 5.9 8 7V10C8 11.1 7.1 12 6 12H4V14H8V16H4C2.9 16 2 15.1 2 14V9ZM4 7V10H6V7H4Z" fill="currentColor"/>
+            </svg>,
+            
+            "text-fields" or "text-field" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 4V6.5H6V18H8.5V6.5H12V4H2.5ZM13 8.5V6H21.5V8.5H19V18H16.5V8.5H13Z" fill="currentColor"/>
+            </svg>,
+            
+            "date-range" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 11H7V13H9V11ZM13 11H11V13H13V11ZM17 11H15V13H17V11ZM19 3H18V1H16V3H8V1H6V3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V8H19V19Z" fill="currentColor"/>
+            </svg>,
+            
+            "menu" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 18H21V16H3V18ZM3 13H21V11H3V13ZM3 6V8H21V6H3Z" fill="currentColor"/>
+            </svg>,
+            
+            "light-mode" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 9C10.34 9 9 10.34 9 12S10.34 15 12 15S15 13.66 15 12S13.66 9 12 9ZM12 17C9.24 17 7 14.76 7 12S9.24 7 12 7S17 9.24 17 12S14.76 17 12 17ZM12 5L14.39 2.61L15.8 4.02L13.41 6.41L12 5ZM6.41 13.41L4.02 15.8L2.61 14.39L5 12L6.41 13.41ZM17.59 10.59L20 12L21.41 10.59L19.02 8.2L17.59 10.59ZM18.41 17.59L19.82 19L17.41 21.39L16 20L18.41 17.59ZM5.59 6.41L4.18 5L6.59 2.61L8 4L5.59 6.41ZM12 19L9.61 21.39L8.2 19.98L10.59 17.59L12 19Z" fill="currentColor"/>
+            </svg>,
+            
+            "dark-mode" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3C7.03 3 3 7.03 3 12S7.03 21 12 21C16.97 21 21 16.97 21 12C21 11.2 20.89 10.43 20.69 9.69C19.9 10.56 18.82 11 17.5 11C14.46 11 12 8.54 12 5.5C12 4.18 12.44 2.9 13.31 2.1C12.87 2.04 12.44 2 12 2V3H12Z" fill="currentColor"/>
+            </svg>,
+            
+            "expand-more" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.59 8.59L12 13.17L7.41 8.59L6 10L12 16L18 10L16.59 8.59Z" fill="currentColor"/>
+            </svg>,
+            
+            "navigate-next" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12L10 6Z" fill="currentColor"/>
+            </svg>,
+            
+            "navigate-before" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" fill="currentColor"/>
+            </svg>,
+            
+            "info" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12S17.52 2 12 2ZM13 17H11V11H13V17ZM13 9H11V7H13V9Z" fill="currentColor"/>
+            </svg>,
+            
+            "check" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/>
+            </svg>,
+            
+            "warning" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 21H23L12 2L1 21ZM13 18H11V16H13V18ZM13 14H11V10H13V14Z" fill="currentColor"/>
+            </svg>,
+            
+            "error" => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12S17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="currentColor"/>
+            </svg>,
+            
+            _ => @<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17L10.58 10.76C10.22 11.12 10 11.6 10 12.1V23H12V12.1L17.5 6.61L19.83 8.94L21.5 7.5L21 9Z" fill="currentColor"/>
+            </svg>
+        };
+    }
+}

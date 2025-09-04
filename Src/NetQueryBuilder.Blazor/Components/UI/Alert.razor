@@ -1,0 +1,121 @@
+@namespace NetQueryBuilder.Blazor.Components.UI
+@using NetQueryBuilder.Blazor.Components.UI.Icons
+
+<div class="@GetAlertClass()" role="alert">
+    @if (ShowIcon)
+    {
+        <span class="nqb-alert-icon">
+            @if (Icon != null)
+            {
+                @Icon
+            }
+            else
+            {
+                <Icon Name="@GetDefaultIcon()" Size="small" />
+            }
+        </span>
+    }
+    
+    <div class="nqb-alert-content">
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <div class="nqb-alert-title">@Title</div>
+        }
+        
+        <div class="nqb-alert-message">
+            @if (!string.IsNullOrEmpty(Text))
+            {
+                @Text
+            }
+            else
+            {
+                @ChildContent
+            }
+        </div>
+    </div>
+    
+    @if (Closable && OnClose.HasDelegate)
+    {
+        <button class="nqb-alert-close" @onclick="HandleClose" type="button" aria-label="Close">
+            @if (CloseIcon != null)
+            {
+                @CloseIcon
+            }
+            else
+            {
+                <Icon Name="close" Size="small" />
+            }
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Severity { get; set; } = "info"; // "info", "success", "warning", "error"
+    [Parameter] public string Variant { get; set; } = "standard"; // "standard", "outlined", "filled"
+    [Parameter] public bool ShowIcon { get; set; } = true;
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public bool Closable { get; set; }
+    [Parameter] public RenderFragment? CloseIcon { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public string? Class { get; set; }
+
+    private string GetAlertClass()
+    {
+        var cssClass = "nqb-alert";
+        
+        // Severity
+        switch (Severity.ToLowerInvariant())
+        {
+            case "success":
+                cssClass += " nqb-alert-success";
+                break;
+            case "warning":
+                cssClass += " nqb-alert-warning";
+                break;
+            case "error":
+                cssClass += " nqb-alert-error";
+                break;
+            default:
+                cssClass += " nqb-alert-info";
+                break;
+        }
+        
+        // Variant
+        switch (Variant.ToLowerInvariant())
+        {
+            case "outlined":
+                cssClass += " nqb-alert-outlined";
+                break;
+            case "filled":
+                cssClass += " nqb-alert-filled";
+                break;
+        }
+        
+        if (!string.IsNullOrEmpty(Class))
+            cssClass += $" {Class}";
+            
+        return cssClass;
+    }
+
+    private string GetDefaultIcon()
+    {
+        return Severity.ToLowerInvariant() switch
+        {
+            "success" => "check",
+            "warning" => "warning",
+            "error" => "error",
+            _ => "info"
+        };
+    }
+
+    private async Task HandleClose()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+}
