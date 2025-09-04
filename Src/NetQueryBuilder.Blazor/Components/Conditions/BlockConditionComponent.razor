@@ -1,87 +1,231 @@
-﻿@using System.Linq.Expressions
-@using NetQueryBuilder.Conditions
-<MudPaper Class="pa-2" Style=@("margin-left:" + IndentationLevel * 20 + "px;")>
-    <MudGrid Spacing="3">
-        <MudItem xs="12" sm="12">
-            <MudStack Row Spacing="3">
-                <MudButton Variant="Variant.Outlined" OnClick="@(() => AddPredicate(ExpressionType.AndAlso))">And/Or</MudButton>
-                <MudButton Variant="Variant.Outlined" OnClick="@(() => GroupConditions())">Group</MudButton>
+﻿@using NetQueryBuilder.Conditions
+<div class="nqb-paper" style="margin-left:@(IndentationLevel * 20)px;">
+    <div class="nqb-grid">
+        <div class="nqb-row nqb-full-width">
+            <div class="nqb-button-row">
+                <button class="nqb-button" @onclick="@(AddPredicate)">And/Or</button>
+                <button class="nqb-button" @onclick="@(GroupConditions)">Group</button>
                 @if (Condition.Parent != null)
                 {
-                    <MudButton Variant="Variant.Outlined" OnClick="@(() => UnGroupConditions())">Ungroup</MudButton>
+                    <button class="nqb-button" @onclick="@(UnGroupConditions)">Ungroup</button>
                 }
-            </MudStack>
-        </MudItem>
+            </div>
+        </div>
+
         @foreach (var childCondition in Condition.Conditions)
         {
             if (childCondition != Condition.Conditions.First())
             {
-                <MudItem xs="12" sm="12">
-                    <MudSelect T="LogicalOperator" Label="Operator" Value="@childCondition.LogicalOperator" ValueChanged="@(v => ChangeOperator(childCondition, v))">
-                        @foreach (var item in _operators)
-                        {
-                            <MudSelectItem T="LogicalOperator" Value="@item">@item.ToString()</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
+                <div class="nqb-row nqb-full-width">
+                    <NetQueryBuilder.Blazor.Components.FormControls.Select TItem="LogicalOperator"
+                                                                           Label="Operator"
+                                                                           Value="@childCondition.LogicalOperator"
+                                                                           ValueChanged="@(v => ChangeOperator(childCondition, v))"
+                                                                           Items="_operators"
+                                                                           ToStringFunc="@(op => op.ToString())">
+
+                    </NetQueryBuilder.Blazor.Components.FormControls.Select>
+                </div>
             }
 
-            <MudItem xs="12" sm="2">
-                <MudStack Row Spacing="3">
-                    <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" OnClick="e => RemovePredicate(childCondition)"></MudIconButton>
-                    <MudCheckBox T="bool" Label="Group" ValueChanged="@(e => Select(e, childCondition))"/>
-                </MudStack>
-            </MudItem>
-            <MudItem xs="12" sm="10">
-                <ConditionComponent Condition="childCondition"></ConditionComponent>
-            </MudItem>
+            <div class="nqb-row">
+                <div class="nqb-col-2">
+                    <div class="nqb-button-row">
+                        <button class="nqb-icon-button" title="Delete" @onclick="e => RemovePredicate(childCondition)">
+                            <svg class="nqb-icon" viewBox="0 0 24 24">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                        </button>
+                        <label class="nqb-checkbox-container">
+                            <span class="nqb-checkbox-label">Group</span>
+                            <input type="checkbox" @onchange="e => Select(e.Value != null && (bool)e.Value, childCondition)"/>
+                            <span class="nqb-checkmark"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="nqb-col-10">
+                    <ConditionComponent Condition="childCondition"></ConditionComponent>
+                </div>
+            </div>
         }
-    </MudGrid>
-</MudPaper>
+    </div>
+</div>
 
-@code {
-    [Parameter] public BlockCondition Condition { get; set; } = null!;
-
-    [Parameter] public int IndentationLevel { get; set; }
-
-
-    List<ICondition> SelectedConditions { get; } = new();
-
-    readonly IEnumerable<LogicalOperator> _operators = Enum.GetValues<LogicalOperator>();
-
-    private void GroupConditions()
-    {
-        Condition.Group(SelectedConditions);
-        SelectedConditions.Clear();
+<style>
+    .nqb-paper {
+        padding: 0.5rem;
+        background-color: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
     }
 
-    private void UnGroupConditions()
-    {
-        Condition.Ungroup(SelectedConditions);
-        SelectedConditions.Clear();
+    .nqb-grid {
+        display: flex;
+        flex-wrap: wrap;
+        margin: -0.375rem; /* Pour compenser les paddings des éléments enfants */
     }
 
-    private void Select(bool e, ICondition childCondition)
-    {
-        if (e)
-            SelectedConditions.Add(childCondition);
-        else
-            SelectedConditions.Remove(childCondition);
+    .nqb-row {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        padding: 0.375rem;
     }
 
-    private void AddPredicate(ExpressionType binaryExpressionType)
-    {
-        Condition.CreateNew();
+    .nqb-full-width {
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 
-    private void RemovePredicate(ICondition condition)
-    {
-        Condition.Remove(condition);
+    .nqb-col-2 {
+        flex: 0 0 16.666667%;
+        max-width: 16.666667%;
+        padding: 0.375rem;
     }
 
-    private void ChangeOperator(ICondition condition, LogicalOperator op)
-    {
-        condition.LogicalOperator = op;
+    .nqb-col-10 {
+        flex: 0 0 83.333333%;
+        max-width: 83.333333%;
+        padding: 0.375rem;
     }
 
-}
+    .nqb-button-row {
+        display: flex;
+        flex-direction: row;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .nqb-button {
+        padding: 0.5rem 1rem;
+        background-color: transparent;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .nqb-button:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        border-color: #b0b0b0;
+    }
+
+    .nqb-icon-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        background-color: transparent;
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .nqb-icon-button:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        border-color: #b0b0b0;
+    }
+
+    .nqb-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        fill: currentColor;
+    }
+
+    .nqb-checkbox-container {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding-left: 1.75rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        user-select: none;
+    }
+
+    .nqb-checkbox-container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .nqb-checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 1.25rem;
+        width: 1.25rem;
+        background-color: #ffffff;
+        border: 1px solid #d0d0d0;
+        border-radius: 3px;
+    }
+
+    .nqb-checkbox-container:hover input ~ .nqb-checkmark {
+        border-color: #b0b0b0;
+    }
+
+    .nqb-checkbox-container input:checked ~ .nqb-checkmark {
+        background-color: #1e88e5;
+        border-color: #1e88e5;
+    }
+
+    .nqb-checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .nqb-checkbox-container input:checked ~ .nqb-checkmark:after {
+        display: block;
+    }
+
+    .nqb-checkbox-container .nqb-checkmark:after {
+        left: 0.4375rem;
+        top: 0.1875rem;
+        width: 0.3125rem;
+        height: 0.625rem;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .nqb-checkbox-label {
+        margin-right: 0.5rem;
+    }
+
+    /* Styles pour le mode sombre si nécessaire */
+    :root[data-theme="dark"] .nqb-paper {
+        background-color: #303030;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    :root[data-theme="dark"] .nqb-button {
+        border-color: #424242;
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-button:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        border-color: #626262;
+    }
+
+    :root[data-theme="dark"] .nqb-icon-button {
+        border-color: #424242;
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-icon-button:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        border-color: #626262;
+    }
+
+    :root[data-theme="dark"] .nqb-checkmark {
+        background-color: #424242;
+        border-color: #626262;
+    }
+</style>

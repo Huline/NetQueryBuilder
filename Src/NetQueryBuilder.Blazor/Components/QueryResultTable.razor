@@ -1,63 +1,300 @@
-﻿
-@typeparam TEntity where TEntity : class
+﻿@typeparam TEntity where TEntity : class
+@using NetQueryBuilder.Blazor.Components.FormControls
 @implements IDisposable
 
-<MudPaper Elevation="0" Class="mt-2">
+<div class="nqb-table-container nqb-mt-2">
     @if (Results == null)
     {
-        <label>Run a query</label>
+        <div class="nqb-table-empty-state">
+            <p>Run a query</p>
+        </div>
     }
     else
     {
-        <MudTable Items="@Results.Items"
-                  Bordered="@Bordered"
-                  Striped="@Striped"
-                  Loading="@Loading"
-                  LoadingProgressColor="@LoadingColor"
-                  Hover="@Hover"
-                  Dense="@Dense"
-                  Virtualize="true"
-                  FixedHeader="true"
-                  Height="400px"
-                  CurrentPage="@Results.CurrentPage"
-                  RowsPerPage="@Results.PageSize">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Results (@Results.TotalItems)</MudText>
-                <MudSpacer/>
-                <MudTextField
-                    T="string"
-                    Placeholder="Search..."
-                    Adornment="Adornment.Start"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    IconSize="Size.Medium"
-                    Class="mt-0"/>
-            </ToolBarContent>
-            <HeaderContent>
-                @foreach (var property in SelectedProperties)
-                {
-                    <MudTh>
-                        <MudText Typo="Typo.subtitle2">@property.Property.DisplayName()</MudText>
-                    </MudTh>
-                }
-            </HeaderContent>
-            <RowTemplate>
-                @foreach (var propertyPath in SelectedProperties)
-                {
-                    <MudTd>@propertyPath.Property.DisplayValue(context)</MudTd>
-                }
-            </RowTemplate>
-            <NoRecordsContent>
-                <MudAlert Severity="Severity.Info" Class="my-2">Aucun résultat trouvé</MudAlert>
-            </NoRecordsContent>
-            <LoadingContent>
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
-                <MudText Class="ms-2">Loading...</MudText>
-            </LoadingContent>
-            <PagerContent>
-                <MudTablePager PageSizeOptions="new[] { 10, 25, 50, 100 }"
-                               PageChanged="@((int page) => Results.GoToPage(page))"
-                               Count="@Results.TotalItems"/>
-            </PagerContent>
-        </MudTable>
+        <div class="nqb-table-toolbar">
+            <h5 class="nqb-table-title">Results (@Results.TotalItems)</h5>
+            <div class="nqb-table-spacer"></div>
+            <div class="nqb-search-container">
+                <span class="nqb-search-icon">🔍</span>
+                <input type="text"
+                       class="nqb-search-input"
+                       placeholder="Search..."
+                       @oninput="OnSearchChanged"
+                       value="@_searchText"/>
+            </div>
+        </div>
+
+        <div class="nqb-table-wrapper @(Bordered ? "nqb-table-bordered" : "") @(Striped ? "nqb-table-striped" : "") @(Hover ? "nqb-table-hover" : "") @(Dense ? "nqb-table-dense" : "")"
+             style="height: 400px;">
+            @if (Loading)
+            {
+                <div class="nqb-table-loading">
+                    <div class="nqb-spinner"></div>
+                    <span class="nqb-loading-text">Loading...</span>
+                </div>
+            }
+            else if (!FilteredItems.Any())
+            {
+                <div class="nqb-table-no-records">
+                    <div class="nqb-alert nqb-alert-info">
+                        <span class="nqb-alert-icon">ℹ️</span>
+                        <span>Aucun résultat trouvé</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <table class="nqb-table">
+                    <thead>
+                    <tr>
+                        @foreach (var property in SelectedProperties)
+                        {
+                            <th>@property.Property.DisplayName()</th>
+                        }
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in FilteredItems)
+                    {
+                        <tr>
+                            @foreach (var propertyPath in SelectedProperties)
+                            {
+                                <td>@propertyPath.Property.DisplayValue(item)</td>
+                            }
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <Pagination PageSizeOptions="new[] { 10, 25, 50, 100 }"
+                    PageSize="@Results.PageSize"
+                    CurrentPage="@Results.CurrentPage"
+                    TotalItems="@Results.TotalItems"
+                    PageChanged="@((int page) => Results.GoToPage(page))"
+                    PageSizeChanged="@OnPageSizeChanged"/>
     }
-</MudPaper>
+</div>
+
+<style>
+    .nqb-table-container {
+        background-color: white;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .nqb-mt-2 {
+        margin-top: 0.75rem;
+    }
+
+    .nqb-table-empty-state {
+        padding: 2rem;
+        text-align: center;
+        color: #757575;
+    }
+
+    .nqb-table-toolbar {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .nqb-table-title {
+        font-size: 1.125rem;
+        font-weight: 500;
+        margin: 0;
+        color: #212121;
+    }
+
+    .nqb-table-spacer {
+        flex-grow: 1;
+    }
+
+    .nqb-search-container {
+        position: relative;
+        width: 250px;
+    }
+
+    .nqb-search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #757575;
+    }
+
+    .nqb-search-input {
+        width: 100%;
+        padding: 0.5rem 0.5rem 0.5rem 2rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+
+    .nqb-search-input:focus {
+        outline: none;
+        border-color: #1e88e5;
+        box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+    }
+
+    .nqb-table-wrapper {
+        overflow: auto;
+        position: relative;
+    }
+
+    .nqb-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .nqb-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .nqb-table th {
+        background-color: #f5f5f5;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        color: #616161;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .nqb-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .nqb-table-loading, .nqb-table-no-records {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .nqb-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #1e88e5;
+        border-radius: 50%;
+        animation: nqb-spin 1s linear infinite;
+    }
+
+    .nqb-loading-text {
+        margin-top: 0.5rem;
+        color: #616161;
+    }
+
+    .nqb-alert {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+    }
+
+    .nqb-alert-info {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+    }
+
+    .nqb-alert-icon {
+        margin-right: 0.5rem;
+    }
+
+    /* Variantes de table */
+    .nqb-table-bordered th, .nqb-table-bordered td {
+        border: 1px solid #e0e0e0;
+    }
+
+    .nqb-table-striped tbody tr:nth-child(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .nqb-table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .nqb-table-dense th, .nqb-table-dense td {
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Styles pour le mode sombre si nécessaire */
+    :root[data-theme="dark"] .nqb-table-container {
+        background-color: #303030;
+    }
+
+    :root[data-theme="dark"] .nqb-table-empty-state {
+        color: #bdbdbd;
+    }
+
+    :root[data-theme="dark"] .nqb-table-toolbar {
+        border-bottom-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-table-title {
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-search-icon {
+        color: #bdbdbd;
+    }
+
+    :root[data-theme="dark"] .nqb-search-input {
+        background-color: #424242;
+        border-color: #616161;
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-table th {
+        background-color: #424242;
+        color: #e0e0e0;
+        border-bottom-color: #616161;
+    }
+
+    :root[data-theme="dark"] .nqb-table td {
+        border-bottom-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-table-loading,
+    :root[data-theme="dark"] .nqb-table-no-records {
+        background-color: rgba(48, 48, 48, 0.8);
+    }
+
+    :root[data-theme="dark"] .nqb-spinner {
+        border-color: #555;
+        border-top-color: #90caf9;
+    }
+
+    :root[data-theme="dark"] .nqb-loading-text {
+        color: #bdbdbd;
+    }
+
+    :root[data-theme="dark"] .nqb-alert-info {
+        background-color: #0d47a1;
+        color: #e3f2fd;
+    }
+
+    :root[data-theme="dark"] .nqb-table-bordered th,
+    :root[data-theme="dark"] .nqb-table-bordered td {
+        border-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-table-striped tbody tr:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    :root[data-theme="dark"] .nqb-table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+</style>

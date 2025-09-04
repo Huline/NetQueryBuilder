@@ -20,6 +20,8 @@ namespace NetQueryBuilder.Queries
         /// A collection of property paths that are used in the conditions of the query.
         IReadOnlyCollection<PropertyPath> ConditionPropertyPaths { get; }
 
+        OrderBy OrderBy { get; }
+
         /// Represents the root condition for the query.
         /// It defines the logical structure and criteria for filtering data within the query.
         /// This property allows construction and manipulation of conditions that dictate

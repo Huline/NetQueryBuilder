@@ -1,61 +1,37 @@
 ﻿@using System.Linq.Expressions
-@using NetQueryBuilder.Conditions
-@using NetQueryBuilder.Queries
+@using NetQueryBuilder.Blazor.Components.FormControls
 @if (Condition.Compile() is BinaryExpression)
 {
-    @switch (Condition.PropertyPath.PropertyType)
+    if (Condition.Operator != null)
+        @switch (Condition.PropertyPath.PropertyType)
     {
         case { } intType when intType == typeof(int):
-            <MudNumericField Label="Valeur" Variant="Variant.Outlined" T="int"
-                             Value="@((int)Condition.Value!)"
-                             ValueChanged="@UpdateValue"
-                             Adornment="Adornment.End"
-                             AdornmentIcon="@Icons.Material.Filled.Numbers"/>
+            <NumericField TValue="int"
+                          Label="Valeur"
+                          Value="@GetIntValue()"
+                          ValueChanged="@UpdateValue"
+                          AdornmentIcon="123"/>
             break;
         case { } stringType when stringType == typeof(string):
-            <MudTextField Label="Valeur" Variant="Variant.Outlined" T="string"
-                          Value="@(Condition.Value?.ToString())"
-                          ValueChanged="@UpdateValue"
-                          Adornment="Adornment.End"
-                          AdornmentIcon="@Icons.Material.Filled.TextFields"/>
+            <TextField Label="Valeur"
+                       Value="@(Condition.Value?.ToString() ?? string.Empty)"
+                       ValueChanged="@UpdateValue"
+                       AdornmentIcon="Aa"/>
             break;
         case { } boolType when boolType == typeof(bool):
-            <MudSwitch Label="Valeur" Color="Color.Primary" T="bool"
-                       Value="@((bool)Condition.Value!)"
-                       ValueChanged="@UpdateValue"/>
+            <SwitchControl Label="Valeur"
+                           Value="@GetBoolValue()"
+                           ValueChanged="@UpdateValue"/>
             break;
         case { } dateTimeType when dateTimeType == typeof(DateTime):
-            <MudDatePicker Label="Valeur" Variant="Variant.Outlined"
-                           Date="@((DateTime)Condition.Value!)"
-                           DateChanged="@UpdateValue"
-                           Adornment="Adornment.End"
-                           AdornmentIcon="@Icons.Material.Filled.DateRange"/>
+            <DatePicker Label="Valeur"
+                        Date="@GetDateTimeValue()"
+                        DateChanged="@UpdateValue"
+                        AdornmentIcon="📅"/>
             break;
     }
 }
 @if (Condition.Compile() is MethodCallExpression)
 {
     <RelationalValueMethod Condition="@Condition"></RelationalValueMethod>
-}
-
-
-@code {
-
-    [CascadingParameter] public IQuery Query { get; set; } = null!;
-
-    [Parameter] public SimpleCondition Condition { get; set; } = null!;
-
-    private void UpdateValue(DateTime? dateTime)
-    {
-        if (dateTime.HasValue)
-        {
-            UpdateValue(dateTime.Value);
-        }
-    }
-
-    private void UpdateValue<T>(T value)
-    {
-        Condition.Value = value;
-    }
-
 }

@@ -1,81 +1,101 @@
 ﻿@using NetQueryBuilder.Configurations
 @inject IQueryConfigurator QueryConfigurator
 
-<MudStack Spacing="5">
-    <MudGrid Spacing="10">
-        <MudItem xs="4">
-            <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="NewQuery" Style="margin: auto; vertical-align: center">New Query</MudButton>
-        </MudItem>
-        <MudItem xs="8">
-            <MudStack Row Spacing="4">
-                <MudText Typo="Typo.h5" Style="margin: auto; vertical-align: center">FROM</MudText>
-                <MudSelect T="Type" Label="Entity" ValueChanged="OnEntitySelect" Style="margin: auto; vertical-align: center">
-                    @foreach (var entity in _entities)
-                    {
-                        <MudSelectItem Value="@entity">@entity.Name</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudStack>
-        </MudItem>
-    </MudGrid>
+<div class="nqb-stack">
+    <div class="nqb-grid">
+        <div class="nqb-item nqb-xs-4">
+            <button class="nqb-button nqb-button-outlined nqb-button-primary" @onclick="NewQuery">New Query</button>
+        </div>
+        <div class="nqb-item nqb-xs-8">
+            <div class="nqb-row-stack">
+                <h5 class="nqb-text nqb-heading">FROM</h5>
+                <NetQueryBuilder.Blazor.Components.FormControls.Select TItem="Type"
+                                                                       Label="Entity"
+                                                                       Items="_entities"
+                                                                       Value="_selectedEntityType"
+                                                                       ToStringFunc="type => type.Name"
+                                                                       ValueChanged="e => OnEntitySelect(e)">
+                </NetQueryBuilder.Blazor.Components.FormControls.Select>
+            </div>
+        </div>
+    </div>
     <div @key="_queryBuilderKey">
         @CreateQueryBuilder()
     </div>
-</MudStack>
+</div>
 
-@code {
-    Type? _selectedEntityType;
-
-    private int _queryBuilderKey; // Unique key to force re-render
-    private IReadOnlyList<Type> _entities = Array.Empty<Type>();
-
-    RenderFragment CreateQueryBuilder()
-    {
-        if (_selectedEntityType is null)
-        {
-            return builder =>
-            {
-                builder.OpenElement(0, "div");
-                builder.AddAttribute(1, "style", "text-align: center; margin-top: 20px;");
-                builder.AddContent(2, "Please select an entity.");
-                builder.CloseElement();
-            };
-        }
-
-        return builder =>
-        {
-            builder.OpenComponent(0, typeof(QueryBuilder<>).MakeGenericType(_selectedEntityType));
-            builder.AddAttribute(1, "Expression", Expression);
-            builder.CloseComponent();
-        };
+<style>
+    .nqb-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
     }
 
-    private string Expression { get; set; } = string.Empty;
-
-    protected override void OnInitialized()
-    {
-        _entities = QueryConfigurator.GetEntities().ToList();
-        NewQuery();
-        base.OnInitializedAsync();
+    .nqb-grid {
+        display: flex;
+        flex-wrap: wrap;
+        margin: -0.75rem;
     }
 
-    public void OnEntitySelect(Type value)
-    {
-        Expression = string.Empty;
-        SelectEntity(value);
+    .nqb-item {
+        padding: 0.75rem;
+        box-sizing: border-box;
     }
 
-    private void SelectEntity(Type entityType)
-    {
-        _selectedEntityType = entityType;
-        StateHasChanged();
+    .nqb-xs-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
     }
 
-    public void NewQuery()
-    {
-        SelectEntity(_entities.First());
-        Expression = string.Empty;
-        _queryBuilderKey++;
+    .nqb-xs-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
     }
 
-}
+    .nqb-row-stack {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .nqb-text {
+        margin: auto;
+        vertical-align: center;
+    }
+
+    .nqb-heading {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .nqb-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background-color 0.2s, box-shadow 0.2s;
+        border: none;
+        font-weight: 500;
+        margin: auto;
+        vertical-align: center;
+    }
+
+    .nqb-button-outlined {
+        background-color: transparent;
+        border: 1px solid;
+    }
+
+    .nqb-button-primary {
+        color: #1e88e5;
+        border-color: #1e88e5;
+    }
+
+    .nqb-button-primary:hover {
+        background-color: rgba(30, 136, 229, 0.04);
+    }
+</style>

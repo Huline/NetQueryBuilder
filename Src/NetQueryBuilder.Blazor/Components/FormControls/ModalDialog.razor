@@ -1,0 +1,131 @@
+﻿@if (IsVisible)
+{
+    <div class="nqb-modal-backdrop" @onclick="@OnBackdropClick"></div>
+    <div class="nqb-modal">
+        <div class="nqb-modal-content">
+            <div class="nqb-modal-header">
+                @if (ShowCloseButton)
+                {
+                    <button class="nqb-modal-close" @onclick="Close">×</button>
+                }
+                <div class="nqb-modal-title">
+                    @TitleContent
+                </div>
+            </div>
+            <div class="nqb-modal-body">
+                @ChildContent
+            </div>
+            <div class="nqb-modal-footer">
+                @ActionContent
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .nqb-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        animation: nqb-modal-fade-in 0.2s ease;
+    }
+
+    .nqb-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        animation: nqb-modal-slide-down 0.3s ease;
+    }
+
+    .nqb-modal-content {
+        background-color: white;
+        border-radius: 4px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .nqb-modal-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .nqb-modal-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: #212121;
+        flex-grow: 1;
+    }
+
+    .nqb-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 1rem;
+        color: #757575;
+        align-self: flex-start;
+        position: absolute;
+        right: 1rem;
+        top: 0.5rem;
+    }
+
+    .nqb-modal-close:hover {
+        color: #212121;
+    }
+
+    .nqb-modal-body {
+        padding: 1rem;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+
+    .nqb-modal-footer {
+        padding: 1rem;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+   
+    /* Styles pour le mode sombre si nécessaire */
+    :root[data-theme="dark"] .nqb-modal-content {
+        background-color: #303030;
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-modal-header {
+        border-bottom-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-modal-footer {
+        border-top-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-modal-title {
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-modal-close {
+        color: #bdbdbd;
+    }
+
+    :root[data-theme="dark"] .nqb-modal-close:hover {
+        color: #ffffff;
+    }
+</style>

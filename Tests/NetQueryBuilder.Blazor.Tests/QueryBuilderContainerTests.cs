@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using MudBlazor.Services;
 using NetQueryBuilder.Blazor.Components;
 using NetQueryBuilder.Configurations;
 
@@ -18,9 +17,7 @@ public sealed class QueryBuilderContainerTests : TestContext
         }.AsQueryable());
 
         Services.AddSingleton(mockQueryConfigurator);
-        Services.AddMudServices();
         JSInterop.Mode = JSRuntimeMode.Loose;
-        JSInterop.SetupModule("mudBlazor.js");
         _ = RenderComponent<MudTestLayout>();
     }
 

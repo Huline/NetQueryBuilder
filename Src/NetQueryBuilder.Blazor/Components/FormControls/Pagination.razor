@@ -1,0 +1,101 @@
+﻿<div class="nqb-pagination">
+    <div class="nqb-pagination-info">
+        Lignes par page:
+        <select class="nqb-pagination-select" @onchange="OnPageSizeChanged">
+            @foreach (var size in PageSizeOptions)
+            {
+                <option value="@size" selected="@(size == PageSize)">@size</option>
+            }
+        </select>
+    </div>
+    
+    <div class="nqb-pagination-count">
+        @StartItem-@EndItem sur @TotalItems
+    </div>
+    
+    <div class="nqb-pagination-actions">
+        <button class="nqb-pagination-button" 
+                @onclick="() => OnPageChanged(CurrentPage - 1)" 
+                disabled="@(CurrentPage <= 1)">
+            ◄
+        </button>
+        <button class="nqb-pagination-button" 
+                @onclick="() => OnPageChanged(CurrentPage + 1)" 
+                disabled="@(CurrentPage >= TotalPages)">
+            ►
+        </button>
+    </div>
+</div>
+
+<style>
+    .nqb-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        color: #616161;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .nqb-pagination-info {
+        display: flex;
+        align-items: center;
+        margin-right: 2rem;
+    }
+
+    .nqb-pagination-select {
+        margin-left: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        background-color: white;
+    }
+
+    .nqb-pagination-count {
+        margin-right: 2rem;
+    }
+
+    .nqb-pagination-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .nqb-pagination-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .nqb-pagination-button:hover:not(:disabled) {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .nqb-pagination-button:disabled {
+        opacity: 0.38;
+        cursor: default;
+    }
+
+    /* Styles pour le mode sombre si nécessaire */
+    :root[data-theme="dark"] .nqb-pagination {
+        color: #bdbdbd;
+        border-top-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-pagination-select {
+        background-color: #424242;
+        border-color: #616161;
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-pagination-button:hover:not(:disabled) {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+</style>

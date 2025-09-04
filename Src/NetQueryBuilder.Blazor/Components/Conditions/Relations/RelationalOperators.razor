@@ -1,32 +1,4 @@
-﻿@using NetQueryBuilder.Conditions
-@using NetQueryBuilder.Operators
-@using NetQueryBuilder.Queries
-<MudSelect T="ExpressionOperator" Label="Operator" Value="Operator" ValueChanged="OperatorChanged" ToStringFunc="@(o => o?.ToString())">
-    @foreach (var item in _operators)
-    {
-        <MudSelectItem Value="@item">@item.ToString()</MudSelectItem>
-    }
-</MudSelect>
+﻿@using NetQueryBuilder.Operators
+<NetQueryBuilder.Blazor.Components.FormControls.Select TItem="ExpressionOperator" Label="Operator" Value="Operator" Items="_operators" ValueChanged="e => OperatorChanged(e)" ToStringFunc="@(o => o?.ToString())">
+</NetQueryBuilder.Blazor.Components.FormControls.Select>
 
-@code {
-
-    [CascadingParameter] public IQuery Query { get; set; } = null!;
-
-    [Parameter] public SimpleCondition Condition { get; set; } = null!;
-
-    private ExpressionOperator? Operator { get; set; }
-    private IEnumerable<ExpressionOperator> _operators = new List<ExpressionOperator>();
-
-    protected override void OnParametersSet()
-    {
-        _operators = Condition.AvailableOperatorsForCurrentProperty();
-        Operator = Condition.Operator;
-    }
-
-    private void OperatorChanged(ExpressionOperator op)
-    {
-        Operator = op;
-        Condition.Operator = op;
-    }
-
-}

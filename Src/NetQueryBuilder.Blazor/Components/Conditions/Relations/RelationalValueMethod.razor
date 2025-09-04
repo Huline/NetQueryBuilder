@@ -1,4 +1,5 @@
 ﻿@using System.Linq.Expressions
+@using NetQueryBuilder.Blazor.Components.FormControls
 @using NetQueryBuilder.Conditions
 @{
     if (_methodCallExpression == null)
@@ -7,7 +8,10 @@
     }
     else if (_methodCallExpression.Method.Name.Contains("Like", StringComparison.OrdinalIgnoreCase))
     {
-        <MudTextField Label="Value" T="string" Value="@GetStringValue(_methodCallExpression.Arguments[2])" ValueChanged="UpdateValue"/>
+        <TextField Label="Value"
+                   Value="@GetStringValue(_methodCallExpression.Arguments[2])"
+                   ValueChanged="UpdateValue"
+                   AdornmentIcon="🔍"/>
     }
     else if (_methodCallExpression.Method.Name.Contains("Contains", StringComparison.OrdinalIgnoreCase))
     {
@@ -25,42 +29,4 @@
     {
         <p>Method call expression is not supported</p>
     }
-}
-
-
-@code {
-    [Parameter] public SimpleCondition Condition { get; set; } = null!;
-
-    private MethodCallExpression? _methodCallExpression;
-    private Type? _memberType;
-
-    protected override void OnParametersSet()
-    {
-        var expression = Condition.Compile();
-        if (expression is not MethodCallExpression methodCallExpression)
-        {
-            _methodCallExpression = null;
-            _memberType = null;
-            return;
-        }
-
-        _methodCallExpression = methodCallExpression;
-        _memberType = ((MemberExpression)_methodCallExpression.Arguments[1]).Type;
-    }
-
-    private string GetStringValue(Expression expression)
-    {
-        return expression switch
-        {
-            ConstantExpression constExpr => constExpr.Value?.ToString() ?? string.Empty,
-            UnaryExpression { NodeType: ExpressionType.Convert, Operand: ConstantExpression constOperand } => constOperand.Value?.ToString() ?? string.Empty,
-            _ => string.Empty
-        };
-    }
-
-    private void UpdateValue<T>(T value)
-    {
-        Condition.Value = value;
-    }
-
 }

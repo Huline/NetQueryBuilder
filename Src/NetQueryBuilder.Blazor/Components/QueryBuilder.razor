@@ -2,46 +2,156 @@
 @using NetQueryBuilder.Properties
 @typeparam TEntity where TEntity : class
 
-<MudPaper Elevation="3" Class="pa-4 mb-4">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">SELECT</MudText>
-            <MudSelect Label="Select fields" T="SelectPropertyPath"
-                       SelectedValues="_selectedPropertyPaths.Where(s => s.IsSelected)"
-                       SelectedValuesChanged="SelectedValuesChanged"
-                       MultiSelection="true" SelectAll="true"
-                       AdornmentIcon="@Icons.Material.Filled.Checklist"
-                       AdornmentColor="Color.Primary"
-                       ToStringFunc="@(prop => prop!.Property.DisplayName())">
-                @foreach (var property in _selectedPropertyPaths)
-                {
-                    <MudSelectItem T="SelectPropertyPath" Value="property">
-                        @property.Property.DisplayName()
-                    </MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
+<div class="nqb-paper nqb-mb-4">
+    <div class="nqb-grid">
+        <div class="nqb-row nqb-full-width">
+            <h3 class="nqb-heading nqb-heading-primary nqb-mb-3">SELECT</h3>
+            <NetQueryBuilder.Blazor.Components.FormControls.MultiSelect TItem="SelectPropertyPath"
+                                                                        Label="Select fields"
+                                                                        Items="_selectedPropertyPaths"
+                                                                        SelectedValues="_selectedPropertyPaths.Where(s => s.IsSelected)"
+                                                                        SelectedValuesChanged="SelectedValuesChanged"
+                                                                        ToStringFunc="@(prop => prop!.Property.DisplayName())"
+                                                                        AdornmentIcon="✓"
+                                                                        SelectAll="true"/>
+        </div>
 
-        <MudItem xs="12" Class="mt-4">
-            <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">WHERE</MudText>
-            <MudPaper Elevation="0" Class="pa-3 mb-3" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <div class="nqb-row nqb-full-width nqb-mt-4">
+            <h3 class="nqb-heading nqb-heading-primary nqb-mb-3">WHERE</h3>
+            <div class="nqb-paper-outline nqb-pa-3 nqb-mb-3">
                 <CascadingValue Value="@_query">
                     <ConditionComponent Condition="@_query.Condition"/>
                 </CascadingValue>
-            </MudPaper>
-        </MudItem>
+            </div>
+        </div>
 
-        <MudItem xs="12" Class="d-flex justify-center mt-4">
-            <MudButton Color="Color.Primary" Variant="Variant.Filled"
-                       StartIcon="@Icons.Material.Filled.PlayArrow"
-                       Size="Size.Large"
-                       OnClick="RunQuery">Run Query
-            </MudButton>
-        </MudItem>
-    </MudGrid>
-</MudPaper>
+        <div class="nqb-row nqb-full-width nqb-mt-4 nqb-center">
+            <button class="nqb-button nqb-button-large nqb-button-primary" @onclick="RunQuery">
+                <span class="nqb-button-icon">▶</span>
+                Run Query
+            </button>
+        </div>
+    </div>
+</div>
 
-<MudPaper Elevation="3" Class="pa-4">
-    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-3">RÉSULTATS</MudText>
-    <QueryResultTable @ref="_queryResult" TEntity="TEntity" Properties="_selectedPropertyPaths" TotalItems="_totalItems" />
-</MudPaper>
+<div class="nqb-paper">
+    <h3 class="nqb-heading nqb-heading-primary nqb-mb-3">RÉSULTATS</h3>
+    <QueryResultTable @ref="_queryResult" TEntity="TEntity" Properties="_selectedPropertyPaths" TotalItems="_totalItems"/>
+</div>
+
+<style>
+    .nqb-paper {
+        background-color: white;
+        border-radius: 4px;
+        box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+        padding: 1.5rem;
+    }
+
+    .nqb-paper-outline {
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .nqb-grid {
+        display: flex;
+        flex-wrap: wrap;
+        margin: -0.75rem;
+    }
+
+    .nqb-row {
+        padding: 0.75rem;
+    }
+
+    .nqb-full-width {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .nqb-heading {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .nqb-heading-primary {
+        color: #1e88e5;
+    }
+
+    .nqb-mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    .nqb-mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .nqb-mt-4 {
+        margin-top: 1.5rem;
+    }
+
+    .nqb-pa-3 {
+        padding: 1rem;
+    }
+
+    .nqb-center {
+        display: flex;
+        justify-content: center;
+    }
+
+    .nqb-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background-color 0.2s, box-shadow 0.2s;
+        border: none;
+        font-weight: 500;
+    }
+
+    .nqb-button-large {
+        padding: 0.625rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .nqb-button-primary {
+        background-color: #1e88e5;
+        color: white;
+    }
+
+    .nqb-button-primary:hover {
+        background-color: #1976d2;
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    }
+
+    .nqb-button-icon {
+        margin-right: 0.5rem;
+    }
+
+    /* Styles pour le mode sombre si nécessaire */
+    :root[data-theme="dark"] .nqb-paper {
+        background-color: #303030;
+        box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.4), 0 6px 10px 0 rgba(0, 0, 0, 0.28), 0 1px 18px 0 rgba(0, 0, 0, 0.24);
+    }
+
+    :root[data-theme="dark"] .nqb-paper-outline {
+        background-color: #303030;
+        border-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-heading {
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-heading-primary {
+        color: #90caf9;
+    }
+</style>
+
+@code {
+    // Garder le code original intact
+    // ...
+}

@@ -1,111 +1,135 @@
 ﻿@using System.Linq.Expressions
+@using NetQueryBuilder.Blazor.Components.FormControls
 @typeparam T
 
-<MudPaper Elevation="0" Class="pa-2" Outlined="true">
-    <MudText Typo="Typo.subtitle2" Class="mb-2">Valeurs de la liste</MudText>
-    <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Class="mb-3">
-        <MudButton StartIcon="@Icons.Material.Filled.Add"
-                   Color="Color.Primary"
-                   OnClick="@OpenDialog">
+<div class="nqb-paper nqb-list-container">
+    <h4 class="nqb-subtitle">Valeurs de la liste</h4>
+    <div class="nqb-button-group">
+        <button class="nqb-button nqb-button-primary" @onclick="OpenDialog">
+            <span class="nqb-button-icon">+</span>
             Ajouter une valeur
-        </MudButton>
-    </MudButtonGroup>
+        </button>
+    </div>
 
-    @* MultiSelection="true" Filter="true" *@
-    <MudChipSet T="T" Class="mb-2">
-        @foreach (var item in Items)
-        {
-            <MudChip Color="Color.Primary"
-                     Size="Size.Small"
-                     T="T"
-                     OnClose="@(value => RemoveListItem(item))"
-                     Label="true"
-                     CloseIcon="@Icons.Material.Filled.Close">
-                @item?.ToString()
-            </MudChip>
-        }
-    </MudChipSet>
-</MudPaper>
+    <ChipSet TItem="T"
+             Items="Items"
+             OnClose="RemoveListItem"/>
+</div>
 
-<MudDialog @bind-Visible="_showListItemDialog" Options="_listItemDialogOptions">
+<ModalDialog IsVisible="_showListItemDialog"
+             IsVisibleChanged="v => _showListItemDialog = v"
+             ShowCloseButton="true">
     <TitleContent>
-        <MudText Typo="Typo.h6">Ajouter une valeur</MudText>
+        <span>Ajouter une valeur</span>
     </TitleContent>
-    <DialogContent>
-        <MudTextField Label="Valeur" T="T" @bind-Value="_listItemInputValue" Variant="Variant.Outlined"/>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="@(() => _showListItemDialog = false)">
+    <ChildContent>
+        @if (typeof(T) == typeof(string))
+        {
+            <TextField Label="Valeur"
+                       Value="@_stringInputValue"
+                       ValueChanged="UpdateStringValue"/>
+        }
+        else if (typeof(T) == typeof(int))
+        {
+            <NumericField TValue="int"
+                          Label="Valeur"
+                          Value="@_intInputValue"
+                          ValueChanged="UpdateIntValue"/>
+        }
+    </ChildContent>
+    <ActionContent>
+        <button class="nqb-button nqb-button-text" @onclick="@(() => _showListItemDialog = false)">
             Annuler
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@AddListItem">
+        </button>
+        <button class="nqb-button nqb-button-primary" @onclick="AddListItem">
             Ajouter
-        </MudButton>
-    </DialogActions>
-</MudDialog>
+        </button>
+    </ActionContent>
+</ModalDialog>
 
+<style>
+    .nqb-paper {
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #d0d0d0;
+        margin-bottom: 1rem;
+    }
+
+    .nqb-list-container {
+        padding: 1rem;
+    }
+
+    .nqb-subtitle {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        color: #424242;
+    }
+
+    .nqb-button-group {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+
+    .nqb-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s;
+        border: 1px solid transparent;
+        background-color: transparent;
+    }
+
+    .nqb-button-primary {
+        background-color: #1e88e5;
+        color: white;
+        border-color: #1e88e5;
+    }
+
+    .nqb-button-primary:hover {
+        background-color: #1976d2;
+        border-color: #1976d2;
+    }
+
+    .nqb-button-text {
+        color: #616161;
+    }
+
+    .nqb-button-text:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .nqb-button-icon {
+        margin-right: 0.5rem;
+        font-weight: bold;
+    }
+
+    /* Styles pour le mode sombre si nécessaire */
+    :root[data-theme="dark"] .nqb-paper {
+        background-color: #303030;
+        border-color: #424242;
+    }
+
+    :root[data-theme="dark"] .nqb-subtitle {
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-button-text {
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-button-text:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+</style>
 
 @code {
-    [Parameter] public MethodCallExpression MethodCallExpression { get; set; } = null!;
-
-    [Parameter] public Action<T> OnUpdateValue { get; set; } = null!;
-
-    [Parameter] public Action<IEnumerable<T>> OnUpdateValues { get; set; } = null!;
-
-    private T? _listItemInputValue;
-    private List<T> _items = new();
-    private bool _showListItemDialog;
-    private readonly DialogOptions _listItemDialogOptions = new() { CloseButton = true };
 
     // Propriété pour accéder aux éléments de manière cohérente
-    private IEnumerable<T> Items => _items;
-
-    protected override void OnParametersSet()
-    {
-        // Si l'argument est un ConstantExpression, on récupère sa valeur
-        if (MethodCallExpression.Arguments[0] is ConstantExpression constantExpression)
-        {
-            _items = ((IEnumerable<T>)constantExpression.Value! ?? Array.Empty<T>()).ToList();
-        }
-        // Si c'est un NewExpression, on part du principe que c'est une liste vide
-        else if (MethodCallExpression.Arguments[0] is NewExpression)
-        {
-            // La liste est déjà initialisée comme vide
-        }
-    }
-
-    private void OpenDialog()
-    {
-        _showListItemDialog = true;
-    }
-
-    private void AddListItem()
-    {
-        if (_listItemInputValue is not null)
-            _items.Add(_listItemInputValue);
-        _showListItemDialog = false;
-        _listItemInputValue = default;
-        UpdateValues(_items);
-    }
-
-    private void RemoveListItem(T item)
-    {
-        if (item is null) return;
-        var chip = _items.FirstOrDefault(i => i?.Equals(item) == true);
-        if (chip is null)
-            return;
-        _items.Remove(chip);
-        UpdateValues(_items);
-    }
-
-    private void UpdateValue(T value)
-    {
-        OnUpdateValue.Invoke(value);
-    }
-
-    private void UpdateValues(IEnumerable<T> value)
-    {
-        OnUpdateValues.Invoke(value);
-    }
 
 }

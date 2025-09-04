@@ -1,0 +1,12 @@
+﻿@typeparam TItem
+<div class="select-container">
+    <label>@Label</label>
+    <select @onchange="OnChange" class="select-dropdown" value="@BindConverter.FormatValue(Value)">
+        @foreach (var item in Items)
+        {
+            <option value="@ToStringFunc(item)" selected="@(Equals(item, Value))">
+                @ToStringFunc(item)
+            </option>
+        }
+    </select>
+</div>

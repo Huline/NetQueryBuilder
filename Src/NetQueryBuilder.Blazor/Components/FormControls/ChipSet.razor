@@ -1,0 +1,98 @@
+﻿@typeparam TItem
+
+<div class="nqb-chip-set">
+    @foreach (var item in Items)
+    {
+        <div class="nqb-chip">
+            <span class="nqb-chip-label">@(ItemToString != null ? ItemToString(item) : item?.ToString())</span>
+            @if (OnClose != null)
+            {
+                <button class="nqb-chip-close" @onclick="() => OnClose.Invoke(item)" title="Supprimer">
+                    <span class="nqb-chip-close-icon">×</span>
+                </button>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .nqb-chip-set {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .nqb-chip {
+        display: inline-flex;
+        align-items: center;
+        height: 2rem;
+        border-radius: 1rem;
+        background-color: #e0e0e0;
+        color: #424242;
+        padding: 0 0.75rem;
+        font-size: 0.875rem;
+        transition: background-color 0.2s;
+    }
+
+    .nqb-chip-label {
+        margin-right: 0.25rem;
+    }
+
+    .nqb-chip-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        color: #757575;
+        padding: 0;
+        margin-left: 0.25rem;
+        transition: background-color 0.2s;
+    }
+
+    .nqb-chip-close:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .nqb-chip-close-icon {
+        font-size: 1rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    /* Style primaire */
+    .nqb-chip-primary {
+        background-color: #1e88e5;
+        color: white;
+    }
+
+    .nqb-chip-primary .nqb-chip-close {
+        color: white;
+    }
+
+    .nqb-chip-primary .nqb-chip-close:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Styles pour le mode sombre si nécessaire */
+    :root[data-theme="dark"] .nqb-chip {
+        background-color: #424242;
+        color: #e0e0e0;
+    }
+
+    :root[data-theme="dark"] .nqb-chip-close {
+        color: #bdbdbd;
+    }
+
+    :root[data-theme="dark"] .nqb-chip-close:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    :root[data-theme="dark"] .nqb-chip-primary {
+        background-color: #1976d2;
+    }
+</style>

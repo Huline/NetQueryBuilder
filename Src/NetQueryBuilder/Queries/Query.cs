@@ -16,6 +16,7 @@ namespace NetQueryBuilder.Queries
     {
         private readonly List<PropertyPath> _conditionPropertyPaths;
         private readonly IOperatorFactory _operatorFactory;
+        private readonly OrderBy<TEntity> _orderBy;
         private readonly ParameterExpression _parameter;
         private readonly List<SelectPropertyPath> _selectPropertyPaths;
         private LambdaExpression _lambda;
@@ -28,6 +29,8 @@ namespace NetQueryBuilder.Queries
             _operatorFactory = operatorFactory;
             _selectPropertyPaths = AvailableProperties(selectConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, selectConfiguration)).Select(p => new SelectPropertyPath(p)).ToList();
             _conditionPropertyPaths = AvailableProperties(conditionConfiguration.PropertyStringifier).Where(p => MatchConfiguration(p, conditionConfiguration)).ToList();
+            _orderBy = new OrderBy<TEntity>();
+            _orderBy.Set(_conditionPropertyPaths.First(), OrderDirection.Ascending);
             Condition = new BlockCondition(new List<ICondition>(), LogicalOperator.And);
             _lambda = null;
             Condition.ConditionChanged += OnConditionConditionChanged;
@@ -36,6 +39,8 @@ namespace NetQueryBuilder.Queries
         public EventHandler OnChanged { get; set; }
         public IReadOnlyCollection<SelectPropertyPath> SelectPropertyPaths => _selectPropertyPaths;
         public IReadOnlyCollection<PropertyPath> ConditionPropertyPaths => _conditionPropertyPaths;
+        public OrderBy OrderBy => _orderBy;
+
         public BlockCondition Condition { get; }
 
         public virtual LambdaExpression Compile()
@@ -95,7 +100,7 @@ namespace NetQueryBuilder.Queries
                 .Select(p => p.Property)
                 .ToList();
             var queryable = GetQueryable(selectedProps);
-
+            queryable = _orderBy.Compile(queryable);
             if (predicate != null)
                 queryable = queryable.Where(predicate);
 

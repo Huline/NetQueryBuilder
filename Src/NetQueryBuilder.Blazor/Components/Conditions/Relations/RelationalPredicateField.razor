@@ -1,34 +1,5 @@
 ﻿@using NetQueryBuilder.Conditions
 @using NetQueryBuilder.Properties
 @using NetQueryBuilder.Queries
-<MudSelect Label="Field" T="PropertyPath" ValueChanged="OnFieldSelected" Value="_selectedPropertyName">
-    @foreach (var property in _properties)
-    {
-        <MudSelectItem Value="@property">
-            @property.PropertyFullName
-        </MudSelectItem>
-    }
-</MudSelect>
-
-@code {
-
-    [CascadingParameter] public IQuery Query { get; set; } = null!;
-    [Parameter] public SimpleCondition Condition { get; set; } = null!;
-
-    private PropertyPath? _selectedPropertyName;
-    private IEnumerable<PropertyPath> _properties = new List<PropertyPath>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        _properties = Query.ConditionPropertyPaths;
-        _selectedPropertyName = Condition.PropertyPath;
-        await base.OnInitializedAsync();
-    }
-
-    private void OnFieldSelected(PropertyPath propertyName)
-    {
-        _selectedPropertyName = propertyName;
-        Condition.PropertyPath = propertyName;
-    }
-
-}
+<NetQueryBuilder.Blazor.Components.FormControls.Select Label="Field" TItem="PropertyPath" ValueChanged="e => OnFieldSelected(e)" ToStringFunc="path => path.DisplayName()" Items="_properties" Value="_selectedPropertyName">
+</NetQueryBuilder.Blazor.Components.FormControls.Select>
