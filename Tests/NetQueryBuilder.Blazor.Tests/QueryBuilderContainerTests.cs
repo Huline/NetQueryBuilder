@@ -18,7 +18,7 @@ public sealed class QueryBuilderContainerTests : TestContext
 
         Services.AddSingleton(mockQueryConfigurator);
         JSInterop.Mode = JSRuntimeMode.Loose;
-        JSInterop.SetupModule("mudBlazor.js");
+        // Remove MudBlazor specific setup as we no longer use it in our custom components
     }
 
     [Fact]
@@ -27,33 +27,41 @@ public sealed class QueryBuilderContainerTests : TestContext
         // Act
         var cut = RenderComponent<QueryBuilderContainer>();
 
-        // Assert
-        Assert.NotNull(cut.Find("div.mud-toolbar"));
-        Assert.NotNull(cut.Find("button"));
-        Assert.NotNull(cut.Find("div.mud-select"));
-
-        // Vérifie que le bouton New Query est présent
+        // Assert - Check for our new professional design elements
+        Assert.NotNull(cut.Find(".nqb-query-builder-container"));
+        Assert.NotNull(cut.Find(".nqb-container-header"));
+        Assert.NotNull(cut.Find(".nqb-container-title"));
+        
+        // Verify the New Query button is present
         var newQueryButton = cut.Find("button");
         Assert.Contains("New Query", newQueryButton.TextContent);
+        
+        // Verify entity selector is present
+        Assert.NotNull(cut.Find(".nqb-entity-selector"));
+        
+        // Verify hero section elements
+        Assert.Contains("Query Builder", cut.Markup);
+        Assert.Contains("Build and execute dynamic queries", cut.Markup);
     }
-    //
-    // [Fact]
-    // public void QueryBuilderContainer_ShowsAllEntities_InDropdown()
-    // {
-    //     // Act
-    //     var cut = RenderComponent<QueryBuilderContainer>();
-    //
-    //     // Assert
-    //     // Ouvrir le menu déroulant
-    //     var select = cut.Find("div.mud-select");
-    //     select.Click();
-    //
-    //     // Vérifier que les deux entités sont présentes dans le menu déroulant
-    //     var items = cut.FindAll(".mud-list-item");
-    //     Assert.Equal(2, items.Count);
-    //     Assert.Contains(items, item => item.TextContent.Contains("TestEntity"));
-    //     Assert.Contains(items, item => item.TextContent.Contains("AnotherEntity"));
-    // }
+    [Fact]
+    public void QueryBuilderContainer_ShowsEntitySelectionUI_Correctly()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilderContainer>();
+
+        // Assert
+        // Verify the entity selector section is present
+        var dataSourceSection = cut.Find(".nqb-container-section");
+        Assert.NotNull(dataSourceSection);
+        
+        // Verify section header and description
+        Assert.Contains("Data Source", cut.Markup);
+        Assert.Contains("Select the entity type to query from", cut.Markup);
+        
+        // Verify the select component for entities is present
+        var entitySelector = cut.Find(".nqb-entity-selector");
+        Assert.NotNull(entitySelector);
+    }
 
     [Fact]
     public void QueryBuilderContainer_SelectsFirstEntity_ByDefault()
@@ -62,10 +70,13 @@ public sealed class QueryBuilderContainerTests : TestContext
         var cut = RenderComponent<QueryBuilderContainer>();
 
         // Assert
-        // Vérifier que le QueryBuilder est rendu (cela indique qu'une entité est sélectionnée)
-        // Nous ne pouvons pas interroger directement le composant générique, 
-        // mais nous pouvons vérifier qu'il n'y a pas de message demandant de sélectionner une entité
+        // Verify that an entity is selected by checking for query builder sections
+        Assert.NotNull(cut.Find(".nqb-query-section"));
         Assert.DoesNotContain("Please select an entity", cut.Markup);
+        
+        // Verify that entity selection feedback is shown
+        Assert.NotNull(cut.Find(".nqb-entity-badge"));
+        Assert.Contains("TestEntity", cut.Markup);
     }
 
     [Fact]
@@ -115,25 +126,105 @@ public sealed class QueryBuilderContainerTests : TestContext
             .Add(p => p.Expression, string.Empty)
         );
 
-        // Act - Simuler un clic sur le bouton "Run Query"
-        cut.Find("button").Click();
-        cut.WaitForState(() => cut.FindAll("table").Count > 0);
-        // Assert
+        // Act - Find and click the "Execute Query" button (our new button text)
+        var executeButton = cut.FindAll("button")
+            .FirstOrDefault(b => b.TextContent.Contains("Execute Query"));
+        Assert.NotNull(executeButton);
+        
+        executeButton.Click();
+        cut.WaitForState(() => cut.FindAll(".nqb-data-table").Count > 0 || 
+                               cut.FindAll(".nqb-no-results").Count > 0);
+        
+        // Assert - Verify results panel is rendered
+        var resultsPanel = cut.Find(".nqb-results-panel");
+        Assert.NotNull(resultsPanel);
+        
         var renderedComponent = cut.FindComponent<QueryResultTable<TestEntity>>();
         Assert.NotNull(renderedComponent);
     }
 
-    // [Fact]
-    // public void EntitySelect_ValueChanged_ShouldUpdateSelectedEntity()
-    // {
-    //     var cut = RenderComponent<QueryBuilderContainer>();
-    //
-    //     // Act - Simulation du changement de valeur dans MudSelect
-    //     // Nous utilisons InvokeAsync pour appeler directement la méthode qui est liée à l'événement ValueChanged
-    //     cut.InvokeAsync(() => cut.Instance.OnEntitySelect(typeof(TestEntity)));
-    //
-    //     // Assert - Vérifier que l'entité sélectionnée a changé
-    //     // Nous pouvons vérifier indirectement que le contenu du composant affiche le nom de la nouvelle entité
-    //     Assert.Contains("TestEntity", cut.Markup);
-    // }
+    [Fact]
+    public void QueryBuilderContainer_ShowsEntityBadge_WhenEntitySelected()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilderContainer>();
+
+        // Assert - Verify entity selection is indicated with a badge
+        var entityBadge = cut.Find(".nqb-entity-badge");
+        Assert.NotNull(entityBadge);
+        Assert.Contains("TestEntity", entityBadge.TextContent);
+        
+        // Verify the success styling for entity selection
+        var entityInfo = cut.Find(".nqb-entity-info");
+        Assert.NotNull(entityInfo);
+        Assert.Contains("Entity selected", cut.Markup);
+    }
+
+    [Fact] 
+    public void QueryBuilderContainer_HasProfessionalDesign_Elements()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilderContainer>();
+
+        // Assert - Verify professional design elements are present
+        Assert.NotNull(cut.Find(".nqb-container-header")); // Gradient header
+        Assert.NotNull(cut.Find(".nqb-container-title")); // Professional title
+        Assert.NotNull(cut.Find(".nqb-container-icon")); // Header icon
+        
+        // Verify the main container has proper styling
+        var container = cut.Find(".nqb-query-builder-container");
+        Assert.NotNull(container);
+    }
+    
+    [Fact]
+    public void QueryBuilderContainer_RespondsToEntitySelection_Correctly()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilderContainer>();
+        
+        // Initially should show TestEntity as selected
+        Assert.Contains("TestEntity", cut.Markup);
+        Assert.NotNull(cut.Find(".nqb-entity-badge"));
+        
+        // Verify entity info feedback
+        Assert.Contains("Entity selected", cut.Markup);
+        var entityInfo = cut.Find(".nqb-entity-info");
+        Assert.NotNull(entityInfo);
+    }
+    
+    [Fact]
+    public void QueryBuilderContainer_ShowsHeroSection_WithDescription()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilderContainer>();
+        
+        // Assert - Verify hero section elements
+        Assert.Contains("Query Builder", cut.Markup);
+        Assert.Contains("Build and execute dynamic queries", cut.Markup);
+        
+        // Verify professional header structure
+        var headerContent = cut.Find(".nqb-container-header-content");
+        Assert.NotNull(headerContent);
+        
+        var titleSection = cut.Find(".nqb-container-title-section");
+        Assert.NotNull(titleSection);
+    }
+    
+    [Fact]
+    public void QueryBuilderContainer_MaintainsQueryBuilder_AfterEntityChange()
+    {
+        // Arrange
+        var cut = RenderComponent<QueryBuilderContainer>();
+        var initialQuerySections = cut.FindAll(".nqb-query-section").Count;
+        
+        // Act - Change entity selection
+        cut.InvokeAsync(() => cut.Instance.OnEntitySelect(typeof(TestEntity)));
+        
+        // Assert - Query builder should still be present and functional
+        var newQuerySections = cut.FindAll(".nqb-query-section");
+        Assert.True(newQuerySections.Count >= initialQuerySections);
+        
+        // Verify query sections are still functional
+        Assert.NotNull(cut.Find(".nqb-query-config-panel"));
+    }
 }

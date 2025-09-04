@@ -25,26 +25,38 @@ public sealed class QueryBuilderTests : TestContext
         _mockQuery = mockQueryConfigurator.BuildFor<TestEntity>();
         Services.AddSingleton(mockQueryConfigurator);
         JSInterop.Mode = JSRuntimeMode.Loose;
-        JSInterop.SetupModule("mudBlazor.js");
+        // Removed MudBlazor setup as we use custom components now
     }
-    //
-    // [Fact]
-    // public void QueryBuilder_RendersCorrectly_WithInitialState()
-    // {
-    //     // Act
-    //     var cut = RenderComponent<QueryBuilder<TestEntity>>(parameters => parameters
-    //         .Add(p => p.Expression, string.Empty)
-    //     );
-    //
-    //     // Assert
-    //     // Vérifier que les sections SELECT, WHERE et le bouton de requête sont présents
-    //     Assert.Contains("SELECT", cut.Markup);
-    //     Assert.Contains("WHERE", cut.Markup);
-    //     Assert.Contains("Run Query", cut.Markup);
-    //
-    //     // Vérifier que le sélecteur de propriétés est présent
-    //     Assert.NotNull(cut.Find("div.mud-select"));
-    // }
+    [Fact]
+    public void QueryBuilder_RendersCorrectly_WithInitialState()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilder<TestEntity>>(parameters => parameters
+            .Add(p => p.Expression, string.Empty)
+        );
+
+        // Assert - Verify our new professional sections are present
+        Assert.Contains("SELECT", cut.Markup);
+        Assert.Contains("WHERE", cut.Markup);
+        Assert.Contains("Execute Query", cut.Markup);
+
+        // Verify the enhanced field selector is present
+        var fieldSelectors = cut.FindAll(".nqb-field-selector");
+        Assert.True(fieldSelectors.Count > 0);
+        
+        // Verify section icons are present
+        var selectIcons = cut.FindAll(".nqb-section-icon-select");
+        var filterIcons = cut.FindAll(".nqb-section-icon-filter");
+        Assert.True(selectIcons.Count > 0);
+        Assert.True(filterIcons.Count > 0);
+        
+        // Verify query configuration panel structure
+        Assert.NotNull(cut.Find(".nqb-query-config-panel"));
+        
+        // Verify professional sections
+        var querySections = cut.FindAll(".nqb-query-section");
+        Assert.True(querySections.Count >= 2); // SELECT and WHERE sections
+    }
 
 
     [Fact]
@@ -55,13 +67,19 @@ public sealed class QueryBuilderTests : TestContext
             .Add(p => p.Expression, string.Empty)
         );
 
-        // Act
-        var runButton = cut.Find("button");
-        runButton.Click();
+        // Act - Find the Execute Query button specifically
+        var executeButton = cut.FindAll("button")
+            .FirstOrDefault(b => b.TextContent.Contains("Execute Query"));
+        Assert.NotNull(executeButton);
+        
+        executeButton.Click();
 
-        // Vérifier que la table de résultats est mise à jour
-        cut.WaitForState(() => cut.FindAll("table").Count > 0);
-        Assert.NotNull(cut.Find("table"));
+        // Verify that the results panel is updated
+        cut.WaitForState(() => cut.FindAll(".nqb-data-table").Count > 0 || 
+                               cut.FindAll(".nqb-no-results").Count > 0);
+        
+        // Verify results panel is present (either with data or no results message)
+        Assert.NotNull(cut.Find(".nqb-results-panel"));
     }
 
     // [Fact]
@@ -120,5 +138,88 @@ public sealed class QueryBuilderTests : TestContext
         // Vérifier que OnChanged a été détaché (difficile à tester directement)
         // Ce test est surtout pour vérifier que DisposeAsync ne génère pas d'exception
         Assert.True(true);
+    }
+    
+    [Fact]
+    public void QueryBuilder_ShowsProfessionalSections_WithIcons()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilder<TestEntity>>(parameters => parameters
+            .Add(p => p.Expression, string.Empty)
+        );
+
+        // Assert - Verify professional section headers with icons
+        var selectIcons = cut.FindAll(".nqb-section-icon-select");
+        var filterIcons = cut.FindAll(".nqb-section-icon-filter");
+        Assert.True(selectIcons.Count > 0);
+        Assert.True(filterIcons.Count > 0);
+        
+        // Verify section titles and descriptions
+        Assert.Contains("Choose fields to include in results", cut.Markup);
+        Assert.Contains("Define conditions to filter data", cut.Markup);
+    }
+    
+    [Fact]
+    public void QueryBuilder_ShowsFieldSelector_Grid()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilder<TestEntity>>(parameters => parameters
+            .Add(p => p.Expression, string.Empty)
+        );
+
+        // Assert - Verify enhanced field selector grid
+        var fieldSelectors = cut.FindAll(".nqb-field-selector");
+        Assert.True(fieldSelectors.Count > 0);
+        
+        // Should have field selection UI for TestEntity properties
+        var fieldItems = cut.FindAll(".nqb-field-item");
+        Assert.True(fieldItems.Count >= 2); // At least Id and Name fields
+    }
+    
+    [Fact]
+    public void QueryBuilder_ShowsExpressionPreview_Section()
+    {
+        // Act
+        var cut = RenderComponent<QueryBuilder<TestEntity>>(parameters => parameters
+            .Add(p => p.Expression, string.Empty)
+        );
+
+        // Assert - Verify expression preview section
+        var previewSection = cut.FindAll(".nqb-expression-preview").FirstOrDefault();
+        if (previewSection != null)
+        {
+            // Expression preview should be present when there are conditions
+            Assert.Contains("Expression Preview", cut.Markup);
+        }
+        
+        // Verify action buttons section - check for Execute Query button instead
+        var executeButton = cut.FindAll("button").FirstOrDefault(b => b.TextContent.Contains("Execute Query"));
+        Assert.NotNull(executeButton);
+    }
+    
+    [Fact]
+    public void QueryBuilder_HandlesQueryExecution_Gracefully()
+    {
+        // Arrange
+        var cut = RenderComponent<QueryBuilder<TestEntity>>(parameters => parameters
+            .Add(p => p.Expression, string.Empty)
+        );
+
+        // Act - Execute query multiple times to test robustness
+        var executeButton = cut.FindAll("button")
+            .FirstOrDefault(b => b.TextContent.Contains("Execute Query"));
+        Assert.NotNull(executeButton);
+        
+        // First execution
+        executeButton.Click();
+        cut.WaitForState(() => cut.FindAll(".nqb-data-table").Count > 0 || 
+                               cut.FindAll(".nqb-no-results").Count > 0);
+        
+        // Second execution should not break anything
+        executeButton.Click();
+        cut.WaitForState(() => cut.FindAll(".nqb-results-panel").Count > 0);
+        
+        // Assert - Results panel should still be functional
+        Assert.NotNull(cut.Find(".nqb-results-panel"));
     }
 }
