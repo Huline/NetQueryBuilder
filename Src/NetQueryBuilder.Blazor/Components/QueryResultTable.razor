@@ -1,96 +1,191 @@
-﻿
+﻿@using NetQueryBuilder.Properties
 @typeparam TEntity where TEntity : class
 @implements IDisposable
 
-<div class="nqb-paper" style="margin-top: 16px;">
+<div class="nqb-results-container">
     @if (Results == null)
     {
-        <label>Run a query</label>
+        <div class="nqb-empty-state">
+            <div class="nqb-empty-state-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor" opacity="0.3"/>
+                </svg>
+            </div>
+            <div class="nqb-empty-state-content">
+                <h3>No Query Results</h3>
+                <p>Execute a query to see results here</p>
+                <Button Variant="outlined" OnClick="@(() => { })" Disabled="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                        <path d="M8 5v14l11-7z" fill="currentColor"/>
+                    </svg>
+                    Run Query First
+                </Button>
+            </div>
+        </div>
     }
     else
     {
-        <div>
-            <!-- Toolbar -->
-            <div class="nqb-stack nqb-stack-horizontal" style="padding: 16px; justify-content: space-between; align-items: center;">
-                <h6 class="nqb-text-h6">Results (@Results.TotalItems)</h6>
-                <div class="nqb-spacer"></div>
-                <TextField 
-                    Placeholder="Search..."
-                    @bind-Value="@_searchTerm" />
+        <div class="nqb-results-content">
+            <!-- Results Header -->
+            <div class="nqb-results-header">
+                <div class="nqb-results-info">
+                    <div class="nqb-results-count">
+                        <span class="nqb-count-number">@Results.TotalItems</span>
+                        <span class="nqb-count-label">@(Results.TotalItems == 1 ? "result" : "results") found</span>
+                    </div>
+                    @if (Results.TotalItems > 0)
+                    {
+                        <div class="nqb-results-meta">
+                            <span>Page @Results.CurrentPage of @((Results.TotalItems + Results.PageSize - 1) / Results.PageSize)</span>
+                            <span class="nqb-separator">•</span>
+                            <span>@Results.PageSize per page</span>
+                        </div>
+                    }
+                </div>
+                
+                <div class="nqb-results-actions">
+                    <TextField 
+                        Placeholder="Search results..."
+                        Size="small"
+                        @bind-Value="@_searchTerm"
+                        StartAdornment="@SearchIcon" />
+                    
+                    <Button Variant="outlined" Size="small">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 4px;">
+                            <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z" fill="currentColor"/>
+                        </svg>
+                        Export
+                    </Button>
+                </div>
             </div>
             
-            <!-- Table -->
+            <!-- Data Table -->
             @if (Loading)
             {
-                <div style="display: flex; align-items: center; justify-content: center; padding: 40px;">
-                    <Progress Variant="circular" Color="@LoadingColor" />
-                    <span style="margin-left: 16px;">Loading...</span>
+                <div class="nqb-loading-state">
+                    <div class="nqb-loading-spinner">
+                        <Progress Variant="circular" Color="@LoadingColor" Size="large" />
+                    </div>
+                    <div class="nqb-loading-text">
+                        <h4>Loading Results...</h4>
+                        <p>Executing your query</p>
+                    </div>
                 </div>
             }
             else
             {
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table class="@GetTableClass()">
-                        <thead>
-                            <tr>
-                                @foreach (var property in SelectedProperties)
-                                {
-                                    <th>
-                                        <span class="nqb-text-subtitle2">@property.Property.DisplayName()</span>
-                                    </th>
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Results.Items?.Any() == true)
-                            {
-                                @foreach (var item in Results.Items)
-                                {
+                <div class="nqb-table-container">
+                    @if (Results.Items?.Any() == true)
+                    {
+                        <div class="nqb-table-scroll">
+                            <table class="nqb-data-table">
+                                <thead class="nqb-table-header">
                                     <tr>
-                                        @foreach (var propertyPath in SelectedProperties)
+                                        @foreach (var property in SelectedProperties)
                                         {
-                                            <td>@propertyPath.Property.DisplayValue(item)</td>
+                                            <th class="nqb-table-column-header">
+                                                <div class="nqb-column-header-content">
+                                                    <span class="nqb-column-name">@property.Property.DisplayName()</span>
+                                                    <div class="nqb-column-type">@GetColumnTypeDisplay(property)</div>
+                                                </div>
+                                            </th>
                                         }
                                     </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="@SelectedProperties.Count()">
-                                        <Alert Severity="info" style="margin: 16px 0;">
-                                            Aucun résultat trouvé
-                                        </Alert>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody class="nqb-table-body">
+                                    @foreach (var (item, index) in Results.Items.Select((item, index) => (item, index)))
+                                    {
+                                        <tr class="nqb-table-row @(index % 2 == 0 ? "nqb-table-row-even" : "nqb-table-row-odd")">
+                                            @foreach (var propertyPath in SelectedProperties)
+                                            {
+                                                <td class="nqb-table-cell">
+                                                    <div class="nqb-cell-content">
+                                                        @FormatCellValue(propertyPath.Property.DisplayValue(item))
+                                                    </div>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="nqb-no-results">
+                            <div class="nqb-no-results-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor" opacity="0.4"/>
+                                    <path d="M6.47 10.82l2.47-2.47 0.79 0.79 2.47 2.47-0.79 0.79-2.47-2.47z" fill="currentColor" opacity="0.4"/>
+                                </svg>
+                            </div>
+                            <div class="nqb-no-results-content">
+                                <h4>No Results Found</h4>
+                                <p>Your query didn't return any data. Try adjusting your filters or conditions.</p>
+                            </div>
+                        </div>
+                    }
                 </div>
                 
                 <!-- Pagination -->
-                <div class="nqb-pagination">
-                    <div class="nqb-pagination-info">
-                        Page @Results.CurrentPage de @((Results.TotalItems + Results.PageSize - 1) / Results.PageSize)
+                @if (Results.Items?.Any() == true && Results.TotalItems > Results.PageSize)
+                {
+                    <div class="nqb-pagination-container">
+                        <div class="nqb-pagination-info">
+                            <span>Showing @((Results.CurrentPage - 1) * Results.PageSize + 1) to @Math.Min(Results.CurrentPage * Results.PageSize, Results.TotalItems) of @Results.TotalItems results</span>
+                        </div>
+                        
+                        <div class="nqb-pagination-controls">
+                            <Button Variant="outlined" Size="small" 
+                                    OnClick="@(() => Results.GoToPage(1))" 
+                                    Disabled="@(Results.CurrentPage <= 1)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" fill="currentColor"/>
+                                </svg>
+                                First
+                            </Button>
+                            
+                            <Button Variant="outlined" Size="small" 
+                                    OnClick="@(() => Results.GoToPage(Results.CurrentPage - 1))" 
+                                    Disabled="@(Results.CurrentPage <= 1)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" fill="currentColor"/>
+                                </svg>
+                                Previous
+                            </Button>
+                            
+                            <div class="nqb-page-numbers">
+                                @for (int pageNum = Math.Max(1, Results.CurrentPage - 2); pageNum <= Math.Min((Results.TotalItems + Results.PageSize - 1) / Results.PageSize, Results.CurrentPage + 2); pageNum++)
+                                {
+                                    var currentPageNum = pageNum; // Capture for closure
+                                    <Button Variant="@(pageNum == Results.CurrentPage ? "filled" : "text")" 
+                                            Size="small" 
+                                            OnClick="@(() => Results.GoToPage(currentPageNum))">
+                                        @pageNum
+                                    </Button>
+                                }
+                            </div>
+                            
+                            <Button Variant="outlined" Size="small" 
+                                    OnClick="@(() => Results.GoToPage(Results.CurrentPage + 1))" 
+                                    Disabled="@(Results.CurrentPage >= (Results.TotalItems + Results.PageSize - 1) / Results.PageSize)">
+                                Next
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12L10 6Z" fill="currentColor"/>
+                                </svg>
+                            </Button>
+                            
+                            <Button Variant="outlined" Size="small" 
+                                    OnClick="@(() => Results.GoToPage((Results.TotalItems + Results.PageSize - 1) / Results.PageSize))" 
+                                    Disabled="@(Results.CurrentPage >= (Results.TotalItems + Results.PageSize - 1) / Results.PageSize)">
+                                Last
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" fill="currentColor"/>
+                                </svg>
+                            </Button>
+                        </div>
                     </div>
-                    <div class="nqb-pagination-controls">
-                        <button type="button" class="nqb-button nqb-button-icon" 
-                                @onclick="@(() => Results.GoToPage(Results.CurrentPage - 1))" 
-                                disabled="@(Results.CurrentPage <= 1)">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" fill="currentColor"/>
-                            </svg>
-                        </button>
-                        <span style="margin: 0 16px;">@Results.CurrentPage</span>
-                        <button type="button" class="nqb-button nqb-button-icon" 
-                                @onclick="@(() => Results.GoToPage(Results.CurrentPage + 1))" 
-                                disabled="@(Results.CurrentPage >= (Results.TotalItems + Results.PageSize - 1) / Results.PageSize)">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12L10 6Z" fill="currentColor"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                }
             }
         </div>
     }
@@ -98,4 +193,41 @@
 
 @code {
     private string _searchTerm = "";
+    
+    private RenderFragment SearchIcon => @<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+    </svg>;
+    
+    private string GetColumnTypeDisplay(SelectPropertyPath propertyPath)
+    {
+        var propertyType = propertyPath.Property.PropertyType;
+        return propertyType.Name switch
+        {
+            "String" => "Text",
+            "Int32" => "Number",
+            "Int64" => "Number", 
+            "Double" => "Decimal",
+            "Decimal" => "Decimal",
+            "DateTime" => "Date",
+            "Boolean" => "Boolean",
+            _ => "Other"
+        };
+    }
+    
+    private string FormatCellValue(object? value)
+    {
+        if (value == null) return "";
+        
+        return value switch
+        {
+            DateTime dateTime => dateTime.ToString("yyyy-MM-dd HH:mm"),
+            DateOnly dateOnly => dateOnly.ToString("yyyy-MM-dd"),
+            TimeOnly timeOnly => timeOnly.ToString("HH:mm"),
+            decimal dec => dec.ToString("N2"),
+            double dbl => dbl.ToString("N2"),
+            float flt => flt.ToString("N2"),
+            bool boolean => boolean ? "Yes" : "No",
+            _ => value.ToString() ?? ""
+        };
+    }
 }

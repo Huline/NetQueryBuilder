@@ -2,44 +2,136 @@
 @using NetQueryBuilder.Properties
 @typeparam TEntity where TEntity : class
 
-<div class="nqb-paper" style="padding: 32px; margin-bottom: 32px; box-shadow: var(--nqb-shadow-md);">
-    <div class="nqb-grid nqb-grid-cols-1" style="gap: 32px;">
-        <div>
-            <h5 class="nqb-text-h5 nqb-text-primary" style="margin-bottom: 24px;">SELECT</h5>
-            <div class="nqb-form-control">
-                <label class="nqb-label">Select fields</label>
-                <div style="border: 1px solid var(--nqb-border-color); border-radius: var(--nqb-border-radius); padding: 12px;">
-                    @foreach (var property in _selectedPropertyPaths)
-                    {
-                        <label class="nqb-checkbox-wrapper" style="display: block; margin-bottom: 8px;">
-                            <input type="checkbox" class="nqb-checkbox" 
+<!-- Query Configuration Panel -->
+<div class="nqb-query-config-panel">
+    <!-- SELECT Section -->
+    <div class="nqb-query-section">
+        <div class="nqb-section-header">
+            <div class="nqb-section-title">
+                <div class="nqb-section-icon nqb-section-icon-select">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>SELECT</h3>
+                    <p>Choose fields to include in results</p>
+                </div>
+            </div>
+            <div class="nqb-section-actions">
+                <Button Variant="text" Size="small" OnClick="SelectAllFields">
+                    Select All
+                </Button>
+                <Button Variant="text" Size="small" OnClick="DeselectAllFields">
+                    Clear All
+                </Button>
+            </div>
+        </div>
+        
+        <div class="nqb-section-content">
+            <div class="nqb-field-selector">
+                @foreach (var property in _selectedPropertyPaths)
+                {
+                    <div class="nqb-field-item @(property.IsSelected ? "nqb-field-selected" : "")">
+                        <label class="nqb-field-checkbox">
+                            <input type="checkbox" 
                                    checked="@property.IsSelected" 
                                    @onchange="@(e => TogglePropertySelection(property, (bool)e.Value!))" />
-                            <span>@property.Property.DisplayName()</span>
+                            <div class="nqb-checkbox-indicator">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
+                                </svg>
+                            </div>
                         </label>
-                    }
+                        <div class="nqb-field-info">
+                            <div class="nqb-field-name">@property.Property.DisplayName()</div>
+                            <div class="nqb-field-type">@GetFieldTypeDisplay(property)</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- WHERE Section -->
+    <div class="nqb-query-section">
+        <div class="nqb-section-header">
+            <div class="nqb-section-title">
+                <div class="nqb-section-icon nqb-section-icon-filter">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>WHERE</h3>
+                    <p>Define conditions to filter data</p>
                 </div>
             </div>
         </div>
-
-        <div style="margin-top: 32px;">
-            <h5 class="nqb-text-h5 nqb-text-primary" style="margin-bottom: 24px;">WHERE</h5>
-            <div class="nqb-paper nqb-paper-outlined" style="padding: 24px; margin-bottom: 24px;">
+        
+        <div class="nqb-section-content">
+            <div class="nqb-conditions-panel">
                 <CascadingValue Value="@_query">
                     <ConditionComponent Condition="@_query.Condition"/>
                 </CascadingValue>
             </div>
         </div>
+    </div>
 
-        <div style="display: flex; justify-content: center; margin-top: 32px;">
-            <Button Color="primary" Variant="filled" Size="large" OnClick="RunQuery">
-                <Icon Name="play-arrow" /> Run Query
-            </Button>
+    <!-- Expression Preview -->
+    @if (!string.IsNullOrEmpty(Expression))
+    {
+        <div class="nqb-query-section nqb-expression-section">
+            <div class="nqb-section-header">
+                <div class="nqb-section-title">
+                    <div class="nqb-section-icon nqb-section-icon-code">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Generated Expression</h3>
+                        <p>Preview of the query expression</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nqb-section-content">
+                <div class="nqb-expression-display">
+                    <code>@Expression</code>
+                </div>
+            </div>
         </div>
+    }
+
+    <!-- Action Section -->
+    <div class="nqb-query-actions">
+        <Button Color="primary" Variant="filled" Size="large" OnClick="RunQuery" Class="nqb-run-query-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                <path d="M8 5v14l11-7z" fill="currentColor"/>
+            </svg>
+            Execute Query
+        </Button>
     </div>
 </div>
 
-<div class="nqb-paper" style="padding: 32px; box-shadow: var(--nqb-shadow-md);">
-    <h5 class="nqb-text-h5 nqb-text-primary" style="margin-bottom: 24px;">RÉSULTATS</h5>
-    <QueryResultTable @ref="_queryResult" TEntity="TEntity" Properties="_selectedPropertyPaths" TotalItems="_totalItems" />
+<!-- Results Panel -->
+<div class="nqb-results-panel">
+    <div class="nqb-section-header">
+        <div class="nqb-section-title">
+            <div class="nqb-section-icon nqb-section-icon-results">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div>
+                <h3>Query Results</h3>
+                <p>Data matching your query criteria</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nqb-section-content">
+        <QueryResultTable @ref="_queryResult" TEntity="TEntity" Properties="_selectedPropertyPaths" TotalItems="_totalItems" />
+    </div>
 </div>

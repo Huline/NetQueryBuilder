@@ -60,4 +60,38 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
         property.IsSelected = isSelected;
         StateHasChanged();
     }
+    
+    private void SelectAllFields()
+    {
+        foreach (var property in _selectedPropertyPaths)
+        {
+            property.IsSelected = true;
+        }
+        StateHasChanged();
+    }
+    
+    private void DeselectAllFields()
+    {
+        foreach (var property in _selectedPropertyPaths)
+        {
+            property.IsSelected = false;
+        }
+        StateHasChanged();
+    }
+    
+    private string GetFieldTypeDisplay(SelectPropertyPath propertyPath)
+    {
+        var propertyType = propertyPath.Property.PropertyType;
+        return propertyType.Name switch
+        {
+            "String" => "Text",
+            "Int32" => "Number",
+            "Int64" => "Number",
+            "Double" => "Decimal",
+            "Decimal" => "Decimal",
+            "DateTime" => "Date/Time",
+            "Boolean" => "Yes/No",
+            _ => propertyType.Name
+        };
+    }
 }
