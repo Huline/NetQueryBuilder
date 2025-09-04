@@ -8,9 +8,10 @@ namespace NetQueryBuilder.Blazor.Components;
 public partial class QueryBuilder<TEntity> : IAsyncDisposable
 {
     private IQuery _query = null!;
-    private QueryResultTable<TEntity> _queryResult;
+    private QueryResultTable<TEntity> _queryResult = null!;
     private IReadOnlyCollection<SelectPropertyPath> _selectedPropertyPaths = new List<SelectPropertyPath>();
     private int _totalItems;
+    private QueryResult<TEntity>? _queryResults;
 
     [Inject] private IQueryConfigurator QueryConfigurator { get; set; } = null!;
     [Parameter] public string Expression { get; set; } = string.Empty;
@@ -44,7 +45,9 @@ public partial class QueryBuilder<TEntity> : IAsyncDisposable
 
     private async Task RunQuery()
     {
-        _queryResult.Results = await _query.Execute<TEntity>(10);
+        var queryResult = await _query.Execute<TEntity>(10);
+        _queryResults = queryResult;
+        _totalItems = queryResult.TotalItems;
         StateHasChanged();
     }
 

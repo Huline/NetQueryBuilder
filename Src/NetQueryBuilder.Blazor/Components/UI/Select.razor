@@ -249,11 +249,11 @@
         // Try direct conversion for simple types
         if (typeof(T) == typeof(string))
         {
-            Value = (T)(object)stringValue;
+            Value = stringValue != null ? (T)(object)stringValue : default(T);
         }
         else if (typeof(T).IsEnum)
         {
-            if (Enum.TryParse(typeof(T), stringValue, out var enumValue))
+            if (Enum.TryParse(typeof(T), stringValue, out var enumValue) && enumValue != null)
             {
                 Value = (T)enumValue;
             }
@@ -263,7 +263,7 @@
             try
             {
                 var convertedValue = Convert.ChangeType(stringValue, typeof(T));
-                Value = (T)convertedValue;
+                Value = convertedValue != null ? (T)convertedValue : default(T);
             }
             catch
             {

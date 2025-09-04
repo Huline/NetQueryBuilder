@@ -54,7 +54,6 @@
 
     [Parameter] public Action<IEnumerable<T>> OnUpdateValues { get; set; } = null!;
 
-    private T? _listItemInputValue;
     private string _inputStringValue = "";
     private List<T> _items = new();
     private bool _showListItemDialog;
@@ -111,7 +110,7 @@
             }
             else if (underlyingType.IsEnum)
             {
-                if (Enum.TryParse(underlyingType, value, true, out var enumValue))
+                if (Enum.TryParse(underlyingType, value, true, out var enumValue) && enumValue != null)
                     return (T)enumValue;
             }
             else
