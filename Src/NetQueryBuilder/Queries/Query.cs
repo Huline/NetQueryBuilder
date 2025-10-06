@@ -42,10 +42,19 @@ namespace NetQueryBuilder.Queries
         {
             var expression = Condition.Compile();
             if (expression == null)
+            {
+                _lambda = null;
                 return null;
-            _lambda = Expression.Lambda(
-                expression,
-                _parameter);
+            }
+
+            // Only create new lambda if expression changed
+            if (_lambda == null || _lambda.Body != expression)
+            {
+                _lambda = Expression.Lambda(
+                    expression,
+                    _parameter);
+            }
+
             return _lambda;
         }
 
