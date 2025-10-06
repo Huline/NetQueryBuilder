@@ -8,13 +8,5 @@
         mc:Ignorable="d"
         Title="NetQueryBuilder WPF Demo" Height="800" Width="1200"
         WindowStartupLocation="CenterScreen">
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/NetQueryBuilder.WPF;component/Themes/Generic.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <wpf:QueryBuilderContainer x:Name="QueryContainer"/>
 </Window>
