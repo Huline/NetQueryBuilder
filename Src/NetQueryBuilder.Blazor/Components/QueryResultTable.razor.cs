@@ -6,6 +6,9 @@ namespace NetQueryBuilder.Blazor.Components;
 
 public partial class QueryResultTable<TEntity> : ComponentBase
 {
+    private QueryResult<TEntity>? _previousResults;
+    private bool _previousLoading;
+
     [Parameter] public QueryResult<TEntity>? Results { get; set; }
     [Parameter] [EditorRequired] public IReadOnlyCollection<SelectPropertyPath> Properties { get; set; } = new List<SelectPropertyPath>();
     [Parameter] public int TotalItems { get; set; }
@@ -17,6 +20,14 @@ public partial class QueryResultTable<TEntity> : ComponentBase
     [Parameter] public bool Hover { get; set; } = true;
     [Parameter] public bool Dense { get; set; }
 
+    protected override bool ShouldRender()
+    {
+        // Only re-render if results changed or loading state changed
+        bool shouldRender = Results != _previousResults || Loading != _previousLoading;
+        _previousResults = Results;
+        _previousLoading = Loading;
+        return shouldRender;
+    }
 
     private IEnumerable<SelectPropertyPath> SelectedProperties => Properties.Where(p => p.IsSelected);
 

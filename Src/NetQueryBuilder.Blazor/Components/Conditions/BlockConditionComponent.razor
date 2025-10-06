@@ -14,28 +14,30 @@
         </div>
         @foreach (var childCondition in Condition.Conditions)
         {
-            if (childCondition != Condition.Conditions.First())
-            {
-                <div>
-                    <Select T="LogicalOperator" Label="Operator" Value="@childCondition.LogicalOperator" ValueChanged="@(v => ChangeOperator(childCondition, v))" Items="@_operators" ToStringFunc="@(item => item.ToString())" />
-                </div>
-            }
+            <div @key="childCondition">
+                @if (childCondition != Condition.Conditions.First())
+                {
+                    <div>
+                        <Select T="LogicalOperator" Label="Operator" Value="@childCondition.LogicalOperator" ValueChanged="@(v => ChangeOperator(childCondition, v))" Items="@_operators" ToStringFunc="@(item => item.ToString())" />
+                    </div>
+                }
 
-            <div>
-                <div class="nqb-stack nqb-stack-horizontal" style="gap: 12px;">
-                    <button type="button" class="nqb-button nqb-button-outlined nqb-button-icon" @onclick="@(e => RemovePredicate(childCondition))">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/>
-                        </svg>
-                    </button>
-                    <label class="nqb-checkbox-wrapper">
-                        <input type="checkbox" class="nqb-checkbox" @onchange="@(e => Select((bool)e.Value!, childCondition))" />
-                        <span>Group</span>
-                    </label>
+                <div>
+                    <div class="nqb-stack nqb-stack-horizontal" style="gap: 12px;">
+                        <button type="button" class="nqb-button nqb-button-outlined nqb-button-icon" @onclick="@(e => RemovePredicate(childCondition))">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <label class="nqb-checkbox-wrapper">
+                            <input type="checkbox" class="nqb-checkbox" @onchange="@(e => Select((bool)e.Value!, childCondition))" />
+                            <span>Group</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div style="grid-column: span 10;">
-                <ConditionComponent Condition="childCondition"></ConditionComponent>
+                <div style="grid-column: span 10;">
+                    <ConditionComponent Condition="childCondition"></ConditionComponent>
+                </div>
             </div>
         }
     </div>

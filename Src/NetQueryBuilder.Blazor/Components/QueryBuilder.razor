@@ -32,10 +32,10 @@
             <div class="nqb-field-selector">
                 @foreach (var property in _selectedPropertyPaths)
                 {
-                    <div class="nqb-field-item @(property.IsSelected ? "nqb-field-selected" : "")">
+                    <div @key="property" class="nqb-field-item @(property.IsSelected ? "nqb-field-selected" : "")">
                         <label class="nqb-field-checkbox">
-                            <input type="checkbox" 
-                                   checked="@property.IsSelected" 
+                            <input type="checkbox"
+                                   checked="@property.IsSelected"
                                    @onchange="@(e => TogglePropertySelection(property, (bool)e.Value!))" />
                             <div class="nqb-checkbox-indicator">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
