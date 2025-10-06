@@ -1,0 +1,57 @@
+<UserControl x:Class="NetQueryBuilder.WPF.Controls.UI.TypedValueInput"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:NetQueryBuilder.WPF.Helpers">
+    <UserControl.Resources>
+        <!-- String Template -->
+        <DataTemplate x:Key="StringTemplate">
+            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                     MinWidth="150"/>
+        </DataTemplate>
+
+        <!-- Integer Template -->
+        <DataTemplate x:Key="IntegerTemplate">
+            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                     MinWidth="100"
+                     PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+        </DataTemplate>
+
+        <!-- Decimal Template -->
+        <DataTemplate x:Key="DecimalTemplate">
+            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                     MinWidth="100"
+                     PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
+        </DataTemplate>
+
+        <!-- Boolean Template -->
+        <DataTemplate x:Key="BooleanTemplate">
+            <CheckBox IsChecked="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      Content="True"
+                      VerticalAlignment="Center"/>
+        </DataTemplate>
+
+        <!-- DateTime Template -->
+        <DataTemplate x:Key="DateTimeTemplate">
+            <DatePicker SelectedDate="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        MinWidth="150"/>
+        </DataTemplate>
+
+        <!-- Default Template -->
+        <DataTemplate x:Key="DefaultTemplate">
+            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                     MinWidth="150"/>
+        </DataTemplate>
+
+        <!-- Template Selector -->
+        <helpers:TypedValueTemplateSelector x:Key="TemplateSelector"
+                                            StringTemplate="{StaticResource StringTemplate}"
+                                            IntegerTemplate="{StaticResource IntegerTemplate}"
+                                            DecimalTemplate="{StaticResource DecimalTemplate}"
+                                            BooleanTemplate="{StaticResource BooleanTemplate}"
+                                            DateTimeTemplate="{StaticResource DateTimeTemplate}"
+                                            DefaultTemplate="{StaticResource DefaultTemplate}"/>
+    </UserControl.Resources>
+
+    <ContentControl Content="{Binding PropertyType, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    ContentTemplateSelector="{StaticResource TemplateSelector}"/>
+</UserControl>

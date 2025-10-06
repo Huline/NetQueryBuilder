@@ -1,8 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0-windows</TargetFramework>
+        <TargetFrameworks>net6.0-windows;net8.0-windows;net9.0-windows</TargetFrameworks>
         <UseWPF>true</UseWPF>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>NetQueryBuilder.WPF</Title>
+        <Description>WPF UI components for NetQueryBuilder - Build dynamic queries with visual interface</Description>
+        <PackageProjectUrl>https://github.com/yourusername/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/yourusername/NetQueryBuilder</RepositoryUrl>
+        <PackageTags>query-builder;wpf;dynamic-query;linq;expression-tree;ui-components</PackageTags>
+        <Authors>NetQueryBuilder Contributors</Authors>
+        <Company>NetQueryBuilder</Company>
     </PropertyGroup>
 
     <ItemGroup>
@@ -11,6 +21,10 @@
             <XamlRuntime>Wpf</XamlRuntime>
             <SubType>Designer</SubType>
         </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.122" />
     </ItemGroup>
 
     <ItemGroup>
