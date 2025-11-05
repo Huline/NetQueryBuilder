@@ -40,6 +40,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetQueryBuilder.WpfSample",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetQueryBuilder.Wpf.Tests", "Tests\NetQueryBuilder.Wpf.Tests\NetQueryBuilder.Wpf.Tests.csproj", "{CFA1D070-F76A-4C3B-9498-312091917C2B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetQueryBuilder.AspNetCore", "Src\NetQueryBuilder.AspNetCore\NetQueryBuilder.AspNetCore.csproj", "{A1234567-89AB-CDEF-0123-456789ABCDEF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetQueryBuilder.AspNetCoreSampleApp", "Samples\NetQueryBuilder.AspNetCoreSampleApp\NetQueryBuilder.AspNetCoreSampleApp.csproj", "{B2345678-9ABC-DEF0-1234-56789ABCDEF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +98,14 @@ Global
 		{CFA1D070-F76A-4C3B-9498-312091917C2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFA1D070-F76A-4C3B-9498-312091917C2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFA1D070-F76A-4C3B-9498-312091917C2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1234567-89AB-CDEF-0123-456789ABCDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1234567-89AB-CDEF-0123-456789ABCDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1234567-89AB-CDEF-0123-456789ABCDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1234567-89AB-CDEF-0123-456789ABCDEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2345678-9ABC-DEF0-1234-56789ABCDEF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2345678-9ABC-DEF0-1234-56789ABCDEF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2345678-9ABC-DEF0-1234-56789ABCDEF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2345678-9ABC-DEF0-1234-56789ABCDEF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,5 +126,7 @@ Global
 		{76972D5B-7170-426A-8C8B-BBCDEA5987D7} = {637AC837-4843-4D8E-AE42-759E2D2DE4C5}
 		{98F7F561-2871-40A1-B43E-AFB97791B73A} = {F513E84C-518B-4052-A529-81846E9E9689}
 		{CFA1D070-F76A-4C3B-9498-312091917C2B} = {A2741D5A-C8E5-4AF3-A544-6ED362460E7A}
+		{A1234567-89AB-CDEF-0123-456789ABCDEF} = {637AC837-4843-4D8E-AE42-759E2D2DE4C5}
+		{B2345678-9ABC-DEF0-1234-56789ABCDEF0} = {F513E84C-518B-4052-A529-81846E9E9689}
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,26 @@
+@model NetQueryBuilder.AspNetCore.ViewComponents.PaginationViewModel
+
+<div class="nqb-pagination">
+    <form method="post" style="display:inline;">
+        <button type="submit"
+                formaction="?handler=ChangePage&page=@(Model.CurrentPage - 1)"
+                disabled="@(!Model.HasPreviousPage)"
+                class="nqb-button nqb-button-outlined nqb-button-small">
+            ← Previous
+        </button>
+    </form>
+
+    <span class="nqb-pagination-info">
+        Page @Model.CurrentPage of @Model.TotalPages
+        (@Model.TotalItems total items)
+    </span>
+
+    <form method="post" style="display:inline;">
+        <button type="submit"
+                formaction="?handler=ChangePage&page=@(Model.CurrentPage + 1)"
+                disabled="@(!Model.HasNextPage)"
+                class="nqb-button nqb-button-outlined nqb-button-small">
+            Next →
+        </button>
+    </form>
+</div>

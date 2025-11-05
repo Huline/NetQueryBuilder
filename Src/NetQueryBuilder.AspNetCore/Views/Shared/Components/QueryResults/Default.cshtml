@@ -1,0 +1,32 @@
+@model NetQueryBuilder.AspNetCore.ViewComponents.QueryResultsViewModel
+
+<div class="nqb-table-container">
+    @if (Model.Items.Any())
+    {
+        <table class="nqb-table nqb-table-bordered nqb-table-striped nqb-table-hover">
+            <thead>
+                <tr>
+                    @foreach (var property in Model.SelectedProperties)
+                    {
+                        <th>@property</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        @foreach (var property in Model.SelectedProperties)
+                        {
+                            <td>@Model.GetPropertyValue(item, property)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="nqb-info-message">No results found matching your query criteria.</p>
+    }
+</div>
