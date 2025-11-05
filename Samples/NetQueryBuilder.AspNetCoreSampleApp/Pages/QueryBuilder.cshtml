@@ -1,0 +1,76 @@
+@page
+@model NetQueryBuilder.AspNetCoreSampleApp.Pages.QueryBuilderModel
+@{
+    ViewData["Title"] = "Query Builder";
+}
+
+<div class="nqb-container">
+    <h1>NetQueryBuilder for ASP.NET Core</h1>
+    <p class="nqb-subtitle">Build dynamic queries with an intuitive interface</p>
+
+    @if (!ModelState.IsValid)
+    {
+        <div class="nqb-alert nqb-alert-error">
+            @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <p>@error.ErrorMessage</p>
+            }
+        </div>
+    }
+
+    <form method="post">
+        <!-- Step 1: Entity Selection -->
+        <div class="nqb-card">
+            <h2>1. Select Entity Type</h2>
+            <nqb-entity-selector session-id="@Model.SessionId"></nqb-entity-selector>
+        </div>
+
+        <!-- Only show following sections if entity is selected -->
+        @if (Model.State.SelectedEntityType != null)
+        {
+            <!-- Step 2: Property Selection -->
+            <div class="nqb-card">
+                <h2>2. Select Properties (SELECT)</h2>
+                <nqb-property-selector session-id="@Model.SessionId"></nqb-property-selector>
+            </div>
+
+            <!-- Step 3: Condition Builder -->
+            <div class="nqb-card">
+                <h2>3. Build Conditions (WHERE)</h2>
+                <nqb-condition-builder session-id="@Model.SessionId"></nqb-condition-builder>
+            </div>
+
+            <!-- Step 4: Expression Preview -->
+            <div class="nqb-card">
+                <h2>Expression Preview</h2>
+                @await Component.InvokeAsync("ExpressionDisplay", new { sessionId = Model.SessionId })
+            </div>
+
+            <!-- Step 5: Execute Query -->
+            <div class="nqb-actions">
+                <button type="submit"
+                        formmethod="post"
+                        formaction="?handler=ExecuteQuery"
+                        class="nqb-button nqb-button-primary nqb-button-large">
+                    ▶ Run Query
+                </button>
+                <button type="submit"
+                        formmethod="post"
+                        formaction="?handler=ClearQuery"
+                        class="nqb-button nqb-button-outlined">
+                    Clear All
+                </button>
+            </div>
+        }
+    </form>
+
+    <!-- Results Section -->
+    @if (Model.State.Results != null)
+    {
+        <div class="nqb-card">
+            <h2>Query Results</h2>
+            @await Component.InvokeAsync("QueryResults", new { sessionId = Model.SessionId })
+            @await Component.InvokeAsync("Pagination", new { sessionId = Model.SessionId })
+        </div>
+    }
+</div>

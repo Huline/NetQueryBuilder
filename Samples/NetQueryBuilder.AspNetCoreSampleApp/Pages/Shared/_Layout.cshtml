@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NetQueryBuilder Demo</title>
+    <link rel="stylesheet" href="~/css/netquerybuilder.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="nqb-header">
+        <div class="nqb-container">
+            <h1>NetQueryBuilder</h1>
+            <p>ASP.NET Core Integration Demo</p>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="nqb-footer">
+        <div class="nqb-container">
+            <p>&copy; 2024 NetQueryBuilder - <a href="https://github.com/remihenache/NetQueryBuilder">GitHub</a></p>
+        </div>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
