@@ -15,5 +15,6 @@
     <converters:NullToVisibilityConverter x:Key="InvertedNullToVisibilityConverter" Invert="True"/>
     <converters:TypeToControlConverter x:Key="TypeToControlConverter"/>
     <converters:BooleanToBackgroundConverter x:Key="BooleanToBackgroundConverter"/>
+    <converters:PropertyPathToDisplayNameConverter x:Key="PropertyPathToDisplayNameConverter"/>
 
 </ResourceDictionary>

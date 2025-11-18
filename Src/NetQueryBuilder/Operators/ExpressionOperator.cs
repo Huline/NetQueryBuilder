@@ -47,5 +47,10 @@ namespace NetQueryBuilder.Operators
         {
             return _expressionStringifier.GetString(ExpressionType, _name);
         }
+
+        /// <summary>
+        /// Gets the display name of the operator (property accessor for data binding).
+        /// </summary>
+        public string DisplayName => ToString();
     }
 }

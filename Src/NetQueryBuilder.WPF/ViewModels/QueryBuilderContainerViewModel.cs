@@ -7,15 +7,15 @@ using NetQueryBuilder.WPF.Commands;
 namespace NetQueryBuilder.WPF.ViewModels;
 
 /// <summary>
-/// ViewModel for the QueryBuilderContainer control.
+///     ViewModel for the QueryBuilderContainer control.
 /// </summary>
 public class QueryBuilderContainerViewModel : ViewModelBase
 {
     private readonly IQueryConfigurator _configurator;
     private ObservableCollection<Type> _availableEntities;
-    private Type? _selectedEntityType;
     private IQuery? _currentQuery;
-    private int _queryCounter = 0;
+    private int _queryCounter;
+    private Type? _selectedEntityType;
 
     public QueryBuilderContainerViewModel(IQueryConfigurator configurator)
     {
@@ -25,14 +25,11 @@ public class QueryBuilderContainerViewModel : ViewModelBase
         NewQueryCommand = new RelayCommand(_ => NewQuery());
 
         // Initialize with first entity
-        if (_availableEntities.Count > 0)
-        {
-            SelectedEntityType = _availableEntities[0];
-        }
+        if (_availableEntities.Count > 0) SelectedEntityType = _availableEntities[0];
     }
 
     /// <summary>
-    /// Gets the collection of available entity types.
+    ///     Gets the collection of available entity types.
     /// </summary>
     public ObservableCollection<Type> AvailableEntities
     {
@@ -41,22 +38,19 @@ public class QueryBuilderContainerViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets the selected entity type.
+    ///     Gets or sets the selected entity type.
     /// </summary>
     public Type? SelectedEntityType
     {
         get => _selectedEntityType;
         set
         {
-            if (SetProperty(ref _selectedEntityType, value) && value != null)
-            {
-                CreateQueryForEntity(value);
-            }
+            if (SetProperty(ref _selectedEntityType, value) && value != null) CreateQueryForEntity(value);
         }
     }
 
     /// <summary>
-    /// Gets the current query.
+    ///     Gets the current query.
     /// </summary>
     public IQuery? CurrentQuery
     {
@@ -65,7 +59,7 @@ public class QueryBuilderContainerViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets a counter to force UI refresh when creating a new query.
+    ///     Gets or sets a counter to force UI refresh when creating a new query.
     /// </summary>
     public int QueryCounter
     {
@@ -74,7 +68,7 @@ public class QueryBuilderContainerViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the command to create a new query.
+    ///     Gets the command to create a new query.
     /// </summary>
     public ICommand NewQueryCommand { get; }
 
@@ -90,5 +84,6 @@ public class QueryBuilderContainerViewModel : ViewModelBase
     private void CreateQueryForEntity(Type entityType)
     {
         CurrentQuery = _configurator.BuildFor(entityType);
+        CurrentQuery.Condition.CreateNew(CurrentQuery.ConditionPropertyPaths.First());
     }
 }

@@ -8,23 +8,21 @@ using NetQueryBuilder.WPF.Commands;
 namespace NetQueryBuilder.WPF.ViewModels;
 
 /// <summary>
-/// ViewModel for a block condition (grouped conditions with logical operators).
+///     ViewModel for a block condition (grouped conditions with logical operators).
 /// </summary>
 public class BlockConditionViewModel : ViewModelBase
 {
-    private readonly IQuery _query;
-    private readonly BlockCondition _condition;
     private ObservableCollection<ICondition> _childConditions;
-    private ObservableCollection<ICondition> _selectedConditions;
     private int _indentationLevel;
+    private ObservableCollection<ICondition> _selectedConditions;
 
     public BlockConditionViewModel(IQuery query, BlockCondition condition, int indentationLevel = 0)
     {
-        _query = query ?? throw new ArgumentNullException(nameof(query));
-        _condition = condition ?? throw new ArgumentNullException(nameof(condition));
+        Query = query ?? throw new ArgumentNullException(nameof(query));
+        Condition = condition ?? throw new ArgumentNullException(nameof(condition));
         _indentationLevel = indentationLevel;
 
-        _childConditions = new ObservableCollection<ICondition>(_condition.Conditions);
+        _childConditions = new ObservableCollection<ICondition>(Condition.Conditions);
         _selectedConditions = new ObservableCollection<ICondition>();
 
         AddConditionCommand = new RelayCommand(_ => AddCondition());
@@ -32,11 +30,11 @@ public class BlockConditionViewModel : ViewModelBase
         UngroupConditionsCommand = new RelayCommand(_ => UngroupConditions(), _ => CanUngroup());
 
         // Subscribe to condition changes to update the collection
-        _condition.ConditionChanged += OnConditionChanged;
+        Condition.ConditionChanged += OnConditionChanged;
     }
 
     /// <summary>
-    /// Gets the collection of child conditions.
+    ///     Gets the collection of child conditions.
     /// </summary>
     public ObservableCollection<ICondition> ChildConditions
     {
@@ -45,7 +43,7 @@ public class BlockConditionViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the collection of selected conditions for grouping.
+    ///     Gets the collection of selected conditions for grouping.
     /// </summary>
     public ObservableCollection<ICondition> SelectedConditions
     {
@@ -54,7 +52,7 @@ public class BlockConditionViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the indentation level for visual hierarchy.
+    ///     Gets the indentation level for visual hierarchy.
     /// </summary>
     public int IndentationLevel
     {
@@ -63,43 +61,66 @@ public class BlockConditionViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the left margin based on indentation level.
+    ///     Gets the left margin based on indentation level.
     /// </summary>
-    public Thickness IndentationMargin => new Thickness(IndentationLevel * 20, 0, 0, 0);
+    public Thickness IndentationMargin => new(IndentationLevel * 20, 0, 0, 0);
 
     /// <summary>
-    /// Gets whether this block has a parent (can be ungrouped).
+    ///     Gets the indentation level for nested child conditions (incremented by 1).
     /// </summary>
-    public bool HasParent => _condition.Parent != null;
+    public int NestedIndentationLevel => IndentationLevel + 1;
 
     /// <summary>
-    /// Gets the query context.
+    ///     Gets whether this block has a parent (can be ungrouped).
     /// </summary>
-    public IQuery Query => _query;
+    public bool HasParent => Condition.Parent != null;
 
     /// <summary>
-    /// Gets the underlying block condition.
+    ///     Gets the query context.
     /// </summary>
-    public BlockCondition Condition => _condition;
+    public IQuery Query { get; }
 
     /// <summary>
-    /// Gets the command to add a new condition.
+    ///     Gets the underlying block condition.
+    /// </summary>
+    public BlockCondition Condition { get; }
+
+    /// <summary>
+    ///     Gets the command to add a new condition.
     /// </summary>
     public ICommand AddConditionCommand { get; }
 
     /// <summary>
-    /// Gets the command to group selected conditions.
+    ///     Gets the command to group selected conditions.
     /// </summary>
     public ICommand GroupConditionsCommand { get; }
 
     /// <summary>
-    /// Gets the command to ungroup conditions.
+    ///     Gets the command to ungroup conditions.
     /// </summary>
     public ICommand UngroupConditionsCommand { get; }
 
     private void AddCondition()
     {
-        _condition.CreateNew();
+        // Check if there are any existing conditions to copy from
+        var existingCondition = Condition.Conditions.OfType<SimpleCondition>().FirstOrDefault();
+
+        if (existingCondition != null)
+        {
+            // Use the parameterless CreateNew which copies from existing condition
+            Condition.CreateNew();
+        }
+        else
+        {
+            // No existing conditions, need to create one with a property
+            var firstProperty = Query.ConditionPropertyPaths.FirstOrDefault();
+            if (firstProperty != null)
+                Condition.CreateNew(firstProperty);
+            else
+                // No properties available - should not happen if query is properly configured
+                throw new InvalidOperationException("Cannot add condition: No properties are available in the query configuration.");
+        }
+
         RefreshChildConditions();
     }
 
@@ -110,7 +131,7 @@ public class BlockConditionViewModel : ViewModelBase
 
     private void GroupConditions()
     {
-        _condition.Group(SelectedConditions);
+        Condition.Group(SelectedConditions);
         SelectedConditions.Clear();
         RefreshChildConditions();
     }
@@ -122,7 +143,7 @@ public class BlockConditionViewModel : ViewModelBase
 
     private void UngroupConditions()
     {
-        _condition.Ungroup(SelectedConditions);
+        Condition.Ungroup(SelectedConditions);
         SelectedConditions.Clear();
         RefreshChildConditions();
     }
@@ -134,12 +155,12 @@ public class BlockConditionViewModel : ViewModelBase
 
     private void RefreshChildConditions()
     {
-        ChildConditions = new ObservableCollection<ICondition>(_condition.Conditions);
+        ChildConditions = new ObservableCollection<ICondition>(Condition.Conditions);
     }
 
     public void RemoveCondition(ICondition condition)
     {
-        _condition.Remove(condition);
+        Condition.Remove(condition);
         RefreshChildConditions();
     }
 }

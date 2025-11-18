@@ -4,10 +4,10 @@
              xmlns:local="clr-namespace:NetQueryBuilder.WPF.Controls">
     <Grid Margin="16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" MinHeight="200" />
+            <RowDefinition Height="Auto" MinHeight="300" />
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -17,12 +17,12 @@
                       Fill="White"
                       Stretch="Uniform"
                       Width="32" Height="32"
-                      Margin="0,0,16,0"/>
+                      Margin="0,0,16,0" />
                 <StackPanel>
-                    <TextBlock Text="Query Builder" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Query Builder" FontSize="24" FontWeight="Bold" Foreground="White" />
                     <TextBlock Text="Build and execute dynamic queries with visual interface"
-                              FontSize="12"
-                              Foreground="#E3F2FD"/>
+                               FontSize="12"
+                               Foreground="#E3F2FD" />
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -31,9 +31,9 @@
         <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="24,16">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,16,0">
@@ -41,29 +41,29 @@
                           Fill="#1976D2"
                           Stretch="Uniform"
                           Width="24" Height="24"
-                          Margin="0,0,12,0"/>
-                    <TextBlock Text="Data Source" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                          Margin="0,0,12,0" />
+                    <TextBlock Text="Data Source" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
                 </StackPanel>
 
                 <ComboBox Grid.Column="1"
-                         ItemsSource="{Binding AvailableEntities}"
-                         SelectedItem="{Binding SelectedEntityType, Mode=TwoWay}"
-                         DisplayMemberPath="Name"
-                         FontSize="14"
-                         Padding="12,8"
-                         MinWidth="200"/>
+                          ItemsSource="{Binding AvailableEntities}"
+                          SelectedItem="{Binding SelectedEntityType, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          FontSize="14"
+                          Padding="12,8"
+                          MinWidth="200" />
 
                 <Button Grid.Column="2"
-                       Command="{Binding NewQueryCommand}"
-                       Style="{StaticResource PrimaryButtonStyle}"
-                       Margin="16,0,0,0">
+                        Command="{Binding NewQueryCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Margin="16,0,0,0">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
                               Fill="White"
                               Stretch="Uniform"
                               Width="16" Height="16"
-                              Margin="0,0,8,0"/>
-                        <TextBlock Text="New Query" VerticalAlignment="Center"/>
+                              Margin="0,0,8,0" />
+                        <TextBlock Text="New Query" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </Grid>
@@ -71,12 +71,12 @@
 
         <!-- Query Builder Section -->
         <Border Grid.Row="2" Background="#F5F5F5" Padding="0,16" Margin="0,0,0,16">
-            <ContentControl x:Name="QueryBuilderHost"/>
+            <ContentControl x:Name="QueryBuilderHost" />
         </Border>
 
         <!-- Results Section -->
         <Border Grid.Row="3">
-            <local:QueryResultGrid x:Name="ResultsGrid"/>
+            <local:QueryResultGrid x:Name="ResultsGrid" />
         </Border>
     </Grid>
 </UserControl>

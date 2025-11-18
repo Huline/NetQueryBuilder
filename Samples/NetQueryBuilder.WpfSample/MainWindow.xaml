@@ -7,6 +7,9 @@
         xmlns:wpf="clr-namespace:NetQueryBuilder.WPF.Controls;assembly=NetQueryBuilder.WPF"
         mc:Ignorable="d"
         Title="NetQueryBuilder WPF Demo" Height="800" Width="1200"
+        MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen">
-    <wpf:QueryBuilderContainer x:Name="QueryContainer"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <wpf:QueryBuilderContainer x:Name="QueryContainer"/>
+    </ScrollViewer>
 </Window>

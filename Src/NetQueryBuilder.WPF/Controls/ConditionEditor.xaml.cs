@@ -6,7 +6,7 @@ using NetQueryBuilder.Queries;
 namespace NetQueryBuilder.WPF.Controls;
 
 /// <summary>
-/// A router control that selects the appropriate editor for a condition.
+///     A router control that selects the appropriate editor for a condition.
 /// </summary>
 public partial class ConditionEditor : UserControl
 {
@@ -37,7 +37,7 @@ public partial class ConditionEditor : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the query context.
+    ///     Gets or sets the query context.
     /// </summary>
     public IQuery? Query
     {
@@ -45,9 +45,6 @@ public partial class ConditionEditor : UserControl
         set => SetValue(QueryProperty, value);
     }
 
-    /// <summary>
-    /// Gets or sets the condition to display.
-    /// </summary>
     public ICondition? Condition
     {
         get => (ICondition?)GetValue(ConditionProperty);
@@ -55,7 +52,7 @@ public partial class ConditionEditor : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the indentation level for nested conditions.
+    ///     Gets or sets the indentation level for nested conditions.
     /// </summary>
     public int IndentationLevel
     {

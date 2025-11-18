@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:NetQueryBuilder.WPF.Controls"
              xmlns:conditions="clr-namespace:NetQueryBuilder.Conditions;assembly=NetQueryBuilder">
+
     <Border BorderBrush="#1976D2" BorderThickness="2" Background="#F5F9FF" Padding="16" CornerRadius="8"
             Margin="{Binding IndentationMargin}">
         <StackPanel>
@@ -11,30 +12,45 @@
                 <Button Content="+ Add Condition"
                         Command="{Binding AddConditionCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
-                        Margin="0,0,8,0"/>
+                        Margin="0,0,8,0" />
 
                 <Button Content="Group Selected"
                         Command="{Binding GroupConditionsCommand}"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Margin="0,0,8,0"/>
+                        Margin="0,0,8,0" />
 
                 <Button Content="Ungroup"
                         Command="{Binding UngroupConditionsCommand}"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Visibility="{Binding HasParent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        Visibility="{Binding HasParent, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
 
             <!-- Child Conditions -->
-            <ItemsControl ItemsSource="{Binding ChildConditions}">
-                <ItemsControl.ItemTemplate>
+            <ListBox ItemsSource="{Binding ChildConditions}"
+                     SelectionMode="Multiple"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     HorizontalContentAlignment="Stretch">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel>
                             <!-- Logical Operator Selector (except for first condition) -->
                             <ComboBox SelectedItem="{Binding LogicalOperator}"
-                                     Margin="0,0,0,8"
-                                     Width="100"
-                                     HorizontalAlignment="Left"
-                                     Visibility="{Binding RelativeSource={RelativeSource PreviousData}, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
+                                      Margin="0,0,0,8"
+                                      Width="100"
+                                      HorizontalAlignment="Left"
+                                      Visibility="{Binding RelativeSource={RelativeSource PreviousData}, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Invert}">
                                 <ComboBox.ItemsSource>
                                     <x:Array Type="{x:Type conditions:LogicalOperator}">
                                         <conditions:LogicalOperator>And</conditions:LogicalOperator>
@@ -46,17 +62,17 @@
                             <!-- Selection and Delete -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <CheckBox IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
-                                         Content="Select for grouping"
-                                         Margin="0,0,12,0"/>
+                                          Content="Select for grouping"
+                                          Margin="0,0,12,0" />
                             </StackPanel>
 
-                            <!-- Condition Content -->
-                            <ContentControl Content="{Binding}"
-                                          ContentTemplateSelector="{StaticResource ConditionTemplateSelector}"/>
+                            <local:ConditionEditor Condition="{Binding}"
+                                                   Query="{Binding Query, RelativeSource={RelativeSource AncestorType=local:BlockConditionEditor}}"
+                                                   IndentationLevel="{Binding DataContext.NestedIndentationLevel, RelativeSource={RelativeSource AncestorType=local:BlockConditionEditor}}" />
                         </StackPanel>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
     </Border>
 </UserControl>

@@ -1,7 +1,12 @@
 <UserControl x:Class="NetQueryBuilder.WPF.Controls.UI.PropertySelector"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:properties="clr-namespace:NetQueryBuilder.Properties;assembly=NetQueryBuilder">
+             xmlns:properties="clr-namespace:NetQueryBuilder.Properties;assembly=NetQueryBuilder"
+             xmlns:converters="clr-namespace:NetQueryBuilder.WPF.Converters">
+    <UserControl.Resources>
+        <converters:PropertyPathToDisplayNameConverter x:Key="PropertyPathToDisplayNameConverter"/>
+    </UserControl.Resources>
+
     <ComboBox ItemsSource="{Binding Properties, RelativeSource={RelativeSource AncestorType=UserControl}}"
               SelectedItem="{Binding SelectedProperty, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
               DisplayMemberPath="PropertyFullName"
@@ -9,7 +14,7 @@
         <ComboBox.ItemTemplate>
             <DataTemplate DataType="{x:Type properties:PropertyPath}">
                 <StackPanel>
-                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Converter={StaticResource PropertyPathToDisplayNameConverter}}" FontWeight="SemiBold"/>
                     <TextBlock Text="{Binding PropertyFullName}" FontSize="10" Foreground="Gray"/>
                 </StackPanel>
             </DataTemplate>

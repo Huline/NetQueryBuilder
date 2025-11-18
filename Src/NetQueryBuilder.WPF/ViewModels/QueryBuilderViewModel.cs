@@ -8,21 +8,20 @@ using NetQueryBuilder.WPF.Commands;
 namespace NetQueryBuilder.WPF.ViewModels;
 
 /// <summary>
-/// ViewModel for the main QueryBuilder control.
+///     ViewModel for the main QueryBuilder control.
 /// </summary>
 public class QueryBuilderViewModel : ViewModelBase
 {
-    private readonly IQuery _query;
     private readonly DispatcherTimer _debounceTimer;
-    private ObservableCollection<SelectPropertyPath> _selectableProperties;
     private string _expressionPreview = string.Empty;
-    private QueryResult<dynamic>? _queryResults;
     private bool _isExecuting;
+    private QueryResult<dynamic>? _queryResults;
+    private ObservableCollection<SelectPropertyPath> _selectableProperties;
 
     public QueryBuilderViewModel(IQuery query)
     {
-        _query = query ?? throw new ArgumentNullException(nameof(query));
-        _selectableProperties = new ObservableCollection<SelectPropertyPath>(_query.SelectPropertyPaths);
+        Query = query ?? throw new ArgumentNullException(nameof(query));
+        _selectableProperties = new ObservableCollection<SelectPropertyPath>(Query.SelectPropertyPaths);
 
         // Setup debounce timer for expression updates
         _debounceTimer = new DispatcherTimer
@@ -32,7 +31,7 @@ public class QueryBuilderViewModel : ViewModelBase
         _debounceTimer.Tick += OnDebounceTimerTick;
 
         // Subscribe to query changes
-        _query.OnChanged += OnQueryChanged;
+        Query.OnChanged += OnQueryChanged;
 
         // Initialize commands
         ExecuteQueryCommand = new AsyncRelayCommand(async _ => await ExecuteQueryAsync(), _ => !IsExecuting);
@@ -43,13 +42,17 @@ public class QueryBuilderViewModel : ViewModelBase
         UpdateExpression();
     }
 
-    /// <summary>
-    /// Gets the underlying query.
-    /// </summary>
-    public IQuery Query => _query;
+    public QueryBuilderViewModel()
+    {
+    }
 
     /// <summary>
-    /// Gets the collection of selectable properties for the SELECT clause.
+    ///     Gets the underlying query.
+    /// </summary>
+    public IQuery Query { get; }
+
+    /// <summary>
+    ///     Gets the collection of selectable properties for the SELECT clause.
     /// </summary>
     public ObservableCollection<SelectPropertyPath> SelectableProperties
     {
@@ -58,7 +61,7 @@ public class QueryBuilderViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets the generated expression preview.
+    ///     Gets or sets the generated expression preview.
     /// </summary>
     public string ExpressionPreview
     {
@@ -67,7 +70,7 @@ public class QueryBuilderViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets the query results.
+    ///     Gets or sets the query results.
     /// </summary>
     public QueryResult<dynamic>? QueryResults
     {
@@ -76,7 +79,7 @@ public class QueryBuilderViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets whether a query is currently executing.
+    ///     Gets or sets whether a query is currently executing.
     /// </summary>
     public bool IsExecuting
     {
@@ -85,17 +88,17 @@ public class QueryBuilderViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the command to execute the query.
+    ///     Gets the command to execute the query.
     /// </summary>
     public ICommand ExecuteQueryCommand { get; }
 
     /// <summary>
-    /// Gets the command to select all fields.
+    ///     Gets the command to select all fields.
     /// </summary>
     public ICommand SelectAllFieldsCommand { get; }
 
     /// <summary>
-    /// Gets the command to clear all field selections.
+    ///     Gets the command to clear all field selections.
     /// </summary>
     public ICommand ClearAllFieldsCommand { get; }
 
@@ -114,7 +117,7 @@ public class QueryBuilderViewModel : ViewModelBase
 
     private void UpdateExpression()
     {
-        var compiled = _query.Compile();
+        var compiled = Query.Compile();
         ExpressionPreview = compiled?.ToString() ?? string.Empty;
     }
 
@@ -123,7 +126,7 @@ public class QueryBuilderViewModel : ViewModelBase
         IsExecuting = true;
         try
         {
-            QueryResults = await _query.Execute(pageSize: 10);
+            QueryResults = await Query.Execute(10);
         }
         finally
         {
@@ -133,17 +136,11 @@ public class QueryBuilderViewModel : ViewModelBase
 
     private void SelectAllFields()
     {
-        foreach (var property in SelectableProperties)
-        {
-            property.IsSelected = true;
-        }
+        foreach (var property in SelectableProperties) property.IsSelected = true;
     }
 
     private void ClearAllFields()
     {
-        foreach (var property in SelectableProperties)
-        {
-            property.IsSelected = false;
-        }
+        foreach (var property in SelectableProperties) property.IsSelected = false;
     }
 }

@@ -32,6 +32,11 @@ public partial class BlockConditionEditor : UserControl
             typeof(BlockConditionEditor),
             new PropertyMetadata(0, OnIndentationLevelChanged));
 
+    private bool _isUpdatePending;
+    private IQuery? _lastQuery;
+    private BlockCondition? _lastCondition;
+    private int _lastIndentationLevel;
+
     public BlockConditionEditor()
     {
         InitializeComponent();
@@ -84,12 +89,53 @@ public partial class BlockConditionEditor : UserControl
 
     private void UpdateViewModel()
     {
+        // Don't schedule multiple deferred updates
+        if (_isUpdatePending)
+            return;
+
+        _isUpdatePending = true;
+
+        // Defer update until UI thread is idle (all bindings resolved)
+        // Using DataBind priority ensures RelativeSource bindings have resolved
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            _isUpdatePending = false;
+            UpdateViewModelCore();
+        }), System.Windows.Threading.DispatcherPriority.DataBind);
+    }
+
+    private void UpdateViewModelCore()
+    {
+        // Check if both required properties are set
         if (Query == null || Condition == null)
         {
-            DataContext = null;
+            // Don't aggressively clear DataContext during initialization
+            // Only clear if we previously had valid properties and now they're null
+            if (DataContext is BlockConditionViewModel && (_lastQuery != null || _lastCondition != null))
+            {
+                // Properties were valid before but now are null - clear
+                DataContext = null;
+                _lastQuery = null;
+                _lastCondition = null;
+                _lastIndentationLevel = 0;
+            }
             return;
         }
 
+        // Check if values actually changed
+        if (Query == _lastQuery &&
+            Condition == _lastCondition &&
+            IndentationLevel == _lastIndentationLevel &&
+            DataContext is BlockConditionViewModel)
+        {
+            // Values haven't changed, keep existing ViewModel
+            return;
+        }
+
+        // Create new ViewModel with current property values
+        _lastQuery = Query;
+        _lastCondition = Condition;
+        _lastIndentationLevel = IndentationLevel;
         DataContext = new BlockConditionViewModel(Query, Condition, IndentationLevel);
     }
 }
