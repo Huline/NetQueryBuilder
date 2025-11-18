@@ -9,7 +9,6 @@
 
     <ComboBox ItemsSource="{Binding Properties, RelativeSource={RelativeSource AncestorType=UserControl}}"
               SelectedItem="{Binding SelectedProperty, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
-              DisplayMemberPath="PropertyFullName"
               MinWidth="150">
         <ComboBox.ItemTemplate>
             <DataTemplate DataType="{x:Type properties:PropertyPath}">

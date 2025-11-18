@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using NetQueryBuilder.Conditions;
@@ -23,7 +24,7 @@ public partial class BlockConditionEditor : UserControl
             nameof(Condition),
             typeof(BlockCondition),
             typeof(BlockConditionEditor),
-            new PropertyMetadata(null, OnConditionChanged));
+            new PropertyMetadata(null, OnConditionChanged, CoerceCondition));
 
     public static readonly DependencyProperty IndentationLevelProperty =
         DependencyProperty.Register(
@@ -75,8 +76,32 @@ public partial class BlockConditionEditor : UserControl
             editor.UpdateViewModel();
     }
 
+    private static object CoerceCondition(DependencyObject d, object baseValue)
+    {
+        if (d is BlockConditionEditor editor)
+        {
+            Debug.WriteLine($"=== BlockConditionEditor: CoerceCondition called with value={baseValue?.GetType().Name ?? "null"}, current={editor.Condition?.GetType().Name ?? "null"} ===");
+
+            // If the new value is null but we have a valid current value, keep the current value
+            if (baseValue == null && editor.Condition != null)
+            {
+                Debug.WriteLine($"=== BlockConditionEditor: CoerceCondition rejecting null, keeping current BlockCondition ===");
+                return editor.Condition;
+            }
+
+            // If the new value is not a BlockCondition (e.g., it's a ViewModel), reject it and keep the old value
+            if (baseValue != null && baseValue is not BlockCondition)
+            {
+                Debug.WriteLine($"=== BlockConditionEditor: CoerceCondition rejecting invalid value of type {baseValue.GetType().Name} ===");
+                return editor.Condition ?? baseValue; // Keep current value
+            }
+        }
+        return baseValue;
+    }
+
     private static void OnConditionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
+        Debug.WriteLine($"=== BlockConditionEditor: OnConditionChanged - Old={e.OldValue?.GetType().Name}, New={e.NewValue?.GetType().Name} ===");
         if (d is BlockConditionEditor editor)
             editor.UpdateViewModel();
     }
@@ -89,26 +114,20 @@ public partial class BlockConditionEditor : UserControl
 
     private void UpdateViewModel()
     {
-        // Don't schedule multiple deferred updates
-        if (_isUpdatePending)
-            return;
-
-        _isUpdatePending = true;
-
-        // Defer update until UI thread is idle (all bindings resolved)
-        // Using DataBind priority ensures RelativeSource bindings have resolved
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-            _isUpdatePending = false;
-            UpdateViewModelCore();
-        }), System.Windows.Threading.DispatcherPriority.DataBind);
+        // Create ViewModel synchronously to avoid binding errors
+        // The DataTemplate sets DataContext to BlockCondition, but our XAML binds to BlockConditionViewModel
+        // We must replace the DataContext immediately before WPF tries to resolve bindings
+        UpdateViewModelCore();
     }
 
     private void UpdateViewModelCore()
     {
+        Debug.WriteLine($"=== BlockConditionEditor: UpdateViewModelCore called - Query={Query != null}, Condition={Condition != null} ===");
+
         // Check if both required properties are set
         if (Query == null || Condition == null)
         {
+            Debug.WriteLine("=== BlockConditionEditor: Missing Query or Condition, skipping ViewModel creation ===");
             // Don't aggressively clear DataContext during initialization
             // Only clear if we previously had valid properties and now they're null
             if (DataContext is BlockConditionViewModel && (_lastQuery != null || _lastCondition != null))
@@ -128,14 +147,17 @@ public partial class BlockConditionEditor : UserControl
             IndentationLevel == _lastIndentationLevel &&
             DataContext is BlockConditionViewModel)
         {
+            Debug.WriteLine("=== BlockConditionEditor: Values haven't changed, keeping existing ViewModel ===");
             // Values haven't changed, keep existing ViewModel
             return;
         }
 
         // Create new ViewModel with current property values
+        Debug.WriteLine($"=== BlockConditionEditor: Creating new BlockConditionViewModel ===");
         _lastQuery = Query;
         _lastCondition = Condition;
         _lastIndentationLevel = IndentationLevel;
         DataContext = new BlockConditionViewModel(Query, Condition, IndentationLevel);
+        Debug.WriteLine($"=== BlockConditionEditor: ViewModel set as DataContext ===");
     }
 }

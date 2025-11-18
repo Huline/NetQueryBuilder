@@ -1,8 +1,11 @@
 <UserControl x:Class="NetQueryBuilder.WPF.Controls.UI.TypedValueInput"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:helpers="clr-namespace:NetQueryBuilder.WPF.Helpers">
+             xmlns:helpers="clr-namespace:NetQueryBuilder.WPF.Helpers"
+             xmlns:converters="clr-namespace:NetQueryBuilder.WPF.Converters">
     <UserControl.Resources>
+        <converters:TypedValueConverter x:Key="IntConverter" TargetType="{x:Type sys:Int32}" xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
+        <converters:TypedValueConverter x:Key="DecimalConverter" TargetType="{x:Type sys:Decimal}" xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
         <!-- String Template -->
         <DataTemplate x:Key="StringTemplate">
             <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
@@ -11,14 +14,14 @@
 
         <!-- Integer Template -->
         <DataTemplate x:Key="IntegerTemplate">
-            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntConverter}}"
                      MinWidth="100"
                      PreviewTextInput="NumericTextBox_PreviewTextInput"/>
         </DataTemplate>
 
         <!-- Decimal Template -->
         <DataTemplate x:Key="DecimalTemplate">
-            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DecimalConverter}}"
                      MinWidth="100"
                      PreviewTextInput="DecimalTextBox_PreviewTextInput"/>
         </DataTemplate>

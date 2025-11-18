@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using NetQueryBuilder.Conditions;
@@ -18,12 +19,21 @@ public class BlockConditionViewModel : ViewModelBase
 
     public BlockConditionViewModel(IQuery query, BlockCondition condition, int indentationLevel = 0)
     {
+        Debug.WriteLine($"=== BlockConditionViewModel: Constructor called (IndentationLevel={indentationLevel}) ===");
+
         Query = query ?? throw new ArgumentNullException(nameof(query));
         Condition = condition ?? throw new ArgumentNullException(nameof(condition));
         _indentationLevel = indentationLevel;
 
         _childConditions = new ObservableCollection<ICondition>(Condition.Conditions);
         _selectedConditions = new ObservableCollection<ICondition>();
+
+        Debug.WriteLine($"=== BlockConditionViewModel: Initialized with {_childConditions.Count} child conditions ===");
+        for (int i = 0; i < _childConditions.Count; i++)
+        {
+            var child = _childConditions[i];
+            Debug.WriteLine($"    [{i}] {child.GetType().Name}");
+        }
 
         AddConditionCommand = new RelayCommand(_ => AddCondition());
         GroupConditionsCommand = new RelayCommand(_ => GroupConditions(), _ => CanGroupConditions());
@@ -150,12 +160,52 @@ public class BlockConditionViewModel : ViewModelBase
 
     private void OnConditionChanged(object? sender, EventArgs e)
     {
+        Debug.WriteLine("=== BlockConditionViewModel: Condition changed event fired ===");
         RefreshChildConditions();
     }
 
     private void RefreshChildConditions()
     {
-        ChildConditions = new ObservableCollection<ICondition>(Condition.Conditions);
+        // Instead of recreating the entire collection (which destroys UI elements and loses focus),
+        // we sync the collection to match the underlying Condition.Conditions
+
+        var currentConditions = Condition.Conditions.ToList();
+
+        // Check if the structure actually changed (add/remove)
+        if (ChildConditions.Count != currentConditions.Count ||
+            !ChildConditions.SequenceEqual(currentConditions))
+        {
+            Debug.WriteLine($"=== BlockConditionViewModel: Structure changed, syncing collection ===");
+
+            // Remove items that are no longer in the source
+            for (int i = ChildConditions.Count - 1; i >= 0; i--)
+            {
+                if (!currentConditions.Contains(ChildConditions[i]))
+                {
+                    ChildConditions.RemoveAt(i);
+                }
+            }
+
+            // Add new items and ensure correct order
+            for (int i = 0; i < currentConditions.Count; i++)
+            {
+                var condition = currentConditions[i];
+                if (i >= ChildConditions.Count)
+                {
+                    ChildConditions.Add(condition);
+                }
+                else if (ChildConditions[i] != condition)
+                {
+                    ChildConditions.Insert(i, condition);
+                }
+            }
+
+            Debug.WriteLine($"=== BlockConditionViewModel: ChildConditions synced - now {ChildConditions.Count} conditions ===");
+        }
+        else
+        {
+            Debug.WriteLine($"=== BlockConditionViewModel: No structural change, keeping existing collection ===");
+        }
     }
 
     public void RemoveCondition(ICondition condition)

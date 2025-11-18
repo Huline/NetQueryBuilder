@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Queries;
@@ -19,13 +20,29 @@ public class QueryBuilderContainerViewModel : ViewModelBase
 
     public QueryBuilderContainerViewModel(IQueryConfigurator configurator)
     {
+        Debug.WriteLine("=== QueryBuilderContainerViewModel: Constructor started ===");
+
         _configurator = configurator ?? throw new ArgumentNullException(nameof(configurator));
         _availableEntities = new ObservableCollection<Type>(_configurator.GetEntities());
+
+        Debug.WriteLine($"=== QueryBuilderContainerViewModel: Found {_availableEntities.Count} entities ===");
+        foreach (var entity in _availableEntities)
+        {
+            Debug.WriteLine($"    - {entity.Name}");
+        }
 
         NewQueryCommand = new RelayCommand(_ => NewQuery());
 
         // Initialize with first entity
-        if (_availableEntities.Count > 0) SelectedEntityType = _availableEntities[0];
+        if (_availableEntities.Count > 0)
+        {
+            Debug.WriteLine($"=== QueryBuilderContainerViewModel: Selecting first entity: {_availableEntities[0].Name} ===");
+            SelectedEntityType = _availableEntities[0];
+        }
+        else
+        {
+            Debug.WriteLine("=== QueryBuilderContainerViewModel: WARNING - No entities available! ===");
+        }
     }
 
     /// <summary>
@@ -83,7 +100,35 @@ public class QueryBuilderContainerViewModel : ViewModelBase
 
     private void CreateQueryForEntity(Type entityType)
     {
+        Debug.WriteLine($"=== QueryBuilderContainerViewModel: Creating query for {entityType.Name} ===");
+
         CurrentQuery = _configurator.BuildFor(entityType);
-        CurrentQuery.Condition.CreateNew(CurrentQuery.ConditionPropertyPaths.First());
+
+        Debug.WriteLine($"=== QueryBuilderContainerViewModel: Query created ===");
+        Debug.WriteLine($"    - SelectPropertyPaths count: {CurrentQuery.SelectPropertyPaths.Count}");
+        Debug.WriteLine($"    - ConditionPropertyPaths count: {CurrentQuery.ConditionPropertyPaths.Count}");
+
+        if (CurrentQuery.ConditionPropertyPaths.Count > 0)
+        {
+            Debug.WriteLine("    - Available condition properties:");
+            foreach (var prop in CurrentQuery.ConditionPropertyPaths)
+            {
+                Debug.WriteLine($"        * {prop.PropertyFullName} ({prop.PropertyType.Name})");
+            }
+
+            var firstProperty = CurrentQuery.ConditionPropertyPaths.First();
+            Debug.WriteLine($"=== QueryBuilderContainerViewModel: Creating initial condition with property: {firstProperty.PropertyFullName} ===");
+
+            CurrentQuery.Condition.CreateNew(firstProperty);
+
+            Debug.WriteLine($"=== QueryBuilderContainerViewModel: Initial condition created. Total conditions: {CurrentQuery.Condition.Conditions.Count} ===");
+        }
+        else
+        {
+            Debug.WriteLine("=== QueryBuilderContainerViewModel: ERROR - No ConditionPropertyPaths available! ===");
+            Debug.WriteLine($"    - Entity type: {entityType.FullName}");
+            Debug.WriteLine($"    - Properties on entity: {string.Join(", ", entityType.GetProperties().Select(p => p.Name))}");
+            throw new InvalidOperationException($"No condition properties available for entity type {entityType.Name}. This indicates a configuration issue.");
+        }
     }
 }

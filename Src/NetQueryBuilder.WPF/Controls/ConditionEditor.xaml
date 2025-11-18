@@ -11,14 +11,14 @@
         <!-- Block Condition Template -->
         <DataTemplate x:Key="BlockConditionTemplate" DataType="{x:Type conditions:BlockCondition}">
             <local:BlockConditionEditor Query="{Binding Query, RelativeSource={RelativeSource AncestorType=local:ConditionEditor}}"
-                                        Condition="{Binding}"
+                                        Condition="{Binding Mode=OneTime}"
                                         IndentationLevel="{Binding IndentationLevel, RelativeSource={RelativeSource AncestorType=local:ConditionEditor}}" />
         </DataTemplate>
 
         <!-- Simple Condition Template -->
         <DataTemplate x:Key="SimpleConditionTemplate" DataType="{x:Type conditions:SimpleCondition}">
             <local:SimpleConditionEditor Query="{Binding Query, RelativeSource={RelativeSource AncestorType=local:ConditionEditor}}"
-                                         Condition="{Binding}" />
+                                         Condition="{Binding Mode=OneTime}" />
         </DataTemplate>
 
         <!-- Template Selector -->
