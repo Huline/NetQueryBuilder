@@ -1,0 +1,32 @@
+<UserControl x:Class="NetQueryBuilder.WPF.Controls.ConditionEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:NetQueryBuilder.WPF.Controls"
+             xmlns:helpers="clr-namespace:NetQueryBuilder.WPF.Helpers"
+             xmlns:conditions="clr-namespace:NetQueryBuilder.Conditions;assembly=NetQueryBuilder"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <!-- Block Condition Template -->
+        <DataTemplate x:Key="BlockConditionTemplate" DataType="{x:Type conditions:BlockCondition}">
+            <local:BlockConditionEditor Query="{Binding Query, RelativeSource={RelativeSource AncestorType=local:ConditionEditor}}"
+                                        Condition="{Binding Mode=OneTime}"
+                                        IndentationLevel="{Binding IndentationLevel, RelativeSource={RelativeSource AncestorType=local:ConditionEditor}}" />
+        </DataTemplate>
+
+        <!-- Simple Condition Template -->
+        <DataTemplate x:Key="SimpleConditionTemplate" DataType="{x:Type conditions:SimpleCondition}">
+            <local:SimpleConditionEditor Query="{Binding Query, RelativeSource={RelativeSource AncestorType=local:ConditionEditor}}"
+                                         Condition="{Binding Mode=OneTime}" />
+        </DataTemplate>
+
+        <!-- Template Selector -->
+        <helpers:ConditionTemplateSelector x:Key="ConditionTemplateSelector"
+                                           BlockConditionTemplate="{StaticResource BlockConditionTemplate}"
+                                           SimpleConditionTemplate="{StaticResource SimpleConditionTemplate}" />
+    </UserControl.Resources>
+
+    <ContentControl Content="{Binding Condition, RelativeSource={RelativeSource AncestorType=local:ConditionEditor}}"
+                    ContentTemplateSelector="{StaticResource ConditionTemplateSelector}" />
+</UserControl>

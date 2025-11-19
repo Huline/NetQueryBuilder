@@ -1,24 +1,6 @@
 @inherits LayoutComponentBase
 
 <MudLayout>
-    <MudAppBar Elevation="3" Dense="true" Fixed="true" Color="Color.Primary">
-        <MudHidden Breakpoint="Breakpoint.SmAndDown">
-            <MudText Typo="Typo.h6" Class="ml-3">Net Query Builder</MudText>
-        </MudHidden>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
-                       OnClick="@(e => DrawerToggle())"/>
-        <MudSpacer/>
-        <MudToggleIconButton
-            Icon="@Icons.Material.Filled.LightMode"
-            Color="Color.Inherit"
-            ToggledIcon="@Icons.Material.Filled.DarkMode"
-            ToggledColor="Color.Inherit"
-            Toggled="@IsDarkMode"
-            ToggledChanged="ToggleDarkMode"/>
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="4" ClipMode="DrawerClipMode.Always" Variant="@DrawerVariant.Mini">
-        <NavMenu/>
-    </MudDrawer>
     <MudMainContent Class="pt-16 px-4">
         <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
             @Body

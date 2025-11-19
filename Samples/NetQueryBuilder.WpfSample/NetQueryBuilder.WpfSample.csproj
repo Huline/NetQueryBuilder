@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Src\NetQueryBuilder.WPF\NetQueryBuilder.WPF.csproj"/>
+        <ProjectReference Include="..\..\Src\NetQueryBuilder\NetQueryBuilder.csproj"/>
+        <ProjectReference Include="..\..\Src\NetQueryBuilder.EntityFramework\NetQueryBuilder.EntityFramework.csproj"/>
+    </ItemGroup>
+
+</Project>

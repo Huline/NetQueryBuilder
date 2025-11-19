@@ -1,19 +1,78 @@
 ﻿@using NetQueryBuilder.Configurations
 @inject IQueryConfigurator QueryConfigurator
 
-<div class="nqb-stack nqb-stack-vertical" style="gap: 40px;">
-    <div class="nqb-grid nqb-grid-cols-12" style="gap: 40px; align-items: center;">
-        <div style="grid-column: span 4;">
-            <Button Color="primary" Variant="outlined" OnClick="NewQuery" style="margin: auto;">New Query</Button>
-        </div>
-        <div style="grid-column: span 8;">
-            <div class="nqb-stack nqb-stack-horizontal" style="gap: 32px; align-items: center;">
-                <h5 class="nqb-text-h5" style="margin: 0;">FROM</h5>
-                <Select T="Type" Label="Entity" ValueChanged="OnEntitySelect" Items="_entities" ToStringFunc="@(entity => entity.Name)" />
+<div class="nqb-query-builder-container">
+    <!-- Header Section -->
+    <div class="nqb-container-header">
+        <div class="nqb-container-header-content">
+            <div class="nqb-container-title-section">
+                <div class="nqb-container-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="nqb-container-title">Query Builder</h1>
+                    <p class="nqb-container-subtitle">Build and execute dynamic queries with visual interface</p>
+                </div>
+            </div>
+            
+            <div class="nqb-container-actions">
+                <Button Color="primary" Variant="filled" Size="large" OnClick="NewQuery">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                    </svg>
+                    New Query
+                </Button>
             </div>
         </div>
     </div>
-    <div @key="_queryBuilderKey">
+    
+    <!-- Entity Selection Section -->
+    <div class="nqb-container-section">
+        <div class="nqb-section-header">
+            <div class="nqb-section-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 4H4c-1.11 0-2 .89-2 2v3h2V6h4V4zm6 0v2h4v3h2V6c0-1.11-.89-2-2-2h-4zm-6 15H4v-3H2v3c0 1.11.89 2 2 2h4v-2zm6 0v2h4c1.11 0 2-.89 2-2v-3h-2v3h-4z" fill="currentColor"/>
+                </svg>
+                <div>
+                    <h3>Data Source</h3>
+                    <p>Select the entity type to query from</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nqb-section-content">
+            <div class="nqb-entity-selector">
+                <Select T="Type" 
+                        Label="Entity Type" 
+                        ValueChanged="OnEntitySelect" 
+                        Items="_entities" 
+                        ToStringFunc="@(entity => entity.Name)"
+                        Variant="outlined"
+                        Size="large"
+                        FullWidth="true"
+                        ShowRequiredAsterisk="false"
+                        HelperText="Choose the data entity you want to query" />
+                
+                @if (_selectedEntityType != null)
+                {
+                    <div class="nqb-entity-info">
+                        <div class="nqb-entity-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                            </svg>
+                            <span>@_selectedEntityType.Name</span>
+                        </div>
+                        <span class="nqb-entity-description">Entity selected</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <!-- Query Builder Section -->
+    <div class="nqb-container-section nqb-query-section" @key="_queryBuilderKey">
         @CreateQueryBuilder()
     </div>
 </div>

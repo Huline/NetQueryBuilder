@@ -10,6 +10,7 @@ namespace NetQueryBuilder.Conditions
     public class SimpleCondition : ICondition
     {
         private Expression _compiledExpression;
+        private bool _isCacheValid;
         private Expression _left;
         private LogicalOperator _logicalOperator;
         private ExpressionOperator _operator;
@@ -43,6 +44,7 @@ namespace NetQueryBuilder.Conditions
                 _left = PropertyPath.GetExpression();
                 _value = PropertyPath.GetDefaultValue();
                 _right = Expression.Constant(_value);
+                InvalidateCache();
                 NotifyConditionChanged();
             }
         }
@@ -54,6 +56,7 @@ namespace NetQueryBuilder.Conditions
             {
                 _value = value;
                 _right = Expression.Constant(Value);
+                InvalidateCache();
                 NotifyConditionChanged();
             }
         }
@@ -66,6 +69,7 @@ namespace NetQueryBuilder.Conditions
                 _operator = value;
                 _value = _operator.GetDefaultValue(PropertyPath.PropertyType, _value);
                 _right = Expression.Constant(Value);
+                InvalidateCache();
                 NotifyConditionChanged();
             }
         }
@@ -76,6 +80,7 @@ namespace NetQueryBuilder.Conditions
             set
             {
                 _logicalOperator = value;
+                InvalidateCache();
                 NotifyConditionChanged();
             }
         }
@@ -86,9 +91,14 @@ namespace NetQueryBuilder.Conditions
 
         public Expression Compile()
         {
-            if (_compiledExpression != null)
+            // Return cached expression if still valid
+            if (_isCacheValid && _compiledExpression != null)
                 return _compiledExpression;
-            return _operator.ToExpression(_left, _right);
+
+            // Recompile and cache
+            _compiledExpression = _operator.ToExpression(_left, _right);
+            _isCacheValid = true;
+            return _compiledExpression;
         }
 
         public ICondition GetRoot()
@@ -101,10 +111,13 @@ namespace NetQueryBuilder.Conditions
             return PropertyPath.GetCompatibleOperators();
         }
 
+        private void InvalidateCache()
+        {
+            _isCacheValid = false;
+        }
+
         private void NotifyConditionChanged()
         {
-            _compiledExpression = null;
-            _compiledExpression = Compile();
             ConditionChanged?.Invoke(this, EventArgs.Empty);
         }
     }

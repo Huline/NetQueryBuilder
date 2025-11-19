@@ -11,6 +11,7 @@ namespace NetQueryBuilder.Conditions
     {
         private readonly List<ICondition> _children = new List<ICondition>();
         private Expression _compiledExpression;
+        private bool _isCacheValid;
         private LogicalOperator _logicalOperator;
 
         public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator, BlockCondition parent = null)
@@ -36,6 +37,7 @@ namespace NetQueryBuilder.Conditions
             set
             {
                 _logicalOperator = value;
+                InvalidateCache();
                 NotifyConditionChanged();
             }
         }
@@ -48,14 +50,25 @@ namespace NetQueryBuilder.Conditions
 
         public Expression Compile()
         {
-            if (_compiledExpression != null)
+            // Return cached expression if still valid
+            if (_isCacheValid && _compiledExpression != null)
                 return _compiledExpression;
 
+            // Clear cache and recompile
+            _compiledExpression = null;
+
             if (Conditions.Count == 0)
+            {
+                _isCacheValid = true;
                 return null;
+            }
+
             var result = Conditions.First().Compile();
             if (result is null)
+            {
+                _isCacheValid = true;
                 return null;
+            }
 
             foreach (var condition in Conditions.Skip(1))
             {
@@ -64,7 +77,9 @@ namespace NetQueryBuilder.Conditions
                     result = Expression.MakeBinary(ToExpression(condition.LogicalOperator), result, compiled);
             }
 
-            return result;
+            _compiledExpression = result;
+            _isCacheValid = true;
+            return _compiledExpression;
         }
 
         private static ExpressionType ToExpression(LogicalOperator logicalOperator)
@@ -85,6 +100,7 @@ namespace NetQueryBuilder.Conditions
             _children.Add(condition);
             condition.Parent = this;
             condition.ConditionChanged += ChildConditionChanged;
+            InvalidateCache();
             NotifyConditionChanged();
             return condition;
         }
@@ -95,6 +111,7 @@ namespace NetQueryBuilder.Conditions
             condition.Parent = null;
             if (condition.ConditionChanged?.GetInvocationList().Length > 0)
                 UnsubscribeChildCondition(condition);
+            InvalidateCache();
             NotifyConditionChanged();
         }
 
@@ -115,6 +132,7 @@ namespace NetQueryBuilder.Conditions
             _children.Add(block);
             block.ConditionChanged += ChildConditionChanged;
 
+            InvalidateCache();
             NotifyConditionChanged();
             return block;
         }
@@ -133,6 +151,7 @@ namespace NetQueryBuilder.Conditions
 
             if (_children.Count == 0) Parent.Remove(this);
 
+            InvalidateCache();
             NotifyConditionChanged();
         }
 
@@ -179,6 +198,7 @@ namespace NetQueryBuilder.Conditions
 
         private void ChildConditionChanged(object sender, EventArgs args)
         {
+            InvalidateCache();
             NotifyConditionChanged();
         }
 
@@ -187,10 +207,13 @@ namespace NetQueryBuilder.Conditions
             child.ConditionChanged -= ChildConditionChanged;
         }
 
+        private void InvalidateCache()
+        {
+            _isCacheValid = false;
+        }
+
         private void NotifyConditionChanged()
         {
-            _compiledExpression = null;
-            _compiledExpression = Compile();
             ConditionChanged?.Invoke(this, EventArgs.Empty);
         }
     }

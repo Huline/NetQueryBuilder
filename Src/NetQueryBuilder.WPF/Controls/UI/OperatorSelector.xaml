@@ -1,0 +1,14 @@
+<UserControl x:Class="NetQueryBuilder.WPF.Controls.UI.OperatorSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:operators="clr-namespace:NetQueryBuilder.Operators;assembly=NetQueryBuilder">
+    <ComboBox ItemsSource="{Binding Operators, RelativeSource={RelativeSource AncestorType=UserControl}}"
+              SelectedItem="{Binding SelectedOperator, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+              MinWidth="120">
+        <ComboBox.ItemTemplate>
+            <DataTemplate DataType="{x:Type operators:ExpressionOperator}">
+                <TextBlock Text="{Binding DisplayName}"/>
+            </DataTemplate>
+        </ComboBox.ItemTemplate>
+    </ComboBox>
+</UserControl>
