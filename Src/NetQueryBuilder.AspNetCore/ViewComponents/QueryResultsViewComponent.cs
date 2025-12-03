@@ -1,11 +1,11 @@
+using System.Collections;
 using Microsoft.AspNetCore.Mvc;
 using NetQueryBuilder.AspNetCore.Services;
-using System.Reflection;
 
 namespace NetQueryBuilder.AspNetCore.ViewComponents;
 
 /// <summary>
-/// View component for displaying query results in a table
+///     View component for displaying query results in a table
 /// </summary>
 public class QueryResultsViewComponent : ViewComponent
 {
@@ -18,17 +18,13 @@ public class QueryResultsViewComponent : ViewComponent
 
     public IViewComponentResult Invoke(string sessionId)
     {
-        if (string.IsNullOrEmpty(sessionId))
-        {
-            return Content(string.Empty);
-        }
+        if (string.IsNullOrEmpty(sessionId)) return Content(string.Empty);
 
         var state = _sessionService.GetState(sessionId);
 
         if (state.Results == null || state.SelectedEntityType == null)
-        {
-            return Content("<p class=\"nqb-info-message\">No results yet. Click 'Run Query' to execute your query.</p>");
-        }
+            return Content(
+                "<p class=\"nqb-info-message\">No results yet. Click 'Run Query' to execute your query.</p>");
 
         // Get selected properties or all properties
         var selectedProperties = state.SelectedPropertyPaths.Any()
@@ -36,19 +32,15 @@ public class QueryResultsViewComponent : ViewComponent
             : state.Query?.SelectPropertyPaths.Select(p => p.Property.PropertyFullName).ToList() ?? new List<string>();
 
         if (!selectedProperties.Any())
-        {
-            return Content("<p class=\"nqb-warning-message\">No properties selected. Please select at least one property to display.</p>");
-        }
+            return Content(
+                "<p class=\"nqb-warning-message\">No properties selected. Please select at least one property to display.</p>");
 
         // Extract items from QueryResult using reflection
         var resultsType = state.Results.GetType();
         var itemsProperty = resultsType.GetProperty("Items");
-        var items = itemsProperty?.GetValue(state.Results) as System.Collections.IEnumerable;
+        var items = itemsProperty?.GetValue(state.Results) as IEnumerable;
 
-        if (items == null)
-        {
-            return Content("<p class=\"nqb-info-message\">No results found.</p>");
-        }
+        if (items == null) return Content("<p class=\"nqb-info-message\">No results found.</p>");
 
         var model = new QueryResultsViewModel
         {
@@ -62,7 +54,7 @@ public class QueryResultsViewComponent : ViewComponent
 }
 
 /// <summary>
-/// View model for query results
+///     View model for query results
 /// </summary>
 public class QueryResultsViewModel
 {
@@ -71,7 +63,7 @@ public class QueryResultsViewModel
     public Type? EntityType { get; set; }
 
     /// <summary>
-    /// Gets the value of a property from an object using dot notation
+    ///     Gets the value of a property from an object using dot notation
     /// </summary>
     public string GetPropertyValue(object item, string propertyPath)
     {
@@ -81,7 +73,7 @@ public class QueryResultsViewModel
         try
         {
             var parts = propertyPath.Split('.');
-            object current = item;
+            var current = item;
 
             foreach (var part in parts)
             {

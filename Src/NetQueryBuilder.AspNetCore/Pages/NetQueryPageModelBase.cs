@@ -2,19 +2,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using NetQueryBuilder.AspNetCore.Models;
 using NetQueryBuilder.AspNetCore.Services;
+using NetQueryBuilder.Conditions;
 using NetQueryBuilder.Configurations;
 using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.AspNetCore.Pages;
 
 /// <summary>
-/// Base page model for pages using the NetQueryBuilder
-/// Provides common functionality for query building and execution
+///     Base page model for pages using the NetQueryBuilder
+///     Provides common functionality for query building and execution
 /// </summary>
 public abstract class NetQueryPageModelBase : PageModel
 {
-    protected readonly IQuerySessionService SessionService;
     protected readonly IQueryConfigurator Configurator;
+    protected readonly IQuerySessionService SessionService;
 
     protected NetQueryPageModelBase(
         IQuerySessionService sessionService,
@@ -25,57 +26,62 @@ public abstract class NetQueryPageModelBase : PageModel
     }
 
     /// <summary>
-    /// Gets the current session ID
+    ///     Gets the current session ID
     /// </summary>
     public string SessionId => SessionService.GetOrCreateSessionId(HttpContext);
 
     /// <summary>
-    /// Gets the current session state
+    ///     Gets the current session state
     /// </summary>
     public QuerySessionState State => SessionService.GetState(SessionId);
 
     /// <summary>
-    /// Selected entity type (for binding)
+    ///     Selected entity type (for binding)
     /// </summary>
     [BindProperty]
     public string? SelectedEntityType { get; set; }
 
     /// <summary>
-    /// Selected properties (for binding)
+    ///     Selected properties (for binding)
     /// </summary>
     [BindProperty]
     public List<string> SelectedProperties { get; set; } = new();
 
     /// <summary>
-    /// Handler for changing the entity type
+    ///     Condition values from form (for binding)
+    /// </summary>
+    [BindProperty]
+    public List<ConditionViewModel> Conditions { get; set; } = new();
+
+    /// <summary>
+    ///     Handler for changing the entity type
     /// </summary>
     public virtual IActionResult OnPostChangeEntity()
     {
         if (!string.IsNullOrEmpty(SelectedEntityType))
         {
-            var type = Type.GetType(SelectedEntityType);
-            if (type != null)
-            {
-                SessionService.GetOrCreateQuery(SessionId, type, Configurator);
-            }
+            // Find the type from the configurator's known entities
+            // Type.GetType() doesn't work for types in other assemblies without assembly-qualified names
+            var type = Configurator.GetEntities()
+                .FirstOrDefault(t => t.FullName == SelectedEntityType || t.Name == SelectedEntityType);
+
+            if (type != null) SessionService.GetOrCreateQuery(SessionId, type, Configurator);
         }
+
         return Page();
     }
 
     /// <summary>
-    /// Handler for toggling property selection
+    ///     Handler for toggling property selection
     /// </summary>
     public virtual IActionResult OnPostToggleProperty(string propertyPath)
     {
-        if (!string.IsNullOrEmpty(propertyPath))
-        {
-            SessionService.ToggleProperty(SessionId, propertyPath);
-        }
+        if (!string.IsNullOrEmpty(propertyPath)) SessionService.ToggleProperty(SessionId, propertyPath);
         return Page();
     }
 
     /// <summary>
-    /// Handler for updating property selections (batch update)
+    ///     Handler for updating property selections (batch update)
     /// </summary>
     public virtual IActionResult OnPostUpdateProperties()
     {
@@ -90,85 +96,68 @@ public abstract class NetQueryPageModelBase : PageModel
             }
 
             // Update session state
-            SessionService.UpdateState(SessionId, state =>
-            {
-                state.SelectedPropertyPaths = SelectedProperties.ToList();
-            });
+            SessionService.UpdateState(SessionId,
+                state => { state.SelectedPropertyPaths = SelectedProperties.ToList(); });
         }
+
         return Page();
     }
 
     /// <summary>
-    /// Handler for adding a new condition
+    ///     Handler for adding a new condition
     /// </summary>
     public virtual IActionResult OnPostAddCondition(string? parentId = null)
     {
         var query = State.Query;
         if (query != null)
-        {
             // Add a new simple condition to the root block
             if (query.ConditionPropertyPaths.Any())
             {
                 var firstProperty = query.ConditionPropertyPaths.First();
                 query.Condition.CreateNew(firstProperty);
             }
-        }
+
         return Page();
     }
 
     /// <summary>
-    /// Handler for removing a condition
+    ///     Handler for removing a condition
     /// </summary>
     public virtual IActionResult OnPostRemoveCondition(int index)
     {
         var query = State.Query;
-        if (query != null && index >= 0 && index < query.Condition.Children.Count)
-        {
-            query.Condition.RemoveAt(index);
-        }
+        if (query != null && index >= 0 && index < query.Condition.Conditions.Count) query.Condition.RemoveAt(index);
         return Page();
     }
 
     /// <summary>
-    /// Handler for adding a condition group
+    ///     Handler for adding a condition group
     /// </summary>
     public virtual IActionResult OnPostAddGroup(string? parentId = null)
     {
         var query = State.Query;
         if (query != null)
-        {
             // Add a new block condition (group)
-            query.Condition.CreateBlock();
-        }
+            query.Condition.CreateNew();
         return Page();
     }
 
     /// <summary>
-    /// Handler for ungrouping conditions
+    ///     Handler for ungrouping conditions
     /// </summary>
     public virtual IActionResult OnPostUngroup(int index)
     {
         var query = State.Query;
-        if (query != null && index >= 0 && index < query.Condition.Children.Count)
-        {
+        if (query != null && index >= 0 && index < query.Condition.Conditions.Count)
             // Get the block condition at the index
-            if (query.Condition.Children[index] is BlockCondition block)
-            {
-                // Move all children to parent and remove the block
-                var children = block.Children.ToList();
-                query.Condition.RemoveAt(index);
+            if (query.Condition[index] is BlockCondition block)
+                block.Ungroup(block.Conditions);
 
-                foreach (var child in children)
-                {
-                    query.Condition.Add(child);
-                }
-            }
-        }
         return Page();
     }
 
     /// <summary>
-    /// Handler for executing the query (to be overridden by derived classes for type-specific execution)
+    ///     Handler for executing the query (to be overridden by derived classes for type-specific execution)
     /// </summary>
     public virtual async Task<IActionResult> OnPostExecuteQueryAsync()
     {
@@ -179,7 +168,7 @@ public abstract class NetQueryPageModelBase : PageModel
     }
 
     /// <summary>
-    /// Handler for changing the page
+    ///     Handler for changing the page
     /// </summary>
     public virtual async Task<IActionResult> OnPostChangePageAsync(int page)
     {
@@ -199,7 +188,7 @@ public abstract class NetQueryPageModelBase : PageModel
     }
 
     /// <summary>
-    /// Handler for clearing the query
+    ///     Handler for clearing the query
     /// </summary>
     public virtual IActionResult OnPostClearQuery()
     {
@@ -208,16 +197,23 @@ public abstract class NetQueryPageModelBase : PageModel
     }
 
     /// <summary>
-    /// Helper method to execute query for a specific entity type
+    ///     Helper method to execute query for a specific entity type
     /// </summary>
     protected async Task<QueryResult<T>?> ExecuteQueryAsync<T>()
     {
-        var query = State.Query;
-        if (query == null)
+        var entityType = State.SelectedEntityType;
+        if (entityType == null)
             return null;
 
         try
         {
+            // Apply form values to the current query's conditions before refreshing
+            ApplyConditionValuesFromForm();
+
+            // Always get a fresh query with current DbContext
+            // This transfers conditions from the old query to a new one
+            var query = SessionService.GetOrCreateQuery(SessionId, entityType, Configurator);
+
             var result = await query.Execute<T>(State.PageSize);
             SessionService.SaveResults(SessionId, result);
             return result;
@@ -231,19 +227,119 @@ public abstract class NetQueryPageModelBase : PageModel
     }
 
     /// <summary>
-    /// Helper method to navigate to a specific page
+    ///     Applies condition values from form binding to the current query
+    /// </summary>
+    protected void ApplyConditionValuesFromForm()
+    {
+        var query = State.Query;
+        if (query == null || Conditions == null || !Conditions.Any())
+            return;
+
+        var simpleConditions = query.Condition.Conditions.OfType<SimpleCondition>().ToList();
+
+        for (int i = 0; i < Conditions.Count && i < simpleConditions.Count; i++)
+        {
+            var formCondition = Conditions[i];
+            var queryCondition = simpleConditions[i];
+
+            // Update the value if provided
+            if (formCondition.Value != null)
+            {
+                // Convert the string value to the appropriate type
+                var targetType = queryCondition.PropertyPath.PropertyType;
+                var convertedValue = ConvertValue(formCondition.Value, targetType);
+                if (convertedValue != null)
+                {
+                    queryCondition.Value = convertedValue;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Converts a string value to the target type
+    /// </summary>
+    private static object? ConvertValue(string value, Type targetType)
+    {
+        try
+        {
+            // Handle nullable types
+            var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+            if (string.IsNullOrEmpty(value))
+                return underlyingType.IsValueType ? Activator.CreateInstance(underlyingType) : null;
+
+            if (underlyingType == typeof(string))
+                return value;
+
+            if (underlyingType == typeof(int))
+                return int.Parse(value);
+
+            if (underlyingType == typeof(long))
+                return long.Parse(value);
+
+            if (underlyingType == typeof(decimal))
+                return decimal.Parse(value);
+
+            if (underlyingType == typeof(double))
+                return double.Parse(value);
+
+            if (underlyingType == typeof(float))
+                return float.Parse(value);
+
+            if (underlyingType == typeof(bool))
+                return bool.Parse(value);
+
+            if (underlyingType == typeof(DateTime))
+                return DateTime.Parse(value);
+
+            if (underlyingType == typeof(Guid))
+                return Guid.Parse(value);
+
+            if (underlyingType.IsEnum)
+                return Enum.Parse(underlyingType, value);
+
+            // Fallback: try Convert.ChangeType
+            return Convert.ChangeType(value, underlyingType);
+        }
+        catch
+        {
+            // If conversion fails, return null
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     Helper method to navigate to a specific page
     /// </summary>
     protected async Task<QueryResult<T>?> GoToPageAsync<T>(int page)
     {
-        var currentResults = SessionService.GetResults<T>(SessionId);
-        if (currentResults == null)
+        var entityType = State.SelectedEntityType;
+        if (entityType == null)
             return null;
 
         try
         {
-            var newResults = await currentResults.GoToPage(page - 1); // GoToPage is 0-indexed
-            SessionService.SaveResults(SessionId, newResults);
-            return newResults;
+            // Get a fresh query with current DbContext and re-execute for the new page
+            // We can't use the stored QueryResult.GoToPage because it holds a reference
+            // to a delegate that uses the old (disposed) DbContext
+            var query = SessionService.GetOrCreateQuery(SessionId, entityType, Configurator);
+
+            // Update page in state
+            SessionService.SetPage(SessionId, page);
+
+            // Execute query to get fresh results
+            var result = await query.Execute<T>(State.PageSize);
+
+            // If we need a different page, use GoToPage on the fresh result
+            // This works because the delegate was just created with the current DbContext
+            if (page > 1 && page <= result.TotalPage)
+            {
+                result = await result.GoToPage(page - 1); // GoToPage is 0-indexed
+            }
+
+            SessionService.SaveResults(SessionId, result);
+            return result;
         }
         catch (Exception ex)
         {

@@ -25,6 +25,7 @@ public class ExpressionDisplayViewComponent : ViewComponent
         var state = _sessionService.GetState(sessionId);
         var expression = state.CurrentExpression ?? "No expression generated yet";
 
-        return View(expression);
+        // Must explicitly specify "Default" view name, otherwise the string is interpreted as a view name
+        return View("Default", expression);
     }
 }

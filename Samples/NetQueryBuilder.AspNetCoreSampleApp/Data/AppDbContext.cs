@@ -17,7 +17,6 @@ public class AppDbContext : DbContext
     {
         modelBuilder
             .Entity<Person>()
-            .ToTable(nameof(Person))
             .HasMany(person => person.Addresses)
             .WithOne(address => address.Person)
             .HasForeignKey(address => address.PersonId);

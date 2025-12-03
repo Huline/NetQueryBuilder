@@ -1,16 +1,21 @@
-using NetQueryBuilder.AspNetCore.Models;
-using Microsoft.AspNetCore.Http;
 using System.Collections.Concurrent;
+using System.Text;
+using Microsoft.AspNetCore.Http;
+using NetQueryBuilder.AspNetCore.Models;
+using NetQueryBuilder.Conditions;
+using NetQueryBuilder.Configurations;
+using NetQueryBuilder.Properties;
+using NetQueryBuilder.Queries;
 
 namespace NetQueryBuilder.AspNetCore.Services;
 
 /// <summary>
-/// Default implementation of IQuerySessionService using in-memory storage
+///     Default implementation of IQuerySessionService using in-memory storage
 /// </summary>
 public class QuerySessionService : IQuerySessionService
 {
-    private readonly ConcurrentDictionary<string, QuerySessionState> _sessions = new();
     private readonly NetQueryBuilderOptions _options;
+    private readonly ConcurrentDictionary<string, QuerySessionState> _sessions = new();
 
     public QuerySessionService(NetQueryBuilderOptions options)
     {
@@ -27,14 +32,14 @@ public class QuerySessionService : IQuerySessionService
         // Try to get existing session ID
         if (context.Session.TryGetValue(SessionIdKey, out var sessionIdBytes))
         {
-            var sessionId = System.Text.Encoding.UTF8.GetString(sessionIdBytes);
+            var sessionId = Encoding.UTF8.GetString(sessionIdBytes);
             if (!string.IsNullOrEmpty(sessionId))
                 return sessionId;
         }
 
         // Create new session ID
         var newSessionId = Guid.NewGuid().ToString();
-        context.Session.Set(SessionIdKey, System.Text.Encoding.UTF8.GetBytes(newSessionId));
+        context.Session.Set(SessionIdKey, Encoding.UTF8.GetBytes(newSessionId));
 
         return newSessionId;
     }
@@ -83,37 +88,94 @@ public class QuerySessionService : IQuerySessionService
             throw new ArgumentNullException(nameof(configurator));
 
         var state = GetState(sessionId);
+        var oldQuery = state.Query;
+        var isSameEntityType = state.SelectedEntityType == entityType;
 
-        // If query exists and entity type matches, return it
-        if (state.Query != null && state.SelectedEntityType == entityType)
-        {
-            return state.Query;
-        }
-
-        // Create new query
+        // Always create a new query to get a fresh DbContext
+        // The DbContext from previous requests will be disposed
         var query = configurator.BuildFor(entityType);
 
         // Subscribe to query events
         SubscribeToQueryEvents(query, sessionId);
 
+        // If same entity type, transfer state from old query
+        if (isSameEntityType && oldQuery != null)
+        {
+            // Transfer conditions from old query to new query
+            TransferConditions(oldQuery.Condition, query.Condition, query.ConditionPropertyPaths);
+
+            // Transfer selected properties
+            foreach (var oldSelect in oldQuery.SelectPropertyPaths.Where(p => p.IsSelected))
+            {
+                var newSelect = query.SelectPropertyPaths
+                    .FirstOrDefault(p => p.Property.PropertyFullName == oldSelect.Property.PropertyFullName);
+                if (newSelect != null)
+                    newSelect.IsSelected = true;
+            }
+        }
+        else
+        {
+            // Entity type changed, clear selections
+            state.SelectedPropertyPaths.Clear();
+            state.Results = null;
+            state.CurrentPage = 1;
+        }
+
         // Update state
         state.Query = query;
         state.SelectedEntityType = entityType;
-        state.SelectedPropertyPaths.Clear();
-        state.Results = null;
-        state.CurrentPage = 1;
-        state.CurrentExpression = query.Stringify();
+        state.CurrentExpression = query.ToString();
 
         return query;
+    }
+
+    private static void TransferConditions(
+        BlockCondition sourceBlock,
+        BlockCondition targetBlock,
+        IReadOnlyCollection<PropertyPath> availableProperties)
+    {
+        // Transfer logical operator
+        targetBlock.LogicalOperator = sourceBlock.LogicalOperator;
+
+        // Transfer each condition
+        foreach (var condition in sourceBlock.Conditions)
+        {
+            if (condition is SimpleCondition simpleCondition)
+            {
+                // Find matching property in new query by name
+                var matchingProperty = availableProperties
+                    .FirstOrDefault(p => p.PropertyFullName == simpleCondition.PropertyPath.PropertyFullName);
+
+                if (matchingProperty != null)
+                {
+                    var newCondition = targetBlock.CreateNew(matchingProperty);
+                    newCondition.LogicalOperator = simpleCondition.LogicalOperator;
+                    newCondition.Value = simpleCondition.Value;
+
+                    // Try to find matching operator by name
+                    var matchingOperator = matchingProperty.GetCompatibleOperators()
+                        .FirstOrDefault(op => op.GetType() == simpleCondition.Operator.GetType());
+                    if (matchingOperator != null)
+                        newCondition.Operator = matchingOperator;
+                }
+            }
+            else if (condition is BlockCondition nestedBlock)
+            {
+                // Create a new nested block and recursively transfer
+                var newNestedBlock = new BlockCondition(
+                    new List<ICondition>(),
+                    nestedBlock.LogicalOperator,
+                    targetBlock);
+                targetBlock.Add(newNestedBlock);
+                TransferConditions(nestedBlock, newNestedBlock, availableProperties);
+            }
+        }
     }
 
     public void UpdateQueryExpression(string sessionId)
     {
         var state = GetState(sessionId);
-        if (state.Query != null)
-        {
-            state.CurrentExpression = state.Query.Stringify();
-        }
+        if (state.Query != null) state.CurrentExpression = state.Query.ToString();
     }
 
     public void ToggleProperty(string sessionId, string propertyPath)
@@ -160,7 +222,7 @@ public class QuerySessionService : IQuerySessionService
 
         var state = GetState(sessionId);
         state.Results = results;
-        state.TotalPages = results.TotalPages;
+        state.TotalPages = results.TotalPage;
         state.TotalItems = results.TotalItems;
         state.CurrentPage = results.CurrentPage;
     }
@@ -193,12 +255,9 @@ public class QuerySessionService : IQuerySessionService
     private void SubscribeToQueryEvents(IQuery query, string sessionId)
     {
         // Subscribe to condition changes
-        query.OnConditionChanged += (sender, args) =>
+        query.OnChanged += (sender, args) =>
         {
-            UpdateState(sessionId, state =>
-            {
-                state.CurrentExpression = query.Stringify();
-            });
+            UpdateState(sessionId, state => { state.CurrentExpression = query.ToString(); });
         };
 
         // Subscribe to selection changes (if the event exists)
