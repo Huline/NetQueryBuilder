@@ -58,12 +58,12 @@ public class ConditionBuilderTagHelper : TagHelper
         html.AppendLine("<p class=\"nqb-hint\">Build conditions to filter your query results</p>");
 
         // Render root block condition
-        RenderBlockCondition(html, state.Query.Condition, 0);
+        RenderBlockCondition(html, state.Query.Condition, 0, state.Query.ConditionPropertyPaths);
 
         output.Content.SetHtmlContent(html.ToString());
     }
 
-    private void RenderBlockCondition(StringBuilder html, BlockCondition block, int level)
+    private void RenderBlockCondition(StringBuilder html, BlockCondition block, int level, IReadOnlyCollection<NetQueryBuilder.Properties.PropertyPath> availableProperties)
     {
         var indent = level * 20; // 20px per level
 
@@ -99,7 +99,7 @@ public class ConditionBuilderTagHelper : TagHelper
 
                 if (condition is SimpleCondition simple)
                 {
-                    RenderSimpleCondition(html, simple, i, i > 0);
+                    RenderSimpleCondition(html, simple, i, i > 0, availableProperties);
                 }
                 else if (condition is BlockCondition childBlock)
                 {
@@ -109,7 +109,7 @@ public class ConditionBuilderTagHelper : TagHelper
                         RenderLogicalOperatorSelect(html, i, childBlock.LogicalOperator);
                     }
 
-                    RenderBlockCondition(html, childBlock, level + 1);
+                    RenderBlockCondition(html, childBlock, level + 1, availableProperties);
                 }
 
                 // Separator between conditions (except last)
@@ -129,24 +129,33 @@ public class ConditionBuilderTagHelper : TagHelper
         html.AppendLine("</div>");
     }
 
-    private void RenderSimpleCondition(StringBuilder html, SimpleCondition condition, int index, bool showLogicalOperator)
+    private void RenderSimpleCondition(StringBuilder html, SimpleCondition condition, int index, bool showLogicalOperator, IReadOnlyCollection<NetQueryBuilder.Properties.PropertyPath> availableProperties)
     {
         html.AppendLine("  <div class=\"nqb-simple-condition\">");
         html.AppendLine("    <div class=\"nqb-condition-row\">");
 
-        // Property selector
+        // Property selector - show all available properties
         html.AppendLine("      <div class=\"nqb-condition-field\">");
         html.AppendLine("        <label class=\"nqb-label-small\">Property</label>");
         html.AppendLine($"        <select name=\"Conditions[{index}].PropertyPath\" class=\"nqb-select nqb-select-small\">");
-        html.AppendLine($"          <option value=\"{condition.PropertyPath.PropertyFullName}\" selected>{condition.PropertyPath.PropertyName}</option>");
+        foreach (var prop in availableProperties)
+        {
+            var selected = prop.PropertyFullName == condition.PropertyPath.PropertyFullName ? " selected" : "";
+            html.AppendLine($"          <option value=\"{prop.PropertyFullName}\"{selected}>{prop.PropertyName}</option>");
+        }
         html.AppendLine("        </select>");
         html.AppendLine("      </div>");
 
-        // Operator selector
+        // Operator selector - show all compatible operators for the current property
         html.AppendLine("      <div class=\"nqb-condition-field\">");
         html.AppendLine("        <label class=\"nqb-label-small\">Operator</label>");
         html.AppendLine($"        <select name=\"Conditions[{index}].Operator\" class=\"nqb-select nqb-select-small\">");
-        html.AppendLine($"          <option value=\"{condition.Operator}\" selected>{condition.Operator}</option>");
+        var compatibleOperators = condition.PropertyPath.GetCompatibleOperators();
+        foreach (var op in compatibleOperators)
+        {
+            var selected = op.GetType().Name == condition.Operator.GetType().Name ? " selected" : "";
+            html.AppendLine($"          <option value=\"{op.GetType().Name}\"{selected}>{op}</option>");
+        }
         html.AppendLine("        </select>");
         html.AppendLine("      </div>");
 

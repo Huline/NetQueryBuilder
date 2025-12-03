@@ -242,6 +242,30 @@ public abstract class NetQueryPageModelBase : PageModel
             var formCondition = Conditions[i];
             var queryCondition = simpleConditions[i];
 
+            // Update property if changed
+            if (!string.IsNullOrEmpty(formCondition.PropertyPath) &&
+                formCondition.PropertyPath != queryCondition.PropertyPath.PropertyFullName)
+            {
+                var newProperty = query.ConditionPropertyPaths
+                    .FirstOrDefault(p => p.PropertyFullName == formCondition.PropertyPath);
+                if (newProperty != null)
+                {
+                    queryCondition.PropertyPath = newProperty;
+                }
+            }
+
+            // Update operator if changed
+            if (!string.IsNullOrEmpty(formCondition.Operator))
+            {
+                var compatibleOperators = queryCondition.PropertyPath.GetCompatibleOperators();
+                var newOperator = compatibleOperators
+                    .FirstOrDefault(op => op.GetType().Name == formCondition.Operator);
+                if (newOperator != null && newOperator.GetType() != queryCondition.Operator.GetType())
+                {
+                    queryCondition.Operator = newOperator;
+                }
+            }
+
             // Update the value if provided
             if (formCondition.Value != null)
             {
