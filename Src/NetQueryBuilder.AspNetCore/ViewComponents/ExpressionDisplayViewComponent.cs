@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NetQueryBuilder.AspNetCore.Services;
 
 namespace NetQueryBuilder.AspNetCore.ViewComponents;
@@ -9,10 +10,14 @@ namespace NetQueryBuilder.AspNetCore.ViewComponents;
 public class ExpressionDisplayViewComponent : ViewComponent
 {
     private readonly IQuerySessionService _sessionService;
+    private readonly ILogger<ExpressionDisplayViewComponent> _logger;
 
-    public ExpressionDisplayViewComponent(IQuerySessionService sessionService)
+    public ExpressionDisplayViewComponent(
+        IQuerySessionService sessionService,
+        ILogger<ExpressionDisplayViewComponent> logger)
     {
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public IViewComponentResult Invoke(string sessionId)

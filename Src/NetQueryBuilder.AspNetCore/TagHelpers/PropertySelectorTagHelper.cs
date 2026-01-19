@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Logging;
 using NetQueryBuilder.AspNetCore.Services;
 using System.Text;
 
@@ -11,10 +12,14 @@ namespace NetQueryBuilder.AspNetCore.TagHelpers;
 public class PropertySelectorTagHelper : TagHelper
 {
     private readonly IQuerySessionService _sessionService;
+    private readonly ILogger<PropertySelectorTagHelper> _logger;
 
-    public PropertySelectorTagHelper(IQuerySessionService sessionService)
+    public PropertySelectorTagHelper(
+        IQuerySessionService sessionService,
+        ILogger<PropertySelectorTagHelper> logger)
     {
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -62,9 +67,9 @@ public class PropertySelectorTagHelper : TagHelper
         // Build HTML
         var html = new StringBuilder();
 
-        html.AppendLine("<h3 class=\"nqb-section-title\">SELECT Properties</h3>");
-        html.AppendLine("<p class=\"nqb-hint\">Choose which properties to display in the results</p>");
-        html.AppendLine("<div class=\"nqb-checkbox-group\">");
+        html.AppendLine("<h3 class=\"nqb-section-title\" id=\"property-selector-title\">SELECT Properties</h3>");
+        html.AppendLine("<p class=\"nqb-hint\" id=\"property-selector-hint\">Choose which properties to display in the results</p>");
+        html.AppendLine("<div class=\"nqb-checkbox-group\" role=\"group\" aria-labelledby=\"property-selector-title\" aria-describedby=\"property-selector-hint\">");
 
         foreach (var selectProperty in properties)
         {
@@ -77,6 +82,7 @@ public class PropertySelectorTagHelper : TagHelper
             html.AppendLine($"           id=\"{propertyId}\" ");
             html.AppendLine($"           name=\"SelectedProperties\" ");
             html.AppendLine($"           value=\"{property.PropertyFullName}\" ");
+            html.AppendLine($"           aria-label=\"Select {property.PropertyName} property\" ");
             html.AppendLine($"           {isChecked} />");
 
             // Display name with depth indicator

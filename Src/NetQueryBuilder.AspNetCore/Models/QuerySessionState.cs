@@ -56,4 +56,10 @@ public class QuerySessionState
     ///     Total number of items (calculated from results)
     /// </summary>
     public int TotalItems { get; set; }
+
+    /// <summary>
+    ///     Timestamp of the last access to this session.
+    ///     Used for session cleanup and expiration.
+    /// </summary>
+    public DateTime LastAccessTime { get; set; } = DateTime.UtcNow;
 }

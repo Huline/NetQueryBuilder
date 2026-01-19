@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NetQueryBuilder.AspNetCore.Services;
 using NetQueryBuilder.AspNetCore.Models;
 
@@ -10,10 +11,14 @@ namespace NetQueryBuilder.AspNetCore.ViewComponents;
 public class PaginationViewComponent : ViewComponent
 {
     private readonly IQuerySessionService _sessionService;
+    private readonly ILogger<PaginationViewComponent> _logger;
 
-    public PaginationViewComponent(IQuerySessionService sessionService)
+    public PaginationViewComponent(
+        IQuerySessionService sessionService,
+        ILogger<PaginationViewComponent> logger)
     {
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public IViewComponentResult Invoke(string sessionId)

@@ -201,24 +201,50 @@ public class CustomOperator : IOperator
 ```
 
 ### ASP.NET Core Razor Pages Integration
+
+**Simplified Setup (Recommended):**
 ```csharp
-// Program.cs
+// Program.cs - Just 5 lines of configuration
 builder.Services.AddRazorPages();
-builder.Services.AddNetQueryBuilder(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseInMemoryDatabase("Demo"));
+
+// Single line registers all services including EfQueryConfigurator
+builder.Services.AddNetQueryBuilder<AppDbContext>(options =>
 {
     options.SessionTimeout = TimeSpan.FromMinutes(30);
     options.DefaultPageSize = 10;
 });
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("Demo"));
-builder.Services.AddScoped<IQueryConfigurator, EfQueryConfigurator<AppDbContext>>();
 
-app.UseSession(); // Required for state management
+// Single line handles session + static files middleware
+app.UseRouting();
+app.UseNetQueryBuilder();
 app.MapRazorPages();
+```
 
-// QueryBuilder.cshtml
+**Page Model (Minimal Code):**
+```csharp
+// QueryBuilder.cshtml.cs - Base class handles everything automatically
+public class QueryBuilderModel : NetQueryPageModelBase
+{
+    public QueryBuilderModel(IQuerySessionService sessionService, IQueryConfigurator configurator)
+        : base(sessionService, configurator) { }
+
+    public void OnGet() { }
+
+    // No overrides needed! Base class uses reflection to automatically
+    // dispatch ExecuteQueryAsync<T> based on selected entity type.
+}
+```
+
+**Razor View:**
+```razor
 @page
 @model QueryBuilderModel
+
+<!-- CSS is served automatically from the library -->
+<link rel="stylesheet" href="~/_content/NetQueryBuilder.AspNetCore/css/netquerybuilder.css" />
+
 <form method="post">
     <nqb-entity-selector session-id="@Model.SessionId"></nqb-entity-selector>
     <nqb-property-selector session-id="@Model.SessionId"></nqb-property-selector>
@@ -234,20 +260,14 @@ app.MapRazorPages();
     @await Component.InvokeAsync("QueryResults", new { sessionId = Model.SessionId })
     @await Component.InvokeAsync("Pagination", new { sessionId = Model.SessionId })
 }
-
-// QueryBuilder.cshtml.cs
-public class QueryBuilderModel : NetQueryPageModelBase
-{
-    public QueryBuilderModel(IQuerySessionService sessionService, IQueryConfigurator configurator)
-        : base(sessionService, configurator) { }
-
-    public override async Task<IActionResult> OnPostExecuteQueryAsync()
-    {
-        await ExecuteQueryAsync<Customer>();
-        return Page();
-    }
-}
 ```
+
+**Key Features:**
+- **Automatic Entity Dispatch**: Base class uses reflection to call correct `ExecuteQueryAsync<T>`
+- **Embedded CSS**: Served automatically from `_content/NetQueryBuilder.AspNetCore/css/`
+- **Session Cleanup**: Background service automatically removes expired sessions
+- **Service Validation**: Startup checks ensure all required services are registered
+- **ARIA Accessibility**: All form controls include accessibility attributes
 
 ## CI/CD Pipeline (GitHub Actions)
 

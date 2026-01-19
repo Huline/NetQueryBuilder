@@ -1587,3 +1587,91 @@
     align-items: center;
     gap: 4px;
 }
+
+/* ==================================
+   Condition Builder Styles
+   ================================== */
+
+/* Block Condition Container */
+.nqb-block-condition {
+    background-color: var(--nqb-surface);
+    border: 1px solid var(--nqb-border-color);
+    border-radius: var(--nqb-border-radius);
+    padding: var(--nqb-spacing-md);
+    margin-bottom: var(--nqb-spacing-md);
+}
+
+/* Block Header */
+.nqb-block-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nqb-spacing-sm);
+    align-items: center;
+    margin-bottom: var(--nqb-spacing-md);
+    padding-bottom: var(--nqb-spacing-sm);
+    border-bottom: 1px solid var(--nqb-border-color);
+}
+
+/* Add Condition Group (dropdown + button) */
+.nqb-add-condition-group {
+    display: flex;
+    gap: var(--nqb-spacing-xs);
+    align-items: center;
+}
+
+.nqb-add-condition-group .nqb-select {
+    min-width: 150px;
+}
+
+/* Conditions List */
+.nqb-conditions-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nqb-spacing-sm);
+}
+
+/* Simple Condition Row */
+.nqb-simple-condition {
+    background-color: var(--nqb-surface-light);
+    border-radius: var(--nqb-border-radius);
+    padding: var(--nqb-spacing-sm);
+}
+
+.nqb-condition-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nqb-spacing-sm);
+    align-items: flex-end;
+}
+
+.nqb-condition-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nqb-spacing-xs);
+}
+
+.nqb-condition-actions {
+    display: flex;
+    align-items: center;
+    padding-bottom: 2px;
+}
+
+/* Logical Operator */
+.nqb-logical-operator {
+    display: flex;
+    justify-content: center;
+    padding: var(--nqb-spacing-xs) 0;
+}
+
+.nqb-logical-operator .nqb-select {
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Empty State Message */
+.nqb-empty-message {
+    color: var(--nqb-text-secondary);
+    font-style: italic;
+    padding: var(--nqb-spacing-md);
+    text-align: center;
+}

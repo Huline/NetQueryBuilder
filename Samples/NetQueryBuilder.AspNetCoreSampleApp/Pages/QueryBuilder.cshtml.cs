@@ -1,11 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
 using NetQueryBuilder.AspNetCore.Pages;
 using NetQueryBuilder.AspNetCore.Services;
-using NetQueryBuilder.AspNetCoreSampleApp.Models;
 using NetQueryBuilder.Configurations;
 
 namespace NetQueryBuilder.AspNetCoreSampleApp.Pages;
 
+/// <summary>
+/// Query builder page using NetQueryBuilder.
+/// The base class handles all query building and execution automatically
+/// using reflection-based entity dispatch.
+/// </summary>
 public class QueryBuilderModel : NetQueryPageModelBase
 {
     public QueryBuilderModel(
@@ -20,62 +23,7 @@ public class QueryBuilderModel : NetQueryPageModelBase
         // Page loads, state read from session automatically
     }
 
-    public override async Task<IActionResult> OnPostExecuteQueryAsync()
-    {
-        // Determine the entity type from session state
-        var entityType = State.SelectedEntityType;
-
-        if (entityType == null)
-        {
-            ModelState.AddModelError(string.Empty, "Please select an entity type first.");
-            return Page();
-        }
-
-        // Execute query based on entity type
-        if (entityType == typeof(Person))
-        {
-            await ExecuteQueryAsync<Person>();
-        }
-        else if (entityType == typeof(Address))
-        {
-            await ExecuteQueryAsync<Address>();
-        }
-        else if (entityType == typeof(Utility))
-        {
-            await ExecuteQueryAsync<Utility>();
-        }
-        else
-        {
-            ModelState.AddModelError(string.Empty, $"Unsupported entity type: {entityType.Name}");
-        }
-
-        return Page();
-    }
-
-    public override async Task<IActionResult> OnPostChangePageAsync(int page)
-    {
-        if (page < 1)
-            return Page();
-
-        var entityType = State.SelectedEntityType;
-
-        if (entityType == null)
-            return Page();
-
-        // Navigate to the specified page based on entity type
-        if (entityType == typeof(Person))
-        {
-            await GoToPageAsync<Person>(page);
-        }
-        else if (entityType == typeof(Address))
-        {
-            await GoToPageAsync<Address>(page);
-        }
-        else if (entityType == typeof(Utility))
-        {
-            await GoToPageAsync<Utility>(page);
-        }
-
-        return Page();
-    }
+    // No need to override OnPostExecuteQueryAsync or OnPostChangePageAsync!
+    // The base class uses reflection to automatically dispatch to the correct
+    // generic method based on the selected entity type.
 }

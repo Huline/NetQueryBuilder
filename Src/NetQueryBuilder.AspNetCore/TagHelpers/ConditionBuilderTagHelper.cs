@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Logging;
 using NetQueryBuilder.AspNetCore.Services;
 using NetQueryBuilder.Conditions;
 using System.Text;
@@ -12,10 +13,14 @@ namespace NetQueryBuilder.AspNetCore.TagHelpers;
 public class ConditionBuilderTagHelper : TagHelper
 {
     private readonly IQuerySessionService _sessionService;
+    private readonly ILogger<ConditionBuilderTagHelper> _logger;
 
-    public ConditionBuilderTagHelper(IQuerySessionService sessionService)
+    public ConditionBuilderTagHelper(
+        IQuerySessionService sessionService,
+        ILogger<ConditionBuilderTagHelper> logger)
     {
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -54,8 +59,8 @@ public class ConditionBuilderTagHelper : TagHelper
         // Build HTML
         var html = new StringBuilder();
 
-        html.AppendLine("<h3 class=\"nqb-section-title\">WHERE Conditions</h3>");
-        html.AppendLine("<p class=\"nqb-hint\">Build conditions to filter your query results</p>");
+        html.AppendLine("<h3 class=\"nqb-section-title\" id=\"condition-builder-title\">WHERE Conditions</h3>");
+        html.AppendLine("<p class=\"nqb-hint\" id=\"condition-builder-hint\">Build conditions to filter your query results</p>");
 
         // Render root block condition
         RenderBlockCondition(html, state.Query.Condition, 0, state.Query.ConditionPropertyPaths);
@@ -67,13 +72,24 @@ public class ConditionBuilderTagHelper : TagHelper
     {
         var indent = level * 20; // 20px per level
 
-        html.AppendLine($"<div class=\"nqb-block-condition\" style=\"margin-left: {indent}px;\">");
+        html.AppendLine($"<div class=\"nqb-block-condition\" style=\"margin-left: {indent}px;\" role=\"group\" aria-label=\"Condition group level {level}\">");
 
-        // Header with add buttons
+        // Header with add buttons and property selector
         html.AppendLine("  <div class=\"nqb-block-header\">");
-        html.AppendLine("    <button type=\"submit\" formmethod=\"post\" formaction=\"?handler=AddCondition\" class=\"nqb-button nqb-button-small nqb-button-outlined\">");
-        html.AppendLine("      + Add Condition");
-        html.AppendLine("    </button>");
+
+        // Property selector and Add Condition button
+        html.AppendLine("    <div class=\"nqb-add-condition-group\">");
+        html.AppendLine("      <select name=\"propertyPath\" class=\"nqb-select nqb-select-small\" aria-label=\"Select property for new condition\">");
+        foreach (var prop in availableProperties)
+        {
+            html.AppendLine($"        <option value=\"{prop.PropertyFullName}\">{prop.PropertyName}</option>");
+        }
+        html.AppendLine("      </select>");
+        html.AppendLine("      <button type=\"submit\" formmethod=\"post\" formaction=\"?handler=AddCondition\" class=\"nqb-button nqb-button-small nqb-button-outlined\">");
+        html.AppendLine("        + Add Condition");
+        html.AppendLine("      </button>");
+        html.AppendLine("    </div>");
+
         html.AppendLine("    <button type=\"submit\" formmethod=\"post\" formaction=\"?handler=AddGroup\" class=\"nqb-button nqb-button-small nqb-button-outlined\">");
         html.AppendLine("      + Add Group");
         html.AppendLine("    </button>");

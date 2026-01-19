@@ -12,7 +12,7 @@ namespace NetQueryBuilder.AspNetCore.Services;
 /// <summary>
 ///     Default implementation of IQuerySessionService using in-memory storage
 /// </summary>
-public class QuerySessionService : IQuerySessionService
+public class QuerySessionService : IQuerySessionService, ISessionCleanupSupport
 {
     private readonly NetQueryBuilderOptions _options;
     private readonly ConcurrentDictionary<string, QuerySessionState> _sessions = new();
@@ -49,11 +49,16 @@ public class QuerySessionService : IQuerySessionService
         if (string.IsNullOrEmpty(sessionId))
             throw new ArgumentNullException(nameof(sessionId));
 
-        return _sessions.GetOrAdd(sessionId, _ => new QuerySessionState
+        var state = _sessions.GetOrAdd(sessionId, _ => new QuerySessionState
         {
             SessionId = sessionId,
             PageSize = _options.DefaultPageSize
         });
+
+        // Update last access time
+        state.LastAccessTime = DateTime.UtcNow;
+
+        return state;
     }
 
     public void UpdateState(string sessionId, Action<QuerySessionState> update)
@@ -263,5 +268,30 @@ public class QuerySessionService : IQuerySessionService
         // Subscribe to selection changes (if the event exists)
         // Note: The core library might not have OnSelectionChanged yet
         // This is prepared for future enhancements
+    }
+
+    /// <summary>
+    ///     Removes sessions that have been inactive longer than the specified timeout.
+    /// </summary>
+    /// <param name="timeout">The timeout after which sessions are considered expired</param>
+    /// <returns>The number of sessions removed</returns>
+    public int CleanupExpiredSessions(TimeSpan timeout)
+    {
+        var cutoffTime = DateTime.UtcNow - timeout;
+        var expiredSessionIds = _sessions
+            .Where(kvp => kvp.Value.LastAccessTime < cutoffTime)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        var removedCount = 0;
+        foreach (var sessionId in expiredSessionIds)
+        {
+            if (_sessions.TryRemove(sessionId, out _))
+            {
+                removedCount++;
+            }
+        }
+
+        return removedCount;
     }
 }

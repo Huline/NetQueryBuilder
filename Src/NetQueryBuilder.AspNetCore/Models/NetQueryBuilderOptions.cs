@@ -24,4 +24,15 @@ public class NetQueryBuilderOptions
     /// Whether to enable session-based state storage. Default is true.
     /// </summary>
     public bool UseSessionStorage { get; set; } = true;
+
+    /// <summary>
+    /// Interval between session cleanup runs. Default is 5 minutes.
+    /// Set to TimeSpan.Zero to disable automatic cleanup.
+    /// </summary>
+    public TimeSpan SessionCleanupInterval { get; set; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Whether to enable automatic session cleanup. Default is true.
+    /// </summary>
+    public bool EnableSessionCleanup { get; set; } = true;
 }

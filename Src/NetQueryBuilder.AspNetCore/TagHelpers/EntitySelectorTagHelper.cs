@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Logging;
 using NetQueryBuilder.AspNetCore.Services;
 using NetQueryBuilder.Configurations;
 using System.Text;
@@ -14,13 +15,16 @@ public class EntitySelectorTagHelper : TagHelper
 {
     private readonly IQuerySessionService _sessionService;
     private readonly IQueryConfigurator _configurator;
+    private readonly ILogger<EntitySelectorTagHelper> _logger;
 
     public EntitySelectorTagHelper(
         IQuerySessionService sessionService,
-        IQueryConfigurator configurator)
+        IQueryConfigurator configurator,
+        ILogger<EntitySelectorTagHelper> logger)
     {
         _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         _configurator = configurator ?? throw new ArgumentNullException(nameof(configurator));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -39,6 +43,7 @@ public class EntitySelectorTagHelper : TagHelper
     {
         if (string.IsNullOrEmpty(SessionId))
         {
+            _logger.LogWarning("EntitySelectorTagHelper: SessionId is null or empty, suppressing output");
             output.SuppressOutput();
             return;
         }
@@ -47,6 +52,9 @@ public class EntitySelectorTagHelper : TagHelper
         var entityTypes = _sessionService.GetAvailableEntityTypes(_configurator);
         var state = _sessionService.GetState(SessionId);
 
+        _logger.LogDebug("EntitySelectorTagHelper: Rendering {EntityCount} entity types for session {SessionId}",
+            entityTypes.Count, SessionId);
+
         // Change output tag
         output.TagName = "div";
         output.Attributes.SetAttribute("class", $"nqb-form-group {CssClass}".Trim());
@@ -54,9 +62,9 @@ public class EntitySelectorTagHelper : TagHelper
         // Build HTML
         var html = new StringBuilder();
 
-        html.AppendLine("<label for=\"entity-selector\" class=\"nqb-label\">Select Entity Type</label>");
-        html.AppendLine("<div class=\"nqb-input-group\">");
-        html.AppendLine("  <select id=\"entity-selector\" name=\"SelectedEntityType\" class=\"nqb-select\">");
+        html.AppendLine("<label for=\"entity-selector\" class=\"nqb-label\" id=\"entity-selector-label\">Select Entity Type</label>");
+        html.AppendLine("<div class=\"nqb-input-group\" role=\"group\" aria-labelledby=\"entity-selector-label\">");
+        html.AppendLine("  <select id=\"entity-selector\" name=\"SelectedEntityType\" class=\"nqb-select\" aria-labelledby=\"entity-selector-label\" aria-describedby=\"entity-selector-hint\" aria-required=\"true\">");
         html.AppendLine("    <option value=\"\">-- Select an Entity --</option>");
 
         foreach (var entityType in entityTypes)

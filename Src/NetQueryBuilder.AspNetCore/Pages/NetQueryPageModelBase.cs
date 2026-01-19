@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using NetQueryBuilder.AspNetCore.Models;
@@ -106,16 +107,24 @@ public abstract class NetQueryPageModelBase : PageModel
     /// <summary>
     ///     Handler for adding a new condition
     /// </summary>
-    public virtual IActionResult OnPostAddCondition(string? parentId = null)
+    /// <param name="propertyPath">Optional property path to use for the new condition. If not specified, uses the first available property.</param>
+    /// <param name="parentId">Optional parent ID for nested conditions</param>
+    public virtual IActionResult OnPostAddCondition(string? propertyPath = null, string? parentId = null)
     {
         var query = State.Query;
-        if (query != null)
+        if (query != null && query.ConditionPropertyPaths.Any())
+        {
+            // Find the specified property or use the first available
+            var property = !string.IsNullOrEmpty(propertyPath)
+                ? query.ConditionPropertyPaths.FirstOrDefault(p => p.PropertyFullName == propertyPath)
+                : null;
+
+            // Fallback to first property if not found
+            property ??= query.ConditionPropertyPaths.First();
+
             // Add a new simple condition to the root block
-            if (query.ConditionPropertyPaths.Any())
-            {
-                var firstProperty = query.ConditionPropertyPaths.First();
-                query.Condition.CreateNew(firstProperty);
-            }
+            query.Condition.CreateNew(property);
+        }
 
         return Page();
     }
@@ -157,14 +166,79 @@ public abstract class NetQueryPageModelBase : PageModel
     }
 
     /// <summary>
-    ///     Handler for executing the query (to be overridden by derived classes for type-specific execution)
+    ///     Handler for executing the query.
+    ///     Uses reflection to automatically dispatch to the correct generic ExecuteQueryAsync method
+    ///     based on the selected entity type.
     /// </summary>
     public virtual async Task<IActionResult> OnPostExecuteQueryAsync()
     {
-        // This method should be overridden in derived classes to handle specific entity types
-        // Because we need the generic type parameter at compile time
-        await Task.CompletedTask;
+        await ExecuteQueryForCurrentEntityAsync();
         return Page();
+    }
+
+    /// <summary>
+    ///     Executes the query for the currently selected entity type using reflection.
+    ///     This eliminates the need for if-else chains based on entity type in derived classes.
+    /// </summary>
+    /// <returns>The query result as an object, or null if no entity type is selected</returns>
+    protected async Task<object?> ExecuteQueryForCurrentEntityAsync()
+    {
+        var entityType = State.SelectedEntityType;
+        if (entityType == null)
+            return null;
+
+        // Get the generic ExecuteQueryAsync<T> method and make it specific to the entity type
+        var method = typeof(NetQueryPageModelBase)
+            .GetMethod(nameof(ExecuteQueryAsync), BindingFlags.NonPublic | BindingFlags.Instance);
+
+        if (method == null)
+            throw new InvalidOperationException("ExecuteQueryAsync method not found.");
+
+        var genericMethod = method.MakeGenericMethod(entityType);
+
+        // Invoke the method and await the result
+        var task = (Task?)genericMethod.Invoke(this, Array.Empty<object>());
+        if (task == null)
+            return null;
+
+        await task.ConfigureAwait(false);
+
+        // Get the result from the Task<QueryResult<T>>
+        var resultProperty = task.GetType().GetProperty("Result");
+        return resultProperty?.GetValue(task);
+    }
+
+    /// <summary>
+    ///     Navigates to the specified page for the current entity type using reflection.
+    ///     This eliminates the need for if-else chains based on entity type in derived classes.
+    /// </summary>
+    /// <param name="page">The page number to navigate to</param>
+    /// <returns>The query result as an object, or null if no entity type is selected</returns>
+    protected async Task<object?> GoToPageForCurrentEntityAsync(int page)
+    {
+        var entityType = State.SelectedEntityType;
+        if (entityType == null)
+            return null;
+
+        // Get the generic GoToPageAsync<T> method and make it specific to the entity type
+        var method = typeof(NetQueryPageModelBase)
+            .GetMethod(nameof(GoToPageAsync), BindingFlags.NonPublic | BindingFlags.Instance);
+
+        if (method == null)
+            throw new InvalidOperationException("GoToPageAsync method not found.");
+
+        var genericMethod = method.MakeGenericMethod(entityType);
+
+        // Invoke the method and await the result
+        var task = (Task?)genericMethod.Invoke(this, new object[] { page });
+        if (task == null)
+            return null;
+
+        await task.ConfigureAwait(false);
+
+        // Get the result from the Task<QueryResult<T>>
+        var resultProperty = task.GetType().GetProperty("Result");
+        return resultProperty?.GetValue(task);
     }
 
     /// <summary>
@@ -179,12 +253,10 @@ public abstract class NetQueryPageModelBase : PageModel
         if (state.Results == null)
             return Page();
 
-        // Update the page in session
-        SessionService.SetPage(SessionId, page);
+        // Navigate to the specified page using reflection-based dispatch
+        await GoToPageForCurrentEntityAsync(page);
 
-        // Re-execute the query to get new page
-        // This will be handled by the derived class's OnPostExecuteQueryAsync
-        return await OnPostExecuteQueryAsync();
+        return Page();
     }
 
     /// <summary>
@@ -220,7 +292,6 @@ public abstract class NetQueryPageModelBase : PageModel
         }
         catch (Exception ex)
         {
-            // Log the error
             ModelState.AddModelError(string.Empty, $"Error executing query: {ex.Message}");
             return null;
         }

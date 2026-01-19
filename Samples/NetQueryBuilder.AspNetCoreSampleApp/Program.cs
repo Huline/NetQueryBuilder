@@ -1,19 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using NetQueryBuilder.AspNetCoreSampleApp.Data;
 using NetQueryBuilder.AspNetCore.Extensions;
-using NetQueryBuilder.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add Razor Pages
 builder.Services.AddRazorPages();
-
-// Add NetQueryBuilder with session support
-builder.Services.AddNetQueryBuilder(options =>
-{
-    options.SessionTimeout = TimeSpan.FromMinutes(30);
-    options.DefaultPageSize = 10;
-});
 
 // Add Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -22,8 +14,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies();
 });
 
-// Add Query Configurator
-builder.Services.AddScoped<NetQueryBuilder.Configurations.IQueryConfigurator, EfQueryConfigurator<AppDbContext>>();
+// Add NetQueryBuilder with EF Core integration (registers all required services)
+builder.Services.AddNetQueryBuilder<AppDbContext>(options =>
+{
+    options.SessionTimeout = TimeSpan.FromMinutes(30);
+    options.DefaultPageSize = 10;
+});
 
 var app = builder.Build();
 
@@ -35,9 +31,8 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 app.UseRouting();
-app.UseSession(); // IMPORTANT: Must be after UseRouting and before MapRazorPages
+app.UseNetQueryBuilder(); // Handles session + static files
 app.MapRazorPages();
 
 // Seed database
