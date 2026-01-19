@@ -1,6 +1,30 @@
 @model string
 
 <div class="nqb-expression-display">
-    <h4 class="nqb-subsection-title">Current Expression</h4>
-    <pre class="nqb-code"><code>@Model</code></pre>
+    <div class="nqb-expression-header">
+        <svg class="nqb-expression-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span class="nqb-subsection-title">Generated LINQ Expression</span>
+    </div>
+    <pre class="nqb-code"><code>@(string.IsNullOrWhiteSpace(Model) ? "// Select an entity and add conditions to see the expression" : Model)</code></pre>
 </div>
+
+<style>
+    .nqb-expression-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .nqb-expression-icon {
+        color: var(--accent-purple, #667eea);
+        flex-shrink: 0;
+    }
+
+    .nqb-expression-display .nqb-subsection-title {
+        margin: 0;
+    }
+</style>

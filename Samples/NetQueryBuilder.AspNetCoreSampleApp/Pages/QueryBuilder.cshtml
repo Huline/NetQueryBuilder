@@ -4,60 +4,85 @@
     ViewData["Title"] = "Query Builder";
 }
 
-<div class="nqb-container">
-    <h1>NetQueryBuilder for ASP.NET Core</h1>
-    <p class="nqb-subtitle">Build dynamic queries with an intuitive interface</p>
+<div class="nqb-container nqb-container-lg">
+    <div class="nqb-page-header">
+        <h1>Dynamic Query Builder</h1>
+        <p class="nqb-subtitle">
+            Create powerful LINQ queries visually — no code required
+        </p>
+    </div>
 
     @if (!ModelState.IsValid)
     {
-        <div class="nqb-alert nqb-alert-error">
-            @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <p>@error.ErrorMessage</p>
-            }
+        <div class="nqb-alert nqb-alert-error" role="alert">
+            <div class="nqb-alert-content">
+                @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
         </div>
     }
 
-    <form method="post">
+    <form method="post" class="nqb-query-form">
         <!-- Step 1: Entity Selection -->
-        <div class="nqb-card">
-            <h2>1. Select Entity Type</h2>
+        <div class="nqb-card nqb-card-step">
+            <h2>Select Data Source</h2>
+            <p class="nqb-card-description">
+                Choose the entity type you want to query from your database
+            </p>
             <nqb-entity-selector session-id="@Model.SessionId"></nqb-entity-selector>
         </div>
 
-        <!-- Only show following sections if entity is selected -->
         @if (Model.State.SelectedEntityType != null)
         {
             <!-- Step 2: Property Selection -->
-            <div class="nqb-card">
-                <h2>2. Select Properties (SELECT)</h2>
+            <div class="nqb-card nqb-card-step">
+                <h2>Choose Columns</h2>
+                <p class="nqb-card-description">
+                    Select which properties to include in your query results
+                </p>
                 <nqb-property-selector session-id="@Model.SessionId"></nqb-property-selector>
             </div>
 
             <!-- Step 3: Condition Builder -->
-            <div class="nqb-card">
-                <h2>3. Build Conditions (WHERE)</h2>
+            <div class="nqb-card nqb-card-step">
+                <h2>Define Filters</h2>
+                <p class="nqb-card-description">
+                    Add conditions to filter your data — combine multiple rules with AND/OR logic
+                </p>
                 <nqb-condition-builder session-id="@Model.SessionId"></nqb-condition-builder>
             </div>
 
             <!-- Step 4: Expression Preview -->
-            <div class="nqb-card">
-                <h2>Expression Preview</h2>
+            <div class="nqb-card nqb-card-preview">
+                <h2>Generated Expression</h2>
+                <p class="nqb-card-description">
+                    Preview the LINQ expression that will be executed
+                </p>
                 @await Component.InvokeAsync("ExpressionDisplay", new { sessionId = Model.SessionId })
             </div>
 
-            <!-- Step 5: Execute Query -->
+            <!-- Actions -->
             <div class="nqb-actions">
                 <button type="submit"
                         formmethod="post"
                         formaction="?handler=ExecuteQuery"
                         class="nqb-button nqb-button-primary nqb-button-large">
-                    ▶ Run Query
+                    <svg class="nqb-button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Execute Query
                 </button>
                 <button type="submit"
                         formmethod="post"
                         formaction="?handler=ClearQuery"
                         class="nqb-button nqb-button-outlined">
+                    <svg class="nqb-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
                     Clear All
                 </button>
             </div>
@@ -67,10 +92,110 @@
     <!-- Results Section -->
     @if (Model.State.Results != null)
     {
-        <div class="nqb-card">
-            <h2>Query Results</h2>
+        <div class="nqb-card nqb-card-results">
+            <div class="nqb-results-header">
+                <h2>Query Results</h2>
+                <span class="nqb-results-badge">
+                    @Model.State.TotalItems items found
+                </span>
+            </div>
             @await Component.InvokeAsync("QueryResults", new { sessionId = Model.SessionId })
             @await Component.InvokeAsync("Pagination", new { sessionId = Model.SessionId })
         </div>
     }
 </div>
+
+<style>
+    /* Page-specific enhancements */
+    .nqb-page-header {
+        margin-bottom: var(--space-10, 2.5rem);
+    }
+
+    .nqb-card-description {
+        color: var(--text-secondary, #64748b);
+        font-size: 0.9375rem;
+        margin: calc(-1 * var(--space-4, 1rem)) 0 var(--space-5, 1.25rem);
+        line-height: 1.5;
+    }
+
+    .nqb-card-step {
+        position: relative;
+    }
+
+    .nqb-card-preview h2::before {
+        content: none !important;
+    }
+
+    .nqb-card-results h2::before {
+        content: none !important;
+    }
+
+    .nqb-results-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--space-4, 1rem);
+        margin-bottom: var(--space-5, 1.25rem);
+    }
+
+    .nqb-results-header h2 {
+        margin-bottom: 0;
+    }
+
+    .nqb-results-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-2, 0.5rem) var(--space-4, 1rem);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        border-radius: var(--radius-full, 9999px);
+    }
+
+    .nqb-button-icon {
+        margin-right: var(--space-2, 0.5rem);
+        flex-shrink: 0;
+    }
+
+    .nqb-button {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* Animation for cards appearing */
+    .nqb-card-step {
+        animation: fadeSlideIn 0.4s ease-out;
+    }
+
+    .nqb-card-step:nth-child(2) { animation-delay: 0.1s; }
+    .nqb-card-step:nth-child(3) { animation-delay: 0.2s; }
+    .nqb-card-preview { animation: fadeSlideIn 0.4s ease-out 0.3s both; }
+    .nqb-card-results { animation: fadeSlideIn 0.4s ease-out; }
+
+    @@keyframes fadeSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Query form spacing */
+    .nqb-query-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 640px) {
+        .nqb-results-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>

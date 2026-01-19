@@ -8,25 +8,183 @@
                 <tr>
                     @foreach (var property in Model.SelectedProperties)
                     {
-                        <th>@property</th>
+                        <th scope="col">
+                            <div class="nqb-th-content">
+                                <span class="nqb-th-text">@property</span>
+                            </div>
+                        </th>
                     }
                 </tr>
             </thead>
             <tbody>
+                @{ var rowIndex = 0; }
                 @foreach (var item in Model.Items)
                 {
-                    <tr>
+                    <tr class="nqb-table-row" style="animation-delay: @(rowIndex * 30)ms;">
                         @foreach (var property in Model.SelectedProperties)
                         {
-                            <td>@Model.GetPropertyValue(item, property)</td>
+                            var value = Model.GetPropertyValue(item, property);
+                            <td>
+                                @if (string.IsNullOrEmpty(value))
+                                {
+                                    <span class="nqb-null-value">—</span>
+                                }
+                                else if (value == "True" || value == "False")
+                                {
+                                    <span class="nqb-bool-value @(value == "True" ? "nqb-bool-true" : "nqb-bool-false")">
+                                        @(value == "True" ? "Yes" : "No")
+                                    </span>
+                                }
+                                else
+                                {
+                                    @value
+                                }
+                            </td>
                         }
                     </tr>
+                    rowIndex++;
                 }
             </tbody>
         </table>
     }
     else
     {
-        <p class="nqb-info-message">No results found matching your query criteria.</p>
+        <div class="nqb-empty-state">
+            <div class="nqb-empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+            </div>
+            <h3 class="nqb-empty-title">No results found</h3>
+            <p class="nqb-empty-message">Try adjusting your filters or search criteria</p>
+        </div>
     }
 </div>
+
+<style>
+    .nqb-table-container {
+        overflow-x: auto;
+        border-radius: 12px 12px 0 0;
+        border: 1px solid #e2e8f0;
+        border-bottom: none;
+    }
+
+    .nqb-table {
+        margin: 0;
+        border: none;
+    }
+
+    .nqb-table th {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        padding: 1rem 1.25rem;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .nqb-th-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nqb-table td {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9375rem;
+        color: #1e293b;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .nqb-table-row {
+        animation: tableRowFade 0.3s ease-out both;
+    }
+
+    @@keyframes tableRowFade {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .nqb-table-striped tbody tr:nth-of-type(even) {
+        background-color: rgba(248, 250, 252, 0.7);
+    }
+
+    .nqb-table-hover tbody tr {
+        transition: all 0.15s ease;
+    }
+
+    .nqb-table-hover tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.06);
+    }
+
+    .nqb-null-value {
+        color: #94a3b8;
+        font-size: 0.875rem;
+    }
+
+    .nqb-bool-value {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.125rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .nqb-bool-true {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+    }
+
+    .nqb-bool-false {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+    }
+
+    /* Empty State */
+    .nqb-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .nqb-empty-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: #94a3b8;
+    }
+
+    .nqb-empty-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0 0 0.5rem;
+    }
+
+    .nqb-empty-message {
+        font-size: 0.9375rem;
+        color: #64748b;
+        margin: 0;
+    }
+</style>

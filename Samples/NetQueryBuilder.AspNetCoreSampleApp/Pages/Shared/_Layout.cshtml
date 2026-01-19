@@ -3,25 +3,47 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - NetQueryBuilder Demo</title>
+    <meta name="description" content="NetQueryBuilder - Build dynamic LINQ queries with an intuitive visual interface" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <title>@ViewData["Title"] - NetQueryBuilder</title>
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="~/_content/NetQueryBuilder.AspNetCore/css/netquerybuilder.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <header class="nqb-header">
         <div class="nqb-container">
             <h1>NetQueryBuilder</h1>
-            <p>ASP.NET Core Integration Demo</p>
+            <p>Build dynamic LINQ queries with visual elegance</p>
+            <div class="nqb-header-badge">
+                ASP.NET Core Integration Demo
+            </div>
         </div>
     </header>
 
-    <main>
+    <main id="main-content">
         @RenderBody()
     </main>
 
     <footer class="nqb-footer">
         <div class="nqb-container">
-            <p>&copy; 2024 NetQueryBuilder - <a href="https://github.com/remihenache/NetQueryBuilder">GitHub</a></p>
+            <p>
+                NetQueryBuilder &mdash; Type-safe dynamic queries for .NET
+                <span style="margin: 0 0.5rem;">&bull;</span>
+                <a href="https://github.com/remihenache/NetQueryBuilder" target="_blank" rel="noopener noreferrer">
+                    View on GitHub
+                </a>
+            </p>
         </div>
     </footer>
 
