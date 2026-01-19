@@ -139,7 +139,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path packages
           dotnet pack Src/NetQueryBuilder.WPF/NetQueryBuilder.WPF.csproj --configuration Release --output packages --no-build
-          msbuild Src/NetQueryBuilder.EntityFrameworkNet4/NetQueryBuilder.EntityFrameworkNet4.csproj /t:Pack /p:Configuration=Release /p:PackageOutputPath=$PWD\packages
+          nuget pack Src/NetQueryBuilder.EntityFrameworkNet4/NetQueryBuilder.EntityFrameworkNet4.nuspec -OutputDirectory packages -Properties Configuration=Release
 
       - name: Upload Windows NuGet packages
         if: github.event_name != 'pull_request'

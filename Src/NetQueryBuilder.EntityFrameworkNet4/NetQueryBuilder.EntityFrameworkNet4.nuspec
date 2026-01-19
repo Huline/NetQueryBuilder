@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>NetQueryBuilder.EntityFrameworkNet4</id>
+    <version>1.0.0</version>
+    <title>NetQueryBuilder.EntityFrameworkNet4</title>
+    <authors>Remi Henache</authors>
+    <owners>Huline SAS</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="file">LICENSE</license>
+    <readme>Readme.md</readme>
+    <projectUrl>https://github.com/remihenache/NetQueryBuilder</projectUrl>
+    <description>Entity Framework 6 integration for NetQueryBuilder targeting .NET Framework 4.8. Enables dynamic query execution against EF6 DbContext for legacy applications.</description>
+    <tags>query-builder entity-framework ef6 dynamic-query linq net-framework legacy</tags>
+    <repository type="git" url="https://github.com/remihenache/NetQueryBuilder" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.8">
+        <dependency id="NetQueryBuilder" version="1.0.0" />
+        <dependency id="EntityFramework" version="6.5.1" />
+        <dependency id="System.Linq.Dynamic.Core" version="1.6.0.2" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="6.0.0" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="6.0.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\NetQueryBuilder.EntityFrameworkNet4.dll" target="lib\net48" />
+    <file src="bin\Release\NetQueryBuilder.EntityFrameworkNet4.pdb" target="lib\net48" />
+    <file src="..\..\LICENSE" target="LICENSE" />
+    <file src="Readme.md" target="Readme.md" />
+  </files>
+</package>
