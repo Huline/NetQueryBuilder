@@ -1,6 +1,6 @@
-﻿# NetQueryBuilder.Blazor
+# NetQueryBuilder.Blazor
 
-NetQueryBuilder.Blazor provides a comprehensive UI component suite for building dynamic queries in Blazor applications, integrating seamlessly with the NetQueryBuilder ecosystem.
+Blazor UI components for building dynamic queries in Blazor applications, integrating seamlessly with the NetQueryBuilder ecosystem.
 
 ## License
 
@@ -9,60 +9,46 @@ For commercial use, a valid commercial license must be purchased from [https://h
 
 ## Description
 
-This package extends NetQueryBuilder with Blazor UI components that allow users to visually construct complex queries through an intuitive interface. It's built on top of MudBlazor to provide a rich, responsive user experience while
-leveraging the powerful query building capabilities of NetQueryBuilder.
+This package extends NetQueryBuilder with standalone Blazor UI components that allow users to visually construct complex queries through an intuitive interface. The components are framework-agnostic and work with any Blazor application - no additional UI framework is required.
 
-For information about the core query building functionality, please refer to the [NetQueryBuilder Core documentation](../NetQueryBuilder/Readme.md). For Entity Framework integration, see
-the [NetQueryBuilder.EntityFramework documentation](../NetQueryBuilder.EntityFramework/Readme.md).
+For information about the core query building functionality, please refer to the [NetQueryBuilder Core documentation](../NetQueryBuilder/Readme.md). For Entity Framework integration, see the [NetQueryBuilder.EntityFramework documentation](../NetQueryBuilder.EntityFramework/Readme.md).
 
 ## Installation
 
-```shell script
+```shell
 dotnet add package NetQueryBuilder
 dotnet add package NetQueryBuilder.EntityFramework  # If using EF Core
 dotnet add package NetQueryBuilder.Blazor
-dotnet add package MudBlazor  # Required dependency
 ```
 
 ## Setup
 
 ### 1. Register Services
 
-In your Blazor application's `Program.cs` or `Startup.cs`:
+In your Blazor application's `Program.cs`:
 
 ```csharp
-// Register MudBlazor services
-builder.Services.AddMudServices();
-
 // Register NetQueryBuilder services
 builder.Services.AddDbContext<YourDbContext>(options =>
     options.UseSqlServer(connectionString));
-    
+
 builder.Services.AddScoped<IQueryConfigurator, EfQueryConfigurator<YourDbContext>>();
 ```
 
-### 2. Add MudBlazor Theme
+### 2. Add Imports
 
 In your `_Imports.razor`:
 
 ```cshtml
-@using MudBlazor
 @using NetQueryBuilder.Blazor.Components
 ```
 
-In your `App.razor` or layout file:
+### 3. Include Stylesheet (Optional)
 
-```cshtml
-<MudThemeProvider/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
-```
-
-Include MudBlazor CSS in your `index.html` or `_Host.cshtml`:
+The components include basic styling. Include the CSS in your `index.html` or `App.razor`:
 
 ```html
-<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-<script src="_content/MudBlazor/MudBlazor.min.js"></script>
+<link href="_content/NetQueryBuilder.Blazor/css/netquerybuilder.css" rel="stylesheet" />
 ```
 
 ## Usage
@@ -98,7 +84,7 @@ You can capture and process the query results:
 
 @code {
     private IEnumerable<Product> _queryResults;
-    
+
     private void HandleQueryResults(IEnumerable<object> results)
     {
         _queryResults = results.Cast<Product>();
@@ -112,13 +98,13 @@ You can capture and process the query results:
 If you want to use the generated expression in other parts of your application:
 
 ```cshtml
-<QueryBuilder TEntity="Product" 
-              Expression="@_currentExpression" 
+<QueryBuilder TEntity="Product"
+              Expression="@_currentExpression"
               ExpressionChanged="@HandleExpressionChanged" />
 
 @code {
     private string _currentExpression;
-    
+
     private void HandleExpressionChanged(string expression)
     {
         _currentExpression = expression;
@@ -138,7 +124,7 @@ You can use individual components instead of the full QueryBuilder for more gran
 
 @code {
     private IQuery _query;
-    
+
     protected override void OnInitialized()
     {
         _query = QueryConfigurator.BuildFor<Product>();
@@ -149,7 +135,7 @@ You can use individual components instead of the full QueryBuilder for more gran
     <ConditionComponent Condition="@_query.Condition" />
 </CascadingValue>
 
-<MudButton Color="Color.Primary" OnClick="ExecuteQuery">Execute</MudButton>
+<button class="btn btn-primary" @onclick="ExecuteQuery">Execute</button>
 
 @code {
     private async Task ExecuteQuery()
@@ -163,13 +149,13 @@ You can use individual components instead of the full QueryBuilder for more gran
 ### Property Selector
 
 ```cshtml
-<PropertySelector TEntity="Product" 
+<PropertySelector TEntity="Product"
                  SelectedProperties="@_selectedProperties"
                  SelectedPropertiesChanged="@HandleSelectedPropertiesChanged" />
 
 @code {
     private List<SelectPropertyPath> _selectedProperties = new();
-    
+
     private void HandleSelectedPropertiesChanged(List<SelectPropertyPath> properties)
     {
         _selectedProperties = properties;
@@ -181,8 +167,8 @@ You can use individual components instead of the full QueryBuilder for more gran
 ### Results Table
 
 ```cshtml
-<QueryResultTable TEntity="Product" 
-                 Data="@_queryResults" 
+<QueryResultTable TEntity="Product"
+                 Data="@_queryResults"
                  Properties="@_selectedProperties" />
 ```
 
@@ -190,22 +176,44 @@ You can use individual components instead of the full QueryBuilder for more gran
 
 ### Custom Styling
 
-The QueryBuilder uses MudBlazor components and can be customized using MudBlazor's theming system:
+The components use standard HTML elements with CSS classes that you can override:
+
+```css
+/* Override default styles */
+.nqb-query-builder {
+    /* Your custom styles */
+}
+
+.nqb-condition {
+    /* Your custom styles */
+}
+
+.nqb-results-table {
+    /* Your custom styles */
+}
+```
+
+### Integration with UI Frameworks
+
+The components work with any UI framework. For example, with MudBlazor (as shown in the sample app):
 
 ```cshtml
-<MudThemeProvider Theme="@_customTheme" />
+@* Wrap components in MudBlazor cards if desired *@
+<MudCard>
+    <MudCardContent>
+        <QueryBuilder TEntity="Product" />
+    </MudCardContent>
+</MudCard>
+```
 
-@code {
-    private MudTheme _customTheme = new()
-    {
-        Palette = new PaletteLight
-        {
-            Primary = "#1E88E5",
-            Secondary = "#FF4081",
-            // Other color customizations
-        }
-    };
-}
+Or with Bootstrap:
+
+```cshtml
+<div class="card">
+    <div class="card-body">
+        <QueryBuilder TEntity="Product" />
+    </div>
+</div>
 ```
 
 ### Custom Operator Components
@@ -218,47 +226,18 @@ You can create custom operator components for specialized filtering needs:
 
 ```csharp
 // Register custom operator
-services.AddScoped<IQueryConfigurator>(provider => 
+services.AddScoped<IQueryConfigurator>(provider =>
 {
     var configurator = new EfQueryConfigurator<YourDbContext>(
         provider.GetRequiredService<YourDbContext>());
-    
-    configurator.ConfigureConditions(config => 
+
+    configurator.ConfigureConditions(config =>
     {
         config.RegisterOperator<YourCustomOperator>();
     });
-    
+
     return configurator;
 });
-```
-
-### Embedding in Existing Forms
-
-You can integrate the QueryBuilder into your existing forms:
-
-```cshtml
-<EditForm Model="@_formModel" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    
-    <MudCard>
-        <MudCardContent>
-            <MudTextField @bind-Value="_formModel.Name" Label="Report Name" />
-            
-            <MudDivider Class="my-4" />
-            
-            <MudText Typo="Typo.h6">Query Criteria</MudText>
-            <QueryBuilder TEntity="Product" 
-                         Expression="@_formModel.QueryExpression" 
-                         ExpressionChanged="@(expr => _formModel.QueryExpression = expr)" />
-        </MudCardContent>
-        
-        <MudCardActions>
-            <MudButton ButtonType="ButtonType.Submit" 
-                      Color="Color.Primary" 
-                      Variant="Variant.Filled">Save Report</MudButton>
-        </MudCardActions>
-    </MudCard>
-</EditForm>
 ```
 
 ## Performance Considerations
@@ -268,6 +247,10 @@ When working with large data sets, consider:
 1. Implement paging for query results
 2. Add debounce logic for automatic query execution
 3. Use server-side filtering for initial data sets
+
+## Sample Application
+
+The [NetQueryBuilder.BlazorSampleApp](../../Samples/NetQueryBuilder.BlazorSampleApp) demonstrates a complete implementation using MudBlazor for enhanced styling. Note that MudBlazor is used only in the sample - it's not a requirement for the library.
 
 ## Contributing
 

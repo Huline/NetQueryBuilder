@@ -11,6 +11,19 @@
         <AssemblyName>NetQueryBuilder.EntityFrameworkNet4</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
+        <!-- NuGet Package Metadata -->
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <PackageId>NetQueryBuilder.EntityFrameworkNet4</PackageId>
+        <Title>NetQueryBuilder.EntityFrameworkNet4</Title>
+        <Description>Entity Framework 6 integration for NetQueryBuilder targeting .NET Framework 4.8. Enables dynamic query execution against EF6 DbContext for legacy applications.</Description>
+        <Authors>Remi Henache</Authors>
+        <Company>Huline SAS</Company>
+        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageTags>query-builder;entity-framework;ef6;dynamic-query;linq;net-framework;legacy</PackageTags>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -48,6 +61,8 @@
     </ItemGroup>
     <ItemGroup>
         <None Include="App.config"/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+        <None Include="Readme.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\NetQueryBuilder\NetQueryBuilder.csproj">
