@@ -4,16 +4,17 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../../Src/NetQueryBuilder.AspNetCore/NetQueryBuilder.AspNetCore.csproj" />
-        <ProjectReference Include="../../Src/NetQueryBuilder.EntityFramework/NetQueryBuilder.EntityFramework.csproj" />
+        <ProjectReference Include="../../Src/NetQueryBuilder.AspNetCore/NetQueryBuilder.AspNetCore.csproj"/>
+        <ProjectReference Include="../../Src/NetQueryBuilder.EntityFramework/NetQueryBuilder.EntityFramework.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.0"/>
     </ItemGroup>
 
 </Project>
