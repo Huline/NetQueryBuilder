@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Commercial Support
+    url: https://huline.gumroad.com/l/netquerybuilder
+    about: Purchase a commercial license for priority support
+  - name: GitHub Discussions
+    url: https://github.com/remihenache/NetQueryBuilder/discussions
+    about: Ask questions and discuss ideas with the community

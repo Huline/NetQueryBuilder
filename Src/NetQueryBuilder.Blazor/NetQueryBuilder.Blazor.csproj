@@ -6,9 +6,22 @@
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>NetQueryBuilder.Blazor</Title>
-        <Description>UI using blazor for NetQueryBuilder</Description>
+        <Description>Blazor UI components for NetQueryBuilder - Build dynamic queries with MudBlazor-based visual interface including query builder, condition editor, and result tables</Description>
         <TargetFrameworks>net8.0;net9.0;net6.0</TargetFrameworks>
+        <Authors>Remi Henache</Authors>
+        <Company>Huline SAS</Company>
+        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageTags>query-builder;blazor;mudblazor;dynamic-query;linq;expression-tree;ui-components</PackageTags>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+        <None Include="Readme.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <ItemGroup>
         <Content Update="Components\QueryBuilder.razor">

@@ -4,7 +4,10 @@
         <Nullable>disable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>NetQueryBuilder</Title>
-        <Description>A framework to create and customize query from code. Allowing an UI an so far an user to create it's own queries.</Description>
+        <Description>Core library for building and executing dynamic queries with type-safe expression trees. Features extensible operators, property path navigation, and seamless integration with ORMs and UI frameworks.</Description>
+        <Authors>Remi Henache</Authors>
+        <Company>Huline SAS</Company>
+        <PackageTags>query-builder;dynamic-query;linq;expression-tree;iqueryable;orm;filtering</PackageTags>
         <TargetFrameworks>net6.0;net8.0;net9.0;netstandard2.1;net48</TargetFrameworks>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>

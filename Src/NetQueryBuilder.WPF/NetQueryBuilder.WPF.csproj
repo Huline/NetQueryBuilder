@@ -7,13 +7,21 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>NetQueryBuilder.WPF</Title>
-        <Description>WPF UI components for NetQueryBuilder - Build dynamic queries with visual interface</Description>
-        <PackageProjectUrl>https://github.com/yourusername/NetQueryBuilder</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/yourusername/NetQueryBuilder</RepositoryUrl>
-        <PackageTags>query-builder;wpf;dynamic-query;linq;expression-tree;ui-components</PackageTags>
-        <Authors>NetQueryBuilder Contributors</Authors>
-        <Company>NetQueryBuilder</Company>
+        <Description>WPF UI components for NetQueryBuilder - Build dynamic queries with Material Design-inspired visual interface including query editor, condition builder, and result display</Description>
+        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageTags>query-builder;wpf;dynamic-query;linq;expression-tree;ui-components;material-design</PackageTags>
+        <Authors>Remi Henache</Authors>
+        <Company>Huline SAS</Company>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <ItemGroup>
         <Page Update="Controls\QueryEditor.xaml">

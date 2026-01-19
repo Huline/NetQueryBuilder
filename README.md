@@ -1,6 +1,30 @@
 # NetQueryBuilder
 
+[![Build Status](https://github.com/remihenache/NetQueryBuilder/actions/workflows/deploy.yaml/badge.svg)](https://github.com/remihenache/NetQueryBuilder/actions/workflows/deploy.yaml)
+[![NuGet](https://img.shields.io/nuget/v/NetQueryBuilder.svg)](https://www.nuget.org/packages/NetQueryBuilder/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/NetQueryBuilder.svg)](https://www.nuget.org/packages/NetQueryBuilder/)
+[![License](https://img.shields.io/badge/license-MIT%2FCommercial-blue.svg)](LICENSE)
+
 NetQueryBuilder is a comprehensive .NET ecosystem for building and executing dynamic queries across different data sources with extensible UI components.
+
+## Screenshots
+
+### Blazor Query Builder
+<!-- TODO: Add screenshot of Blazor query builder UI -->
+![Blazor Query Builder](docs/images/blazor-query-builder.png)
+
+### WPF Query Editor
+<!-- TODO: Add screenshot of WPF query editor UI -->
+![WPF Query Editor](docs/images/wpf-query-editor.png)
+
+### ASP.NET Core Razor Pages
+<!-- TODO: Add screenshot of ASP.NET Core query builder UI -->
+![ASP.NET Core Query Builder](docs/images/aspnetcore-query-builder.png)
+
+## Live Demos
+
+- **Blazor Demo**: [Try it online](<!-- TODO: Add Blazor demo URL -->)
+- **WPF Sample**: [Download executable](<!-- TODO: Add WPF sample download URL -->)
 
 ## Vision
 
@@ -23,11 +47,13 @@ See [LICENSE](./Src/NetQueryBuilder/LICENSE) for more details.
 
 NetQueryBuilder is structured as a modular ecosystem with these main packages:
 
-| Package                             | Description                                     | Documentation                                                       |
-|-------------------------------------|-------------------------------------------------|---------------------------------------------------------------------|
-| **NetQueryBuilder**                 | Core library with IQueryable-based architecture | [Core Documentation](./Src/NetQueryBuilder/Readme.md)               |
-| **NetQueryBuilder.EntityFramework** | Entity Framework Core integration               | [EF Documentation](./Src/NetQueryBuilder.EntityFramework/Readme.md) |
-| **NetQueryBuilder.Blazor**          | Blazor UI components for query building         | [Blazor Documentation](./Src/NetQueryBuilder.Blazor/Readme.md)      |
+| Package | NuGet | Description | Documentation |
+|---------|-------|-------------|---------------|
+| **NetQueryBuilder** | [![NuGet](https://img.shields.io/nuget/v/NetQueryBuilder.svg)](https://www.nuget.org/packages/NetQueryBuilder/) | Core library with IQueryable-based architecture | [Docs](./Src/NetQueryBuilder/Readme.md) |
+| **NetQueryBuilder.EntityFramework** | [![NuGet](https://img.shields.io/nuget/v/NetQueryBuilder.EntityFramework.svg)](https://www.nuget.org/packages/NetQueryBuilder.EntityFramework/) | Entity Framework Core integration | [Docs](./Src/NetQueryBuilder.EntityFramework/Readme.md) |
+| **NetQueryBuilder.Blazor** | [![NuGet](https://img.shields.io/nuget/v/NetQueryBuilder.Blazor.svg)](https://www.nuget.org/packages/NetQueryBuilder.Blazor/) | Blazor UI components (MudBlazor) | [Docs](./Src/NetQueryBuilder.Blazor/Readme.md) |
+| **NetQueryBuilder.AspNetCore** | [![NuGet](https://img.shields.io/nuget/v/NetQueryBuilder.AspNetCore.svg)](https://www.nuget.org/packages/NetQueryBuilder.AspNetCore/) | ASP.NET Core Razor Pages integration | [Docs](./Src/NetQueryBuilder.AspNetCore/Readme.md) |
+| **NetQueryBuilder.WPF** | [![NuGet](https://img.shields.io/nuget/v/NetQueryBuilder.WPF.svg)](https://www.nuget.org/packages/NetQueryBuilder.WPF/) | WPF UI components | [Docs](./Src/NetQueryBuilder.WPF/README.md) |
 
 ## Quick Start
 
