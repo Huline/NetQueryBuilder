@@ -16,6 +16,7 @@
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
     </PropertyGroup>
 
     <ItemGroup>
