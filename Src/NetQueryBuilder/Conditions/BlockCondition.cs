@@ -14,7 +14,8 @@ namespace NetQueryBuilder.Conditions
         private bool _isCacheValid;
         private LogicalOperator _logicalOperator;
 
-        public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator, BlockCondition parent = null)
+        public BlockCondition(IEnumerable<ICondition> children, LogicalOperator logicalOperator,
+            BlockCondition parent = null)
         {
             _children.AddRange(children);
             foreach (var condition in _children)
@@ -28,6 +29,8 @@ namespace NetQueryBuilder.Conditions
         }
 
         public IReadOnlyCollection<ICondition> Conditions => _children.AsReadOnly();
+
+        public ICondition this[int index] => _children[index];
         public EventHandler ConditionChanged { get; set; }
         public BlockCondition Parent { get; set; }
 
@@ -115,6 +118,17 @@ namespace NetQueryBuilder.Conditions
             NotifyConditionChanged();
         }
 
+        public void RemoveAt(int index)
+        {
+            var condition = _children[index];
+            _children.Remove(condition);
+            condition.Parent = null;
+            if (condition.ConditionChanged?.GetInvocationList().Length > 0)
+                UnsubscribeChildCondition(condition);
+            InvalidateCache();
+            NotifyConditionChanged();
+        }
+
         public BlockCondition Group(IEnumerable<ICondition> childrenToGroup)
         {
             var children = Conditions.Where(childrenToGroup.Contains).ToList();
@@ -169,11 +183,13 @@ namespace NetQueryBuilder.Conditions
         public SimpleCondition CreateNew<TOperator>(PropertyPath property, object valueOverride = null)
             where TOperator : ExpressionOperator
         {
-            return CreateNew(property, property.GetCompatibleOperators().OfType<TOperator>().FirstOrDefault(), valueOverride);
+            return CreateNew(property, property.GetCompatibleOperators().OfType<TOperator>().FirstOrDefault(),
+                valueOverride);
         }
 
 
-        public SimpleCondition CreateNew(PropertyPath property, ExpressionOperator operatorOverride = null, object valueOverride = null)
+        public SimpleCondition CreateNew(PropertyPath property, ExpressionOperator operatorOverride = null,
+            object valueOverride = null)
         {
             var newLogicalCondition = new SimpleCondition(property, LogicalOperator.And);
             if (operatorOverride != null)
@@ -186,14 +202,18 @@ namespace NetQueryBuilder.Conditions
         public SimpleCondition CreateNew()
         {
             var lastLogicalCondition = FindLogicalCondition();
-            if (lastLogicalCondition == null) throw new InvalidOperationException("No logical condition found to create a new one. Use CreateNew(PropertyPath property) instead.");
-            var newLogicalCondition = new SimpleCondition(lastLogicalCondition.PropertyPath, lastLogicalCondition.LogicalOperator);
+            if (lastLogicalCondition == null)
+                throw new InvalidOperationException(
+                    "No logical condition found to create a new one. Use CreateNew(PropertyPath property) instead.");
+            var newLogicalCondition =
+                new SimpleCondition(lastLogicalCondition.PropertyPath, lastLogicalCondition.LogicalOperator);
             return Add(newLogicalCondition) as SimpleCondition;
         }
 
         private SimpleCondition FindLogicalCondition()
         {
-            return Conditions.OfType<SimpleCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>().Select(c => c.FindLogicalCondition()).FirstOrDefault();
+            return Conditions.OfType<SimpleCondition>().FirstOrDefault() ?? Conditions.OfType<BlockCondition>()
+                .Select(c => c.FindLogicalCondition()).FirstOrDefault();
         }
 
         private void ChildConditionChanged(object sender, EventArgs args)

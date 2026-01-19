@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>NetQueryBuilder.AspNetCore</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Remi Henache</Authors>
+        <Company>NetQueryBuilder</Company>
+        <Description>ASP.NET Core Razor Pages integration for NetQueryBuilder - Tag Helpers and components for dynamic query building</Description>
+        <PackageTags>querybuilder;aspnetcore;razor;taghelpers;entityframework</PackageTags>
+        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <!-- Static web assets configuration -->
+        <StaticWebAssetBasePath>_content/NetQueryBuilder.AspNetCore</StaticWebAssetBasePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../NetQueryBuilder/NetQueryBuilder.csproj" />
+        <ProjectReference Include="../NetQueryBuilder.EntityFramework/NetQueryBuilder.EntityFramework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.36" Condition="'$(TargetFramework)' == 'net6.0'" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" Condition="'$(TargetFramework)' == 'net8.0'" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
+    </ItemGroup>
+
+</Project>

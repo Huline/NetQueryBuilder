@@ -43,6 +43,14 @@ Extensible operator system with expression building:
 - `OnQueryExecuted`: Post-execution event with result metadata
 - Parent-child communication through cascading parameters
 
+#### ASP.NET Core Razor Pages Components:
+- **Tag Helpers**: `EntitySelectorTagHelper`, `PropertySelectorTagHelper`, `ConditionBuilderTagHelper` for rendering query UI
+- **View Components**: `QueryResultsViewComponent`, `PaginationViewComponent`, `ExpressionDisplayViewComponent` for async rendering
+- **`NetQueryPageModelBase`**: Reusable base class for Razor Pages with common handlers
+- **`QuerySessionService`**: Session-based state management between postbacks
+- **Form-based interaction**: Standard HTTP POST with page handlers (no JavaScript required)
+- **Shared CSS**: Reuses `netquerybuilder.css` from Blazor for consistent styling
+
 ## Project Structure
 
 ```
@@ -58,6 +66,13 @@ NetQueryBuilder/
 │   ├── NetQueryBuilder.EntityFramework/     # EF Core 6.0+ integration
 │   ├── NetQueryBuilder.EntityFrameworkNet4/ # .NET Framework 4.8 EF6 support
 │   ├── NetQueryBuilder.Blazor/              # Blazor components
+│   ├── NetQueryBuilder.AspNetCore/          # ASP.NET Core Razor Pages integration
+│   │   ├── Services/                        # Session and state management
+│   │   ├── TagHelpers/                      # UI rendering tag helpers
+│   │   ├── ViewComponents/                  # Async data display components
+│   │   ├── Pages/                           # Base page models
+│   │   ├── Models/                          # View models and state
+│   │   └── Views/                           # View component views
 │   └── NetQueryBuilder.WPF/                 # WPF controls
 ├── Tests/
 │   ├── NetQueryBuilder.Tests/               # Core unit tests
@@ -65,7 +80,8 @@ NetQueryBuilder/
 │   ├── NetQueryBuilder.EntityFrameworkNet.Tests/
 │   └── NetQueryBuilder.Blazor.Tests/        # bunit component tests
 └── Samples/
-    └── NetQueryBuilder.BlazorSampleApp/     # Reference implementation
+    ├── NetQueryBuilder.BlazorSampleApp/     # Blazor reference implementation
+    └── NetQueryBuilder.AspNetCoreSampleApp/ # Razor Pages reference implementation
 ```
 
 ## Development Commands
@@ -98,13 +114,17 @@ dotnet test --filter "FullyQualifiedName~NetQueryBuilder.Tests.Conditions"
 dotnet test Tests/NetQueryBuilder.Blazor.Tests/NetQueryBuilder.Blazor.Tests.csproj
 ```
 
-### Running Sample Application
+### Running Sample Applications
 ```bash
 # Run Blazor sample (launches on https://localhost:5001)
 dotnet run --project Samples/NetQueryBuilder.BlazorSampleApp/NetQueryBuilder.BlazorSampleApp.csproj
 
+# Run ASP.NET Core Razor Pages sample
+dotnet run --project Samples/NetQueryBuilder.AspNetCoreSampleApp/NetQueryBuilder.AspNetCoreSampleApp.csproj
+
 # Run with hot reload
 dotnet watch run --project Samples/NetQueryBuilder.BlazorSampleApp/NetQueryBuilder.BlazorSampleApp.csproj
+dotnet watch run --project Samples/NetQueryBuilder.AspNetCoreSampleApp/NetQueryBuilder.AspNetCoreSampleApp.csproj
 ```
 
 ### Package Management
@@ -125,6 +145,7 @@ dotnet pack Src/NetQueryBuilder/NetQueryBuilder.csproj --configuration Release
 |---------|------------------|------------------|
 | NetQueryBuilder (Core) | net6.0, net8.0, net9.0, netstandard2.1, net48 | Microsoft.CodeAnalysis.CSharp.Scripting (4.12.0), System.Linq.Dynamic.Core (1.6.0.2) |
 | NetQueryBuilder.Blazor | net6.0, net8.0, net9.0 | MudBlazor (6.21.0), Microsoft.AspNetCore.Components |
+| NetQueryBuilder.AspNetCore | net6.0, net8.0, net9.0 | Microsoft.AspNetCore.App, Microsoft.EntityFrameworkCore |
 | NetQueryBuilder.EntityFramework | net6.0, net8.0, net9.0 | Microsoft.EntityFrameworkCore (6.0.36) |
 | NetQueryBuilder.EntityFrameworkNet4 | net48 | EntityFramework (6.5.1) |
 | Tests | net9.0 | xUnit (2.9.2), bunit (1.38.5), coverlet.collector (6.0.2) |
@@ -178,6 +199,75 @@ public class CustomOperator : IOperator
     <QueryBuilder T="Customer" OnQueryExecuted="@HandleResults" />
 </QueryBuilderContainer>
 ```
+
+### ASP.NET Core Razor Pages Integration
+
+**Simplified Setup (Recommended):**
+```csharp
+// Program.cs - Just 5 lines of configuration
+builder.Services.AddRazorPages();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseInMemoryDatabase("Demo"));
+
+// Single line registers all services including EfQueryConfigurator
+builder.Services.AddNetQueryBuilder<AppDbContext>(options =>
+{
+    options.SessionTimeout = TimeSpan.FromMinutes(30);
+    options.DefaultPageSize = 10;
+});
+
+// Single line handles session + static files middleware
+app.UseRouting();
+app.UseNetQueryBuilder();
+app.MapRazorPages();
+```
+
+**Page Model (Minimal Code):**
+```csharp
+// QueryBuilder.cshtml.cs - Base class handles everything automatically
+public class QueryBuilderModel : NetQueryPageModelBase
+{
+    public QueryBuilderModel(IQuerySessionService sessionService, IQueryConfigurator configurator)
+        : base(sessionService, configurator) { }
+
+    public void OnGet() { }
+
+    // No overrides needed! Base class uses reflection to automatically
+    // dispatch ExecuteQueryAsync<T> based on selected entity type.
+}
+```
+
+**Razor View:**
+```razor
+@page
+@model QueryBuilderModel
+
+<!-- CSS is served automatically from the library -->
+<link rel="stylesheet" href="~/_content/NetQueryBuilder.AspNetCore/css/netquerybuilder.css" />
+
+<form method="post">
+    <nqb-entity-selector session-id="@Model.SessionId"></nqb-entity-selector>
+    <nqb-property-selector session-id="@Model.SessionId"></nqb-property-selector>
+    <nqb-condition-builder session-id="@Model.SessionId"></nqb-condition-builder>
+
+    @await Component.InvokeAsync("ExpressionDisplay", new { sessionId = Model.SessionId })
+
+    <button type="submit" formaction="?handler=ExecuteQuery">Run Query</button>
+</form>
+
+@if (Model.State.Results != null)
+{
+    @await Component.InvokeAsync("QueryResults", new { sessionId = Model.SessionId })
+    @await Component.InvokeAsync("Pagination", new { sessionId = Model.SessionId })
+}
+```
+
+**Key Features:**
+- **Automatic Entity Dispatch**: Base class uses reflection to call correct `ExecuteQueryAsync<T>`
+- **Embedded CSS**: Served automatically from `_content/NetQueryBuilder.AspNetCore/css/`
+- **Session Cleanup**: Background service automatically removes expired sessions
+- **Service Validation**: Startup checks ensure all required services are registered
+- **ARIA Accessibility**: All form controls include accessibility attributes
 
 ## CI/CD Pipeline (GitHub Actions)
 

@@ -1,0 +1,857 @@
+/* NetQueryBuilder Sample App - Modern Premium Design */
+
+/* ====================================
+   CSS Variables & Theme
+   ==================================== */
+:root {
+    /* Premium Color Palette */
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-dark: linear-gradient(135deg, #232526 0%, #414345 100%);
+    --gradient-hero: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+
+    /* Glassmorphism */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+    /* Accent Colors */
+    --accent-purple: #667eea;
+    --accent-pink: #f093fb;
+    --accent-blue: #4facfe;
+    --accent-cyan: #00f2fe;
+
+    /* Surface Colors */
+    --surface-elevated: #ffffff;
+    --surface-default: #f8fafc;
+    --surface-muted: #f1f5f9;
+
+    /* Text Colors */
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --text-inverse: #ffffff;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+    --shadow-card-hover: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* Spacing */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ====================================
+   Base Styles
+   ==================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--surface-default);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ====================================
+   Header - Hero Section
+   ==================================== */
+.nqb-header {
+    background: var(--gradient-hero);
+    color: var(--text-inverse);
+    padding: var(--space-16) 0 var(--space-12);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated background effect */
+.nqb-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.15) 0%, transparent 40%);
+    animation: headerGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes headerGlow {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Floating particles */
+.nqb-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 50px 160px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.2), transparent);
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: particleFloat 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes particleFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-200px); }
+}
+
+.nqb-header .nqb-container {
+    position: relative;
+    z-index: 1;
+}
+
+.nqb-header h1 {
+    margin: 0;
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+}
+
+.nqb-header p {
+    margin: var(--space-3) 0 0;
+    font-size: 1.25rem;
+    font-weight: 400;
+    opacity: 0.85;
+    letter-spacing: 0.01em;
+}
+
+/* Badge in header */
+.nqb-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+    padding: var(--space-2) var(--space-4);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.nqb-header-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+/* ====================================
+   Main Content Area
+   ==================================== */
+main {
+    padding: var(--space-12) var(--space-4);
+    min-height: calc(100vh - 400px);
+}
+
+main > .nqb-container {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (min-width: 1200px) {
+    main {
+        padding: var(--space-12) var(--space-8);
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        padding: var(--space-6) var(--space-4);
+    }
+
+    main > .nqb-container {
+        max-width: 100%;
+    }
+}
+
+/* ====================================
+   Page Title & Subtitle
+   ==================================== */
+.nqb-container > h1:first-of-type {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-2);
+    letter-spacing: -0.02em;
+}
+
+.nqb-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    margin: 0 0 var(--space-10);
+    font-weight: 400;
+}
+
+/* ====================================
+   Cards - Glassmorphism Style
+   ==================================== */
+.nqb-card {
+    background: var(--surface-elevated);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-8);
+    margin-bottom: var(--space-6);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    position: relative;
+    transition: all var(--transition-normal);
+}
+
+.nqb-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.nqb-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+}
+
+.nqb-card:hover::before {
+    opacity: 1;
+}
+
+/* Card Headers with Step Numbers */
+.nqb-card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-6);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* Step Number Badge */
+.nqb-card h2::before {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.nqb-card:nth-of-type(1) h2::before { content: '1'; }
+.nqb-card:nth-of-type(2) h2::before { content: '2'; }
+.nqb-card:nth-of-type(3) h2::before { content: '3'; }
+.nqb-card:nth-of-type(4) h2::before { content: '4'; }
+.nqb-card:nth-of-type(5) h2::before { content: '5'; }
+.nqb-card:nth-of-type(6) h2::before { content: '6'; }
+
+/* Results card shouldn't have step number */
+.nqb-card:has(.nqb-table-container) h2::before,
+.nqb-card:has(.nqb-expression-display) h2::before {
+    display: none;
+}
+
+/* ====================================
+   Buttons - Premium Style
+   ==================================== */
+.nqb-button {
+    font-family: inherit;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.nqb-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.nqb-button:hover::before {
+    left: 100%;
+}
+
+.nqb-button-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+}
+
+.nqb-button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.nqb-button-primary:active {
+    transform: translateY(0);
+}
+
+.nqb-button-large {
+    padding: var(--space-4) var(--space-8);
+    font-size: 1rem;
+    min-width: 160px;
+}
+
+.nqb-button-outlined {
+    background: transparent;
+    border: 2px solid var(--accent-purple);
+    color: var(--accent-purple);
+}
+
+.nqb-button-outlined:hover {
+    background: rgba(102, 126, 234, 0.08);
+    border-color: var(--accent-purple);
+}
+
+/* Action Buttons Container */
+.nqb-actions {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--surface-muted);
+    flex-wrap: wrap;
+}
+
+/* ====================================
+   Alerts - Modern Style
+   ==================================== */
+.nqb-alert {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-6);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.nqb-alert-error {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.nqb-alert-error::before {
+    content: '!';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #ef4444;
+    color: white;
+    font-weight: 700;
+    font-size: 0.875rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.nqb-alert p {
+    margin: 0;
+    font-size: 0.9375rem;
+}
+
+/* ====================================
+   Expression Display - Code Block
+   ==================================== */
+.nqb-expression-display {
+    position: relative;
+}
+
+.nqb-expression-display h4,
+.nqb-subsection-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 var(--space-3);
+}
+
+.nqb-code {
+    background: var(--gradient-dark);
+    color: #e2e8f0;
+    padding: var(--space-5);
+    border-radius: var(--radius-md);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, Monaco, monospace;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.nqb-code::before {
+    content: 'LINQ Expression';
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-3);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: inherit;
+}
+
+.nqb-code code {
+    color: #a5f3fc;
+}
+
+/* ====================================
+   Tables - Modern Data Display
+   ==================================== */
+.nqb-table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--surface-muted);
+}
+
+.nqb-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.nqb-table th {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 2px solid var(--surface-muted);
+    position: sticky;
+    top: 0;
+}
+
+.nqb-table td {
+    padding: var(--space-4) var(--space-5);
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--surface-muted);
+    transition: background-color var(--transition-fast);
+}
+
+.nqb-table-striped tbody tr:nth-of-type(even) {
+    background-color: rgba(248, 250, 252, 0.5);
+}
+
+.nqb-table-hover tbody tr {
+    transition: all var(--transition-fast);
+}
+
+.nqb-table-hover tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.06);
+    transform: scale(1.002);
+}
+
+.nqb-table-hover tbody tr:hover td {
+    color: var(--accent-purple);
+}
+
+/* ====================================
+   Pagination - Clean Design
+   ==================================== */
+.nqb-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-5) var(--space-6);
+    background: var(--surface-muted);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-top: -1px;
+}
+
+.nqb-pagination-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.nqb-pagination .nqb-button-small {
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.8125rem;
+}
+
+.nqb-pagination .nqb-button-outlined:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ====================================
+   Info Messages
+   ==================================== */
+.nqb-info-message {
+    text-align: center;
+    padding: var(--space-12) var(--space-8);
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.nqb-info-message::before {
+    content: '';
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-4);
+    background: var(--surface-muted);
+    border-radius: var(--radius-full);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 32px;
+}
+
+/* ====================================
+   Footer - Clean & Minimal
+   ==================================== */
+.nqb-footer {
+    background: var(--surface-elevated);
+    padding: var(--space-8) 0;
+    text-align: center;
+    margin-top: var(--space-16);
+    border-top: 1px solid var(--surface-muted);
+}
+
+.nqb-footer p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
+.nqb-footer a {
+    color: var(--accent-purple);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.nqb-footer a:hover {
+    color: var(--accent-pink);
+}
+
+/* ====================================
+   Form Controls Enhancement
+   ==================================== */
+.nqb-form-control,
+.nqb-textfield,
+.nqb-select {
+    margin-bottom: var(--space-5);
+}
+
+.nqb-label,
+.nqb-textfield-label,
+.nqb-select-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+    font-size: 0.875rem;
+}
+
+.nqb-input,
+.nqb-textfield-input,
+.nqb-select-input {
+    border: 2px solid var(--surface-muted);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    font-size: 0.9375rem;
+    transition: all var(--transition-fast);
+    background: var(--surface-elevated);
+}
+
+.nqb-input:focus,
+.nqb-textfield-input:focus,
+.nqb-select-input:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+/* ====================================
+   Block Condition Styling
+   ==================================== */
+.nqb-block-condition {
+    background: var(--surface-elevated);
+    border: 2px solid var(--surface-muted);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    transition: border-color var(--transition-fast);
+}
+
+.nqb-block-condition:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.nqb-block-header {
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px dashed var(--surface-muted);
+}
+
+.nqb-simple-condition {
+    background: var(--surface-muted);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    transition: all var(--transition-fast);
+}
+
+.nqb-simple-condition:hover {
+    background: rgba(102, 126, 234, 0.08);
+}
+
+/* ====================================
+   Chip Enhancement
+   ==================================== */
+.nqb-chip {
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+}
+
+.nqb-chip:hover {
+    transform: scale(1.05);
+}
+
+.nqb-chip-primary {
+    background: var(--gradient-primary);
+}
+
+/* ====================================
+   Loading State
+   ==================================== */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.nqb-loading {
+    background: linear-gradient(90deg, var(--surface-muted) 25%, var(--surface-default) 50%, var(--surface-muted) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+}
+
+/* ====================================
+   Responsive Design
+   ==================================== */
+@media (max-width: 768px) {
+    .nqb-header {
+        padding: var(--space-10) 0 var(--space-8);
+    }
+
+    .nqb-header h1 {
+        font-size: 2.25rem;
+    }
+
+    .nqb-header p {
+        font-size: 1rem;
+    }
+
+    main {
+        padding: var(--space-6) 0;
+    }
+
+    .nqb-card {
+        padding: var(--space-5);
+        margin-bottom: var(--space-4);
+    }
+
+    .nqb-card h2 {
+        font-size: 1.125rem;
+    }
+
+    .nqb-actions {
+        flex-direction: column;
+    }
+
+    .nqb-button-large {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nqb-pagination {
+        flex-direction: column;
+        gap: var(--space-3);
+        text-align: center;
+    }
+
+    .nqb-table th,
+    .nqb-table td {
+        padding: var(--space-3);
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nqb-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .nqb-container > h1:first-of-type {
+        font-size: 1.5rem;
+    }
+
+    .nqb-subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* ====================================
+   Print Styles
+   ==================================== */
+@media print {
+    .nqb-header::before,
+    .nqb-header::after,
+    .nqb-actions,
+    .nqb-pagination {
+        display: none;
+    }
+
+    .nqb-header {
+        background: #1a1a2e;
+        padding: var(--space-4) 0;
+    }
+
+    .nqb-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+}
+
+/* ====================================
+   Accessibility
+   ==================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+    outline: 2px solid var(--accent-purple);
+    outline-offset: 2px;
+}
+
+/* Skip to content link */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-purple);
+    color: white;
+    padding: var(--space-3) var(--space-6);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    z-index: 9999;
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: 0;
+}
