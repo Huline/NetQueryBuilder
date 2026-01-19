@@ -8,8 +8,8 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>NetQueryBuilder.WPF</Title>
         <Description>WPF UI components for NetQueryBuilder - Build dynamic queries with Material Design-inspired visual interface including query editor, condition builder, and result display</Description>
-        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/huline/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/huline/NetQueryBuilder</RepositoryUrl>
         <PackageTags>query-builder;wpf;dynamic-query;linq;expression-tree;ui-components;material-design</PackageTags>
         <Authors>Remi Henache</Authors>
         <Company>Huline SAS</Company>

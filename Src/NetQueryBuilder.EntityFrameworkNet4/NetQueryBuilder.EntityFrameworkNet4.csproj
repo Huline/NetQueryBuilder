@@ -18,8 +18,8 @@
         <Description>Entity Framework 6 integration for NetQueryBuilder targeting .NET Framework 4.8. Enables dynamic query execution against EF6 DbContext for legacy applications.</Description>
         <Authors>Remi Henache</Authors>
         <Company>Huline SAS</Company>
-        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/huline/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/huline/NetQueryBuilder</RepositoryUrl>
         <PackageTags>query-builder;entity-framework;ef6;dynamic-query;linq;net-framework;legacy</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>

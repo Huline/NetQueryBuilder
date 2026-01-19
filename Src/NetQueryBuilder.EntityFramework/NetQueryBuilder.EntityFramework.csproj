@@ -9,8 +9,8 @@
         <Description>Entity Framework Core integration for NetQueryBuilder - Enables dynamic query execution against EF Core DbContext with full support for navigation properties and relationships</Description>
         <Authors>Remi Henache</Authors>
         <Company>Huline SAS</Company>
-        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/huline/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/huline/NetQueryBuilder</RepositoryUrl>
         <PackageTags>query-builder;entity-framework;ef-core;dynamic-query;linq;expression-tree;orm</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -19,8 +19,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
-        <None Include="Readme.md" Pack="true" PackagePath="\" />
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+        <None Include="Readme.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup>

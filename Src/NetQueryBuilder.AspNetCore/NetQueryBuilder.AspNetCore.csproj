@@ -12,8 +12,8 @@
         <Company>Huline SAS</Company>
         <Description>ASP.NET Core Razor Pages integration for NetQueryBuilder - Tag Helpers, View Components, and base page models for server-side dynamic query building without JavaScript</Description>
         <PackageTags>query-builder;aspnetcore;razor-pages;taghelpers;entityframework;dynamic-query</PackageTags>
-        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/huline/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/huline/NetQueryBuilder</RepositoryUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>

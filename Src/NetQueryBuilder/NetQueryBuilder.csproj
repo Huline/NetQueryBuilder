@@ -10,10 +10,10 @@
         <PackageTags>query-builder;dynamic-query;linq;expression-tree;iqueryable;orm;filtering</PackageTags>
         <TargetFrameworks>net6.0;net8.0;net9.0;netstandard2.1;net48</TargetFrameworks>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/huline/NetQueryBuilder</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <RepositoryUrl>https://github.com/huline/NetQueryBuilder</RepositoryUrl>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
     </PropertyGroup>
 

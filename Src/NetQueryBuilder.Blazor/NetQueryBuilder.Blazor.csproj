@@ -10,8 +10,8 @@
         <TargetFrameworks>net8.0;net9.0;net6.0</TargetFrameworks>
         <Authors>Remi Henache</Authors>
         <Company>Huline SAS</Company>
-        <PackageProjectUrl>https://github.com/remihenache/NetQueryBuilder</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/remihenache/NetQueryBuilder</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/huline/NetQueryBuilder</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/huline/NetQueryBuilder</RepositoryUrl>
         <PackageTags>query-builder;blazor;mudblazor;dynamic-query;linq;expression-tree;ui-components</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -20,8 +20,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
-        <None Include="Readme.md" Pack="true" PackagePath="\" />
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+        <None Include="Readme.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup>
