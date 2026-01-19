@@ -110,20 +110,27 @@ jobs:
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
 
-      - name: Restore WPF project
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore WPF project (SDK-style)
         run: dotnet restore Src/NetQueryBuilder.WPF/NetQueryBuilder.WPF.csproj
 
       - name: Restore .NET Framework projects (packages.config style)
-        run: nuget restore NetQueryBuilder.sln
+        run: nuget restore NetQueryBuilder.sln -PackagesDirectory packages
 
-      - name: Build Windows projects
+      - name: Build WPF project
+        run: dotnet build Src/NetQueryBuilder.WPF/NetQueryBuilder.WPF.csproj --configuration Release --no-restore
+
+      - name: Build .NET Framework projects with MSBuild
         run: |
-          dotnet build Src/NetQueryBuilder.WPF/NetQueryBuilder.WPF.csproj --configuration Release --no-restore
-          dotnet build Src/NetQueryBuilder.EntityFrameworkNet4/NetQueryBuilder.EntityFrameworkNet4.csproj --configuration Release
-          dotnet build Tests/NetQueryBuilder.EntityFrameworkNet.Tests/NetQueryBuilder.EntityFrameworkNet.Tests.csproj --configuration Release
+          msbuild Src/NetQueryBuilder.EntityFrameworkNet4/NetQueryBuilder.EntityFrameworkNet4.csproj /p:Configuration=Release /p:Platform=AnyCPU
+          msbuild Tests/NetQueryBuilder.EntityFrameworkNet.Tests/NetQueryBuilder.EntityFrameworkNet.Tests.csproj /p:Configuration=Release /p:Platform=AnyCPU
 
       - name: Test .NET Framework projects
-        run: dotnet test Tests/NetQueryBuilder.EntityFrameworkNet.Tests/NetQueryBuilder.EntityFrameworkNet.Tests.csproj --configuration Release --no-build --verbosity normal
+        run: |
+          nuget install xunit.runner.console -Version 2.4.2 -OutputDirectory testrunner
+          .\testrunner\xunit.runner.console.2.4.2\tools\net48\xunit.console.exe Tests\NetQueryBuilder.EntityFrameworkNet.Tests\bin\Release\NetQueryBuilder.EntityFrameworkNet.Tests.dll
 
       - name: Pack WPF NuGet package
         if: github.event_name != 'pull_request'
@@ -175,8 +182,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Deploy Blazor demo to Azure App Service (Free tier)
-  # To enable: Create Azure App Service and add AZURE_BLAZOR_PUBLISH_PROFILE secret + AZURE_BLAZOR_APP_NAME variable
+  # Deploy Blazor demo
   deploy-blazor-demo:
     runs-on: ubuntu-latest
     needs: build
@@ -200,8 +206,7 @@ jobs:
           publish-profile: ${{ secrets.AZURE_BLAZOR_PUBLISH_PROFILE }}
           package: ./blazor-publish
 
-  # Deploy ASP.NET Core demo to Azure App Service (Free tier)
-  # To enable: Create Azure App Service and add AZURE_ASPNETCORE_PUBLISH_PROFILE secret + AZURE_ASPNETCORE_APP_NAME variable
+  # Deploy ASP.NET Core demo
   deploy-aspnetcore-demo:
     runs-on: ubuntu-latest
     needs: build
